@@ -1,0 +1,96 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Dark par défaut (on joue aux cartes le soir), clair dispo.
+ * Accent : or "millénaire" — utilisé avec parcimonie (actions primaires, focus).
+ */
+:root {
+  --bg: oklch(0.155 0.008 270);
+  --bg-elevated: oklch(0.195 0.01 270);
+  --bg-sunken: oklch(0.13 0.008 270);
+  --fg: oklch(0.96 0.005 270);
+  --fg-muted: oklch(0.72 0.012 270);
+  --fg-subtle: oklch(0.55 0.012 270);
+  --border: oklch(0.28 0.012 270);
+  --border-strong: oklch(0.38 0.014 270);
+  --accent: oklch(0.82 0.13 85);
+  --accent-fg: oklch(0.2 0.03 85);
+  --danger: oklch(0.68 0.19 25);
+  --success: oklch(0.75 0.15 155);
+  --warning: oklch(0.8 0.14 70);
+
+  --monster: oklch(0.72 0.1 60);
+  --spell: oklch(0.7 0.11 170);
+  --trap: oklch(0.66 0.14 340);
+  --extra: oklch(0.68 0.13 290);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme='dark']) {
+    --bg: oklch(0.985 0.003 270);
+    --bg-elevated: oklch(1 0 0);
+    --bg-sunken: oklch(0.955 0.005 270);
+    --fg: oklch(0.2 0.01 270);
+    --fg-muted: oklch(0.45 0.012 270);
+    --fg-subtle: oklch(0.6 0.012 270);
+    --border: oklch(0.9 0.006 270);
+    --border-strong: oklch(0.82 0.008 270);
+    --accent: oklch(0.7 0.14 80);
+    --accent-fg: oklch(0.18 0.03 85);
+    color-scheme: light;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-sunken: var(--bg-sunken);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-danger: var(--danger);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-monster: var(--monster);
+  --color-spell: var(--spell);
+  --color-trap: var(--trap);
+  --color-extra: var(--extra);
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --aspect-card: 59 / 86;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+dialog::backdrop {
+  background: oklch(0 0 0 / 0.6);
+  backdrop-filter: blur(4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,315 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// YGO Deck Builder — schéma de données
+//
+// Deux mondes séparés :
+//   1. Catalogue (Card, CardSet, CardPrint) : données publiques synchronisées
+//      depuis YGOPRODeck. Jamais modifiées par les utilisateurs.
+//   2. Données utilisateur (User, CollectionItem, Deck, WishlistItem) : tout ce
+//      qui appartient à un compte, toujours filtré par userId.
+//   + MetaDeck : decklists de référence (tier list) pour le moteur de suggestion.
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ═══════════════════════════════ Catalogue ═══════════════════════════════════
+
+enum CardCategory {
+  MONSTER
+  SPELL
+  TRAP
+  SKILL
+  TOKEN
+}
+
+/// Une carte unique, identifiée par son passcode Konami (ex: 89631139 = Dragon Blanc aux Yeux Bleus).
+model Card {
+  id          Int          @id // passcode Konami
+  name        String
+  nameFr      String?
+  category    CardCategory
+  type        String // ex: "Effect Monster", "Quick-Play Spell Card"... (brut YGOPRODeck)
+  frameType   String // normal, effect, fusion, synchro, xyz, link, spell, trap...
+  desc        String
+  descFr      String?
+  archetype   String?
+  attribute   String?
+  race        String? // type de monstre (Dragon, Warrior...) ou sous-type de magie/piège
+  level       Int? // niveau / rang
+  atk         Int?
+  def         Int?
+  linkVal     Int?
+  linkMarkers String[]
+  scale       Int?
+  isExtraDeck Boolean      @default(false)
+
+  banTcg String?
+  banOcg String?
+  formats String[]
+  tcgDate DateTime? @db.Date
+
+  /// Texte de recherche normalisé (FR + EN + archétype, sans accents ni ponctuation).
+  /// Calculé en SQL par ygo_normalize() — voir migration "search".
+  searchText String @default("")
+
+  imageUrl        String?
+  imageUrlSmall   String?
+  priceCardmarket Decimal? @db.Decimal(10, 2)
+  priceTcgplayer  Decimal? @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  prints          CardPrint[]
+  collectionItems CollectionItem[]
+  deckCards       DeckCard[]
+  wishlistItems   WishlistItem[]
+  metaDeckCards   MetaDeckCard[]
+
+  @@index([name])
+  @@index([archetype])
+  @@index([category])
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+/// Un produit/édition (booster, structure deck, tin...).
+model CardSet {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  code      String? // préfixe, ex: "SDBE" (pas unique : certains sets partagent un préfixe)
+  cardCount Int?
+  tcgDate   DateTime? @db.Date
+  imageUrl  String?
+  /// Nom normalisé pour la recherche (cf. Card.searchText)
+  searchText String @default("")
+
+  prints CardPrint[]
+
+  @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+/// Une impression précise d'une carte dans un set, avec sa rareté (ex: LOB-EN001 Ultra Rare).
+model CardPrint {
+  id         String   @id @default(cuid())
+  cardId     Int
+  setId      String
+  printCode  String // ex: "LOB-EN001"
+  rarity     String
+  rarityCode String?
+  price      Decimal? @db.Decimal(10, 2)
+
+  card            Card             @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  set             CardSet          @relation(fields: [setId], references: [id], onDelete: Cascade)
+  collectionItems CollectionItem[]
+  wishlistItems   WishlistItem[]
+
+  @@unique([cardId, printCode, rarity])
+  @@index([setId])
+  @@index([printCode])
+}
+
+/// Métadonnées de synchronisation du catalogue.
+model SyncState {
+  id              String   @id // ex: "ygoprodeck"
+  databaseVersion String?
+  lastSyncAt      DateTime?
+  lastStatus      String?
+  lastError       String?
+  cardCount       Int      @default(0)
+}
+
+// ═══════════════════════════════ Utilisateurs ════════════════════════════════
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  username     String   @unique
+  passwordHash String
+  role         UserRole @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens   RefreshToken[]
+  collectionItems CollectionItem[]
+  decks           Deck[]
+  wishlistItems   WishlistItem[]
+}
+
+/// Refresh tokens stockés hashés (rotation à chaque refresh, révocables).
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  userAgent String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ═══════════════════════════════ Collection ══════════════════════════════════
+
+enum CardCondition {
+  MINT
+  NEAR_MINT
+  EXCELLENT
+  GOOD
+  LIGHT_PLAYED
+  PLAYED
+  POOR
+}
+
+enum CardLanguage {
+  FR
+  EN
+  DE
+  IT
+  ES
+  PT
+  JP
+  KR
+}
+
+/// Une "pile" d'exemplaires identiques possédés (même carte, même print, même état, même langue).
+model CollectionItem {
+  id           String        @id @default(cuid())
+  userId       String
+  cardId       Int
+  printId      String?
+  quantity     Int           @default(1)
+  condition    CardCondition @default(NEAR_MINT)
+  language     CardLanguage  @default(FR)
+  firstEdition Boolean       @default(false)
+  notes        String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card  Card       @relation(fields: [cardId], references: [id])
+  print CardPrint? @relation(fields: [printId], references: [id], onDelete: SetNull)
+
+  @@index([userId, cardId])
+}
+
+// ═══════════════════════════════ Decks ═══════════════════════════════════════
+
+enum DeckFormat {
+  TCG
+  OCG
+  GOAT
+  EDISON
+  CASUAL
+}
+
+enum DeckZone {
+  MAIN
+  EXTRA
+  SIDE
+}
+
+model Deck {
+  id          String     @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  format      DeckFormat @default(TCG)
+  isPublic    Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards         DeckCard[]
+  wishlistItems WishlistItem[]
+
+  @@index([userId])
+}
+
+model DeckCard {
+  deckId   String
+  cardId   Int
+  zone     DeckZone
+  quantity Int
+
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id])
+
+  @@id([deckId, cardId, zone])
+}
+
+// ═══════════════════════════════ Wishlist ════════════════════════════════════
+
+enum WishlistPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+/// Carte recherchée, avec l'édition/print visé, le budget et éventuellement le deck qui la réclame.
+model WishlistItem {
+  id        String           @id @default(cuid())
+  userId    String
+  cardId    Int
+  printId   String?
+  deckId    String?
+  quantity  Int              @default(1)
+  maxPrice  Decimal?         @db.Decimal(10, 2)
+  language  CardLanguage?
+  priority  WishlistPriority @default(MEDIUM)
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card  Card       @relation(fields: [cardId], references: [id])
+  print CardPrint? @relation(fields: [printId], references: [id], onDelete: SetNull)
+  deck  Deck?      @relation(fields: [deckId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+}
+
+// ═══════════════════════════════ Meta ════════════════════════════════════════
+
+/// Decklist de référence (tier list / tournoi) utilisée par le moteur de suggestion.
+model MetaDeck {
+  id        String     @id @default(cuid())
+  name      String
+  archetype String?
+  tier      Int?
+  format    DeckFormat @default(TCG)
+  source    String? // ex: "ygoprodeck", "manual"
+  sourceUrl String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  cards MetaDeckCard[]
+
+  @@unique([name, format])
+}
+
+model MetaDeckCard {
+  metaDeckId String
+  cardId     Int
+  zone       DeckZone
+  quantity   Int
+
+  metaDeck MetaDeck @relation(fields: [metaDeckId], references: [id], onDelete: Cascade)
+  card     Card     @relation(fields: [cardId], references: [id])
+
+  @@id([metaDeckId, cardId, zone])
+}

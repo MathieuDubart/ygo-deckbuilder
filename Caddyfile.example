@@ -1,0 +1,6 @@
+# Reverse proxy HTTPS automatique (Let's Encrypt) devant le conteneur web.
+#   Remplace le domaine, puis : caddy run --config Caddyfile
+ygo.example.com {
+	encode zstd gzip
+	reverse_proxy localhost:3000
+}

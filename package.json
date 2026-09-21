@@ -1,0 +1,22 @@
+{
+  "name": "ygo-deckbuilder",
+  "private": true,
+  "packageManager": "pnpm@10.34.5",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
+    "db:migrate": "pnpm --filter @ygo/api prisma:migrate",
+    "cards:sync": "pnpm --filter @ygo/api cards:sync"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "turbo": "^2.11.2",
+    "typescript": "~5.9.3"
+  }
+}

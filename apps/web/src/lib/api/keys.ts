@@ -1,0 +1,17 @@
+/** Clés TanStack Query centralisées → invalidations cohérentes partout. */
+export const qk = {
+  me: ['me'] as const,
+  cards: (params: object) => ['cards', params] as const,
+  card: (id: number) => ['card', id] as const,
+  archetypes: ['archetypes'] as const,
+  sets: (params: object) => ['sets', params] as const,
+  collection: (params: object) => ['collection', params] as const,
+  collectionAll: ['collection'] as const,
+  collectionStats: ['collection-stats'] as const,
+  decks: ['decks'] as const,
+  deck: (id: string) => ['deck', id] as const,
+  wishlist: ['wishlist'] as const,
+  metaSuggestions: ['suggestions', 'meta'] as const,
+  archetypeSuggestions: ['suggestions', 'archetypes'] as const,
+  deckSuggestions: (deckId: string) => ['suggestions', 'deck', deckId] as const,
+};

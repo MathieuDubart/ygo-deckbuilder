@@ -1,0 +1,20 @@
+# Dev local : juste PostgreSQL. L'API et le front tournent via `pnpm dev`.
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ygo
+      POSTGRES_PASSWORD: ygo
+      POSTGRES_DB: ygo
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-dev-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ygo']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
+volumes:
+  db-dev-data:
