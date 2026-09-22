@@ -9,7 +9,8 @@ and generated play guides.
 
 ## Features
 
-- **Accounts** — multi-user, Argon2id passwords, short-lived JWT + rotated refresh token in an httpOnly cookie.
+- **Accounts** — multi-user, Argon2id passwords, short-lived JWT + rotated refresh token in an httpOnly cookie (or in the response body for native clients).
+- **iOS app** — native SwiftUI client with a card scanner (separate `ygo-deckbuilder-iOS` repository).
 - **Card catalog** — fully synced from [YGOPRODeck](https://ygoprodeck.com/api-guide/): names and effects in 5 languages, prints, rarities, Cardmarket prices. Typo-tolerant search in any language, or by the code printed on the card (`SDBE-EN001`).
 - **Collection** — by print, condition, language and 1st edition, with an estimated value. Add a whole product (structure deck, tin, box…) from a gallery of HD box art, with the **official quantities** of each card (Yugipedia set lists).
 - **Products** — every product you added, with its full content to rebuild it (what is missing, a copyable list), one-click deck creation, and a play guide for structure and starter decks.
@@ -79,6 +80,11 @@ packages/
 
 The browser only talks to the web app: `/api/*` is proxied by Next to the API. First-party cookies,
 no CORS, a single domain to expose.
+
+Native clients (the iOS app) use the same `/api/*` routes with the `X-Auth-Mode: token` header:
+`/auth/login`, `/auth/register` and `/auth/refresh` then return `{ user, accessToken, refreshToken, … }`
+instead of setting cookies, the access token goes in `Authorization: Bearer …`, and the refresh token is
+sent in the body of `/auth/refresh` and `/auth/logout`. Refresh tokens rotate; reusing one revokes the session.
 
 ## Running locally
 
