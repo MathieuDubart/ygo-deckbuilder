@@ -96,7 +96,11 @@ export interface DeckScoreDto {
   fillerShare: number;
   /** Proximité de la liste de tournoi (0..1) si basé sur un deck du meta */
   metaCoverage: number | null;
-  /** 40 cartes, légal, et un vrai moteur */
+  /** 0..1 — synergie : cartes qui s'appellent entre elles, starters, Extra Deck invocable */
+  synergy: number | null;
+  /** Exemplaires de cartes qui lancent le jeu seules */
+  starters: number | null;
+  /** 40 cartes, légal, un vrai moteur et assez de starters */
   playable: boolean;
 }
 
@@ -129,7 +133,8 @@ export interface GeneratedDeckDto {
 /** Deck complet et jouable proposé automatiquement à partir de la collection. */
 export interface PlayableDeckDto {
   /** Pour ouvrir l'aperçu : deck du meta (mode "avec mes cartes") ou archétype de la collection */
-  target: { kind: 'meta'; metaDeckId: string; name: string } | { kind: 'archetype'; archetype: string };
+  target:
+    { kind: 'meta'; metaDeckId: string; name: string } | { kind: 'archetype'; archetype: string };
   name: string;
   archetype: string | null;
   /** Tier du deck meta dont il s'inspire, s'il y en a un */
