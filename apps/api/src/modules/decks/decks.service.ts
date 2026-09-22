@@ -13,6 +13,7 @@ import {
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 import type { Prisma } from '../../generated/prisma/client';
+import { CardResolver } from '../../common/catalog/card-resolver.service';
 import { OwnershipService } from '../collection/ownership.service';
 
 const deckInclude = {
@@ -26,6 +27,7 @@ export class DecksService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly ownership: OwnershipService,
+    private readonly resolver: CardResolver,
   ) {}
 
   async list(userId: string): Promise<DeckListItemDto[]> {
@@ -113,21 +115,19 @@ export class DecksService {
   }
 
   async importYdk(userId: string, input: ImportYdkInput): Promise<DeckDto> {
-    const entries = parseYdk(input.content);
-    if (!entries.length) throw new BadRequestException('Fichier .ydk vide ou invalide');
-    const known = await this.prisma.card.findMany({
-      where: { id: { in: entries.map((e) => e.cardId) } },
-      select: { id: true },
+    const parsed = parseYdk(input.content);
+    if (!parsed.length) throw new BadRequestException('Fichier .ydk vide ou invalide');
+    // Artworks alternatifs → carte principale ; cartes inconnues ignorées plutôt que de tout rejeter
+    const ids = await this.resolver.resolve(parsed.map((e) => e.cardId));
+    const cards = parsed.flatMap((e) => {
+      const cardId = ids.get(e.cardId);
+      return cardId === undefined ? [] : [{ ...e, cardId }];
     });
-    const knownIds = new Set(known.map((c) => c.id));
     return this.create(userId, {
       name: input.name,
       format: input.format,
       isPublic: false,
-      // Les cartes inconnues (ex: pas encore synchronisées) sont ignorées plutôt que de tout rejeter.
-      cards: entries
-        .filter((e) => knownIds.has(e.cardId))
-        .map((e) => ({ ...e, quantity: Math.min(e.quantity, 3) })),
+      cards: mergeEntries(cards).map((e) => ({ ...e, quantity: Math.min(e.quantity, 3) })),
     });
   }
 

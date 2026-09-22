@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config.service';
-import type { YgoCard, YgoDbVersion, YgoSetInfo } from './ygoprodeck.types';
+import type { YgoCard, YgoDbVersion, YgoSetInfo, YgoTournamentDeck } from './ygoprodeck.types';
 
 /**
  * Client HTTP minimal pour YGOPRODeck.
@@ -28,14 +28,28 @@ export class YgoprodeckClient {
     return this.get<YgoSetInfo[]>('/cardsets.php');
   }
 
-  private async get<T>(path: string): Promise<T> {
-    const url = `${this.config.get('YGOPRODECK_BASE_URL')}${path}`;
+  /**
+   * Decklists de tournoi récentes (catégorie "Tournament Meta Decks", ~20 par page, plus récentes d'abord).
+   * Endpoint du site (pas de l'API v7 documentée) : à utiliser avec modération.
+   */
+  tournamentDecks(offset: number): Promise<YgoTournamentDeck[]> {
+    const params = new URLSearchParams({ format: 'Tournament Meta Decks', offset: String(offset) });
+    return this.fetchJson<YgoTournamentDeck[]>(
+      `${this.config.get('YGOPRODECK_DECKS_URL')}?${params}`,
+    );
+  }
+
+  private get<T>(path: string): Promise<T> {
+    return this.fetchJson<T>(`${this.config.get('YGOPRODECK_BASE_URL')}${path}`);
+  }
+
+  private async fetchJson<T>(url: string): Promise<T> {
     this.logger.debug(`GET ${url}`);
     const res = await fetch(url, {
       headers: { 'User-Agent': 'ygo-deckbuilder (self-hosted)' },
       signal: AbortSignal.timeout(120_000),
     });
-    if (!res.ok) throw new Error(`YGOPRODeck ${res.status} sur ${path}`);
+    if (!res.ok) throw new Error(`YGOPRODeck ${res.status} sur ${new URL(url).pathname}`);
     return (await res.json()) as T;
   }
 }

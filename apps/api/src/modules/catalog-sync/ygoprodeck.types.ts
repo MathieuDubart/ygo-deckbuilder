@@ -42,3 +42,16 @@ export interface YgoDbVersion {
   database_version: string;
   last_update: string;
 }
+
+/** Deck de la base YGOPRODeck (getDecks.php). Les listes sont des tableaux JSON sérialisés en string. */
+export interface YgoTournamentDeck {
+  deckNum: number;
+  deck_name: string;
+  main_deck: string;
+  extra_deck: string;
+  side_deck: string;
+  pretty_url?: string;
+  tournamentName?: string | null;
+  tournamentPlacement?: string | null;
+  tournamentPlayerCount?: number | null;
+}

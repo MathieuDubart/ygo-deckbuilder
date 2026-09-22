@@ -10,7 +10,8 @@ vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui ma
 - **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck, tin…) depuis une galerie de visuels HD (Yugipedia), valeur estimée
 - **Deck builder** : recherche limitée à tes cartes (ou tout le catalogue), validation live (40–60, 3 max, banlist, zone Extra), exemplaires manquants signalés, auto-save, import/export `.ydk`
 - **Wishlist** : édition visée, budget max, priorité, lien vers le deck qui la réclame, « Je l'ai » → bascule en collection
-- **Suggestions** : couverture de ta collection sur chaque deck meta de référence + coût pour compléter ; archétypes les plus fournis ; cartes possédées qui collent à un deck en cours
+- **Meta automatique** : les tops de tournois récents (YGOPRODeck) sont regroupés en archétypes par similarité de contenu, avec une liste type par archétype, un tier et la part du meta
+- **Suggestions & génération de decks** : pour chaque deck du meta, ta couverture et le coût pour compléter ; génération en un clic de la liste meta complète ou d'une version « avec mes cartes » (cœur de la liste, cartes flex, staples que tu possèdes) ; deck auto pour tout archétype de ta collection ; les manquantes partent en wishlist
 
 ## Stack
 
@@ -37,8 +38,8 @@ apps/
         collection/    CRUD, import de set, stats, OwnershipService
         decks/         CRUD, import/export .ydk, validation
         wishlist/
-        meta-decks/    decklists de référence (admin)
-        suggestions/   coverage.ts (moteur pur, testé) + service
+        meta-decks/    listes de tournoi, moteur meta (engine/), sync
+        suggestions/   couverture, génération de decks
   web/                 Next.js
     src/
       app/             routes (auth) et (app)
@@ -82,30 +83,36 @@ docker compose up -d --build
 - Ensuite la sync tourne selon `CARD_SYNC_CRON` (lundi 4h par défaut) et ne fait rien si YGOPRODeck n'a pas bougé.
 - Mets un reverse proxy HTTPS devant le port 3000 (voir `Caddyfile.example`). En HTTP pur, passe `COOKIE_SECURE=false`.
 
-## Decks meta de référence
+## Meta et génération de decks
 
-Pour l'instant, import par un admin depuis un `.ydk` :
+Le meta se calcule tout seul à partir des decklists de tournoi publiées par YGOPRODeck
+(catégorie *Tournament Meta Decks*) :
 
-```bash
-curl -X POST https://ton-domaine/api/meta-decks/import-ydk \
-  -H 'content-type: application/json' --cookie "ygo_at=…" \
-  -d '{"name":"Snake-Eye","tier":1,"format":"TCG","ydk":"#main\n…"}'
-```
+1. les ~300 listes les plus récentes sont récupérées (`META_SYNC_PAGES`), les artworks alternatifs résolus ;
+2. elles sont regroupées en archétypes par **contenu** (Jaccard sur les cartes jouées), pas par nom ;
+3. pour chaque archétype : liste type (cartes par taux d'inclusion, au nombre d'exemplaires le plus joué),
+   cartes *flex*, tier selon la part du meta ;
+4. les **staples** (cartes jouées par plusieurs archétypes : hand traps, board breakers) servent à compléter
+   les decks générés avec ta collection.
 
-(Une page d'admin est la prochaine étape.)
+Mise à jour au premier démarrage, puis selon `META_SYNC_CRON` (lundi 5h), ou à la main :
+`pnpm meta:sync`, ou le bouton « Mettre à jour » de la page Suggestions (admin).
+
+Le moteur (`apps/api/src/modules/meta-decks/engine/`) est fait de fonctions pures, testées sur de vraies listes.
+Les decks meta peuvent aussi être importés à la main depuis un `.ydk` (`POST /api/meta-decks/import-ydk`, admin).
 
 ## Qualité
 
 ```bash
 pnpm typecheck
-pnpm test        # règles de deck, parser .ydk, mapper YGOPRODeck, moteur de couverture
+pnpm test        # règles de deck, .ydk, recherche, YGOPRODeck/Yugipedia, moteur meta (clustering, consensus, génération)
 pnpm build
 ```
 
 ## Roadmap
 
-- [ ] Page admin : import de decks meta, statut de sync
-- [ ] Moteur de synergie (au-delà de l'archétype : types, attributs, cartes citées, ratios starters/extenders)
+- [ ] Page admin : import de decks meta, statut des syncs
+- [ ] Moteur de synergie plus fin (rôles des cartes : starters, extenders, hand traps, ratios)
 - [ ] Quantités réelles des Structure Decks
 - [ ] Recherche plein texte (`pg_trgm`) sur les effets
 - [ ] Deck public partageable (lecture seule)
