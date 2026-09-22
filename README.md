@@ -19,7 +19,7 @@ and generated play guides.
 - **Automatic meta** — recent tournament top decks are clustered into archetypes by content, with a consensus list, flex cards, a tier and the meta share.
 - **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; **official preconstructed decks** (structure decks, starters, the decks inside boxes such as *Legendary 5D's Decks* or the *2-Player Starter Set*) with what you own of each; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
 - **Synergy & play guides** — card effects are read (who searches, summons or sends what; starters, extenders, hand traps; which Extra Deck monsters are actually reachable). Generated decks favour cards that work together, and every deck gets a **play guide**: game plan, key cards, step-by-step combos, going first/second, mistakes to avoid. Optionally rewritten by an AI model (OpenAI-compatible or Anthropic, local models welcome).
-- **Duel simulator** — test your decks with the **real card effects**: the [EDOPro](https://github.com/edo9300/ygopro-core) engine (compiled to WebAssembly) and the [Project Ignis](https://github.com/ProjectIgnis) card scripts run on the server. Force your opening hand, set up the opponent's board (monsters, set cards, hand traps, graveyard), then play against a passive opponent (combo testing) or make the opponent's choices yourself (interactions). Every summon type, chains, battle and the duel log are supported. A bot opponent is coming.
+- **Duel simulator** — test your decks with the **real card effects**: the [EDOPro](https://github.com/edo9300/ygopro-core) engine (compiled to WebAssembly) and the [Project Ignis](https://github.com/ProjectIgnis) card scripts run on the server. Force your opening hand, set up the opponent's board (monsters, set cards, hand traps, graveyard), then play against a passive opponent (combo testing), make the opponent's choices yourself (interactions), or face the **bot**, which plays any deck on its own: it builds its board, attacks when the battle favours it and answers your plays with its hand traps and traps. Every summon type, chains, battle and the duel log are supported; you are only asked to chain after an opponent's action (or switch to every chain window, as in EDOPro).
 - **Rules reminder** — the official rules (current Master Rule) in 5 languages: turn structure, every summon type (Fusion, Ritual, Synchro, Xyz, Pendulum, Link), Extra Monster Zones, chains, battle.
 - **Wishlist** — target print, max budget, priority, link to the deck that needs it, "Got it" moves it to the collection.
 
@@ -221,7 +221,8 @@ pnpm build
 - [x] Real structure deck quantities (Yugipedia set lists)
 - [x] Five languages
 - [x] Duel simulator (EDOPro engine) + rules reminder
-- [ ] Bot opponent in the duel simulator (WindBot)
+- [x] Bot opponent in the duel simulator (built-in heuristic AI, any deck)
+- [ ] Duel simulator in the iOS app
 - [ ] Opening-hand simulator (odds of opening each combo)
 - [ ] Deck builder suggestions from the interaction index (owned cards linked to the deck, beyond its archetype)
 - [ ] Shareable read-only public decks
