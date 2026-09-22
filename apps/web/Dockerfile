@@ -8,6 +8,9 @@ WORKDIR /repo
 FROM base AS build
 # URL de l'API vue depuis le conteneur web (figée dans les rewrites au build)
 ARG API_URL=http://api:4000
+# Lien « code source » (AGPL-3.0) : ton fork si tu déploies une version modifiée
+ARG SOURCE_URL=
+ENV NEXT_PUBLIC_SOURCE_URL=$SOURCE_URL
 ENV API_URL=$API_URL NEXT_TELEMETRY_DISABLED=1
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY packages ./packages

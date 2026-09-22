@@ -20,6 +20,8 @@ FROM base AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
+# Données du simulateur de duel (volume) : doit appartenir à l'utilisateur de l'API
+RUN mkdir -p /app/data/duel && chown -R node:node /app/data
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
