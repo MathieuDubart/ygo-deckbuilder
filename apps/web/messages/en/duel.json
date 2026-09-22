@@ -1,0 +1,298 @@
+{
+  "page": {
+    "title": "Duel simulator",
+    "description": "Test your combos and play real duels with the actual card effects (EDOPro engine).",
+    "rules": "Rules reminder",
+    "source": "Source code (AGPL-3.0)"
+  },
+  "engine": {
+    "loading": "Checking the duel engine…",
+    "downloading": "The server is downloading card scripts (a few minutes the first time). This page refreshes on its own.",
+    "unavailable": "The duel engine is unavailable on this server.",
+    "stats": "{cards, number} cards · {scripts, number} scripts"
+  },
+  "setup": {
+    "title": "New duel",
+    "deck": "Your deck",
+    "deckPlaceholder": "Choose a deck",
+    "noDecks": "Build a deck first to test it here.",
+    "first": {
+      "label": "Who goes first",
+      "me": "Me",
+      "opponent": "Opponent"
+    },
+    "lp": "Life Points",
+    "opponent": {
+      "label": "Opponent",
+      "PASSIVE": "Passive",
+      "PASSIVE_hint": "Does nothing: perfect to test combos against a board you set up.",
+      "ME": "Controlled by me",
+      "ME_hint": "You make every choice for both players: test interactions, hand traps, lines.",
+      "BOT": "Bot",
+      "BOT_hint": "An AI that plays its own deck.",
+      "soon": "Soon"
+    },
+    "opponentDeck": {
+      "label": "Opponent deck",
+      "copy": "A copy of my deck"
+    },
+    "hand": {
+      "label": "Opening hand",
+      "hint": "Force cards into your starting hand (the rest is drawn at random).",
+      "count": "{count}/{max} chosen",
+      "clear": "Clear"
+    },
+    "board": {
+      "label": "Opponent board",
+      "hint": "Cards already in place on the opponent's side when the duel starts: monsters, set cards, hand traps, graveyard…",
+      "search": "Search a card to add…",
+      "empty": "No cards: the opponent starts with an empty field.",
+      "noResults": "No card found.",
+      "remove": "Remove",
+      "zone": "Zone",
+      "auto": "Auto",
+      "full": "This zone is full.",
+      "locations": {
+        "MZONE": "Monster Zone",
+        "SZONE": "Spell & Trap Zone",
+        "FZONE": "Field Zone",
+        "HAND": "Hand",
+        "GRAVE": "Graveyard",
+        "BANISHED": "Banished"
+      },
+      "positions": {
+        "ATTACK": "Attack",
+        "DEFENSE": "Defense",
+        "SET": "Face-down",
+        "FACE_UP": "Face-up"
+      }
+    },
+    "start": "Start the duel",
+    "resume": "Resuming the duel…"
+  },
+  "board": {
+    "you": "You",
+    "opponent": "Opponent",
+    "deck": "Deck",
+    "extra": "Extra Deck",
+    "grave": "Graveyard",
+    "banished": "Banished",
+    "field": "Field",
+    "hand": "Hand",
+    "emptyPile": "Empty.",
+    "lp": "LP",
+    "materials": "{count, plural, one {# material} other {# materials}}",
+    "counters": "{count, plural, one {# counter} other {# counters}}",
+    "cardCount": "{count, plural, one {# card} other {# cards}}",
+    "chain": "Chain",
+    "chainLink": "Link {link}",
+    "actionable": "Has available actions",
+    "turn": "Turn {turn}",
+    "yourTurn": "Your turn",
+    "opponentTurn": "Opponent's turn"
+  },
+  "phases": {
+    "DRAW": "Draw Phase",
+    "STANDBY": "Standby Phase",
+    "MAIN1": "Main Phase 1",
+    "BATTLE": "Battle Phase",
+    "MAIN2": "Main Phase 2",
+    "END": "End Phase"
+  },
+  "phaseShort": {
+    "DRAW": "DP",
+    "STANDBY": "SP",
+    "MAIN1": "M1",
+    "BATTLE": "BP",
+    "MAIN2": "M2",
+    "END": "EP"
+  },
+  "actions": {
+    "SUMMON": "Normal Summon",
+    "SPSUMMON": "Special Summon",
+    "REPOSITION": "Change position",
+    "SET_MONSTER": "Set",
+    "SET_SPELL": "Set",
+    "ACTIVATE": "Activate",
+    "ATTACK": "Attack",
+    "ATTACK_DIRECT": "Attack directly",
+    "inspect": "View card",
+    "available": "{count, plural, one {# action} other {# actions}}"
+  },
+  "controls": {
+    "battle": "Battle Phase",
+    "main2": "Main Phase 2",
+    "end": "End turn",
+    "leave": "Leave",
+    "restart": "Restart",
+    "thinking": "The engine is resolving…"
+  },
+  "prompt": {
+    "opponent": "Opponent's choice",
+    "IDLE": "Click a highlighted card to play it, or change phase.",
+    "BATTLE": "Choose an attacker, activate an effect or leave the Battle Phase.",
+    "waiting": "Waiting for the opponent…",
+    "CHAIN": {
+      "title": "Activate a card or effect?",
+      "forced": "You must activate one of these effects.",
+      "pass": "Don't activate"
+    },
+    "YESNO": {
+      "title": "Confirm",
+      "yes": "Yes",
+      "no": "No"
+    },
+    "OPTION": {
+      "title": "Choose an option"
+    },
+    "SELECT_CARDS": {
+      "CARD": "Select cards",
+      "TRIBUTE": "Select the monsters to Tribute",
+      "SUM": "Select cards whose total reaches {sum}",
+      "selected": "{count} selected",
+      "total": "Total: {total} / {sum}",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "always": "Always included"
+    },
+    "range": {
+      "exact": "Choose {count}",
+      "between": "Choose {min} to {max}",
+      "upTo": "Choose up to {max}"
+    },
+    "SELECT_UNSELECT": {
+      "title": "Select cards one by one",
+      "selected": "Selected (click to remove)",
+      "finish": "Done",
+      "cancel": "Cancel"
+    },
+    "PLACE": {
+      "title": "Choose a zone on the field",
+      "titleMany": "Choose {count} zones on the field",
+      "disable": "Choose a zone that will become unusable"
+    },
+    "POSITION": {
+      "title": "Choose a battle position"
+    },
+    "ANNOUNCE_NUMBER": {
+      "title": "Declare a number"
+    },
+    "ANNOUNCE_RACE": {
+      "title": "Declare a monster Type"
+    },
+    "ANNOUNCE_ATTRIBUTE": {
+      "title": "Declare an Attribute"
+    },
+    "ANNOUNCE_CARD": {
+      "title": "Declare a card name",
+      "search": "Search a card…"
+    },
+    "SORT": {
+      "title": "Choose the order",
+      "hint": "Click the cards in the order you want (first = top).",
+      "keep": "Keep this order",
+      "reset": "Reset",
+      "confirm": "Confirm"
+    },
+    "choose": "Choose {count, plural, one {# value} other {# values}}",
+    "confirm": "Confirm"
+  },
+  "positions": {
+    "ATK": "Face-up Attack",
+    "DEF": "Face-up Defense",
+    "FD_ATK": "Face-down Attack",
+    "FD_DEF": "Face-down Defense"
+  },
+  "locations": {
+    "DECK": "Deck",
+    "HAND": "hand",
+    "MZONE": "Monster Zone",
+    "SZONE": "Spell & Trap Zone",
+    "GRAVE": "GY",
+    "BANISHED": "banishment",
+    "EXTRA": "Extra Deck",
+    "OVERLAY": "Xyz materials"
+  },
+  "races": {
+    "WARRIOR": "Warrior",
+    "SPELLCASTER": "Spellcaster",
+    "FAIRY": "Fairy",
+    "FIEND": "Fiend",
+    "ZOMBIE": "Zombie",
+    "MACHINE": "Machine",
+    "AQUA": "Aqua",
+    "PYRO": "Pyro",
+    "ROCK": "Rock",
+    "WINGEDBEAST": "Winged Beast",
+    "PLANT": "Plant",
+    "INSECT": "Insect",
+    "THUNDER": "Thunder",
+    "DRAGON": "Dragon",
+    "BEAST": "Beast",
+    "BEASTWARRIOR": "Beast-Warrior",
+    "DINOSAUR": "Dinosaur",
+    "FISH": "Fish",
+    "SEASERPENT": "Sea Serpent",
+    "REPTILE": "Reptile",
+    "PSYCHIC": "Psychic",
+    "DIVINE": "Divine-Beast",
+    "CREATORGOD": "Creator God",
+    "WYRM": "Wyrm",
+    "CYBERSE": "Cyberse",
+    "ILLUSION": "Illusion",
+    "CYBORG": "Cyborg",
+    "MAGICALKNIGHT": "Magical Knight",
+    "HIGHDRAGON": "High Dragon",
+    "OMEGAPSYCHIC": "Omega Psychic",
+    "CELESTIALWARRIOR": "Celestial Warrior",
+    "GALAXY": "Galaxy"
+  },
+  "attributes": {
+    "EARTH": "EARTH",
+    "WATER": "WATER",
+    "FIRE": "FIRE",
+    "WIND": "WIND",
+    "LIGHT": "LIGHT",
+    "DARK": "DARK",
+    "DIVINE": "DIVINE"
+  },
+  "log": {
+    "title": "Duel log",
+    "empty": "Nothing yet.",
+    "hidden": "a card",
+    "TURN": "Turn {turn} — {player, select, you {your turn} other {opponent's turn}}",
+    "PHASE": "{phase}",
+    "DRAW": "{player, select, you {You draw} other {Your opponent draws}} {cards}",
+    "DRAW_hidden": "{player, select, you {You draw} other {Your opponent draws}} {count, plural, one {# card} other {# cards}}",
+    "SUMMON_NORMAL": "{player, select, you {You Normal Summon} other {Your opponent Normal Summons}} <c>{card}</c>",
+    "SUMMON_SPECIAL": "{player, select, you {You Special Summon} other {Your opponent Special Summons}} <c>{card}</c>",
+    "SUMMON_FLIP": "{player, select, you {You Flip Summon} other {Your opponent Flip Summons}} <c>{card}</c>",
+    "SET": "{player, select, you {You set a card} other {Your opponent sets a card}}",
+    "ACTIVATE": "Chain Link {link}: {player, select, you {you activate} other {your opponent activates}} <c>{card}</c>",
+    "CHAIN_NEGATED": "Chain Link {link} is negated",
+    "MOVE": "<c>{card}</c> goes from {from} to {to}",
+    "ATTACK": "<c>{card}</c> attacks <t>{target}</t>",
+    "ATTACK_direct": "<c>{card}</c> attacks directly",
+    "DAMAGE": "{player, select, you {You take} other {Your opponent takes}} {amount} damage",
+    "DAMAGE_cost": "{player, select, you {You pay} other {Your opponent pays}} {amount} LP",
+    "RECOVER": "{player, select, you {You gain} other {Your opponent gains}} {amount} LP",
+    "COIN": "Coin toss: {results}",
+    "DICE": "Die roll: {results}",
+    "heads": "Heads",
+    "tails": "Tails",
+    "WIN": "{player, select, you {You win the duel} other {Your opponent wins the duel}}",
+    "WIN_draw": "The duel is a draw"
+  },
+  "result": {
+    "win": "Victory!",
+    "lose": "Defeat",
+    "draw": "Draw",
+    "rematch": "Replay with the same setup",
+    "newSetup": "New setup",
+    "review": "Look at the board"
+  },
+  "inspector": {
+    "empty": "Hover over or tap a card to read it.",
+    "hidden": "Face-down card."
+  }
+}

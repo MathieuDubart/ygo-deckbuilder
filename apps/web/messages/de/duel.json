@@ -1,0 +1,298 @@
+{
+  "page": {
+    "title": "Duell-Simulator",
+    "description": "Teste deine Combos und spiele echte Duelle mit den echten Karteneffekten (EDOPro-Engine).",
+    "rules": "Regeln im Überblick",
+    "source": "Quellcode (AGPL-3.0)"
+  },
+  "engine": {
+    "loading": "Duell-Engine wird geprüft…",
+    "downloading": "Der Server lädt die Kartenskripte herunter (beim ersten Mal ein paar Minuten). Die Seite aktualisiert sich von selbst.",
+    "unavailable": "Die Duell-Engine ist auf diesem Server nicht verfügbar.",
+    "stats": "{cards, number} Karten · {scripts, number} Skripte"
+  },
+  "setup": {
+    "title": "Neues Duell",
+    "deck": "Dein Deck",
+    "deckPlaceholder": "Wähle ein Deck",
+    "noDecks": "Baue zuerst ein Deck, um es hier zu testen.",
+    "first": {
+      "label": "Wer beginnt",
+      "me": "Ich",
+      "opponent": "Gegner"
+    },
+    "lp": "Lebenspunkte",
+    "opponent": {
+      "label": "Gegner",
+      "PASSIVE": "Passiv",
+      "PASSIVE_hint": "Macht nichts: ideal, um Combos gegen ein Board zu testen, das du vorbereitest.",
+      "ME": "Von mir gesteuert",
+      "ME_hint": "Du triffst alle Entscheidungen für beide Spieler: Interaktionen, Handtraps, Spielzüge.",
+      "BOT": "Bot",
+      "BOT_hint": "Eine KI, die ihr eigenes Deck spielt.",
+      "soon": "Bald"
+    },
+    "opponentDeck": {
+      "label": "Deck des Gegners",
+      "copy": "Eine Kopie meines Decks"
+    },
+    "hand": {
+      "label": "Starthand",
+      "hint": "Lege Karten für deine Starthand fest (der Rest wird zufällig gezogen).",
+      "count": "{count}/{max} gewählt",
+      "clear": "Leeren"
+    },
+    "board": {
+      "label": "Board des Gegners",
+      "hint": "Karten, die beim Duellstart schon auf der Seite des Gegners liegen: Monster, gesetzte Karten, Handtraps, Friedhof…",
+      "search": "Karte zum Hinzufügen suchen…",
+      "empty": "Keine Karten: Der Gegner beginnt mit leerem Spielfeld.",
+      "noResults": "Keine Karte gefunden.",
+      "remove": "Entfernen",
+      "zone": "Zone",
+      "auto": "Auto",
+      "full": "Diese Zone ist voll.",
+      "locations": {
+        "MZONE": "Monsterzone",
+        "SZONE": "Zauber- & Fallenzone",
+        "FZONE": "Spielfeldzone",
+        "HAND": "Hand",
+        "GRAVE": "Friedhof",
+        "BANISHED": "Verbannt"
+      },
+      "positions": {
+        "ATTACK": "Angriff",
+        "DEFENSE": "Verteidigung",
+        "SET": "Verdeckt",
+        "FACE_UP": "Offen"
+      }
+    },
+    "start": "Duell starten",
+    "resume": "Duell wird fortgesetzt…"
+  },
+  "board": {
+    "you": "Du",
+    "opponent": "Gegner",
+    "deck": "Deck",
+    "extra": "Extra-Deck",
+    "grave": "Friedhof",
+    "banished": "Verbannt",
+    "field": "Spielfeld",
+    "hand": "Hand",
+    "emptyPile": "Leer.",
+    "lp": "LP",
+    "materials": "{count, plural, one {# Material} other {# Materialien}}",
+    "counters": "{count, plural, one {# Zählmarke} other {# Zählmarken}}",
+    "cardCount": "{count, plural, one {# Karte} other {# Karten}}",
+    "chain": "Kette",
+    "chainLink": "Glied {link}",
+    "actionable": "Aktionen verfügbar",
+    "turn": "Spielzug {turn}",
+    "yourTurn": "Dein Spielzug",
+    "opponentTurn": "Spielzug des Gegners"
+  },
+  "phases": {
+    "DRAW": "Draw Phase",
+    "STANDBY": "Standby Phase",
+    "MAIN1": "Main Phase 1",
+    "BATTLE": "Battle Phase",
+    "MAIN2": "Main Phase 2",
+    "END": "End Phase"
+  },
+  "phaseShort": {
+    "DRAW": "DP",
+    "STANDBY": "SP",
+    "MAIN1": "M1",
+    "BATTLE": "BP",
+    "MAIN2": "M2",
+    "END": "EP"
+  },
+  "actions": {
+    "SUMMON": "Normalbeschwörung",
+    "SPSUMMON": "Spezialbeschwörung",
+    "REPOSITION": "Position ändern",
+    "SET_MONSTER": "Setzen",
+    "SET_SPELL": "Setzen",
+    "ACTIVATE": "Aktivieren",
+    "ATTACK": "Angreifen",
+    "ATTACK_DIRECT": "Direkt angreifen",
+    "inspect": "Karte ansehen",
+    "available": "{count, plural, one {# Aktion} other {# Aktionen}}"
+  },
+  "controls": {
+    "battle": "Battle Phase",
+    "main2": "Main Phase 2",
+    "end": "Spielzug beenden",
+    "leave": "Verlassen",
+    "restart": "Neu starten",
+    "thinking": "Die Engine rechnet…"
+  },
+  "prompt": {
+    "opponent": "Wahl des Gegners",
+    "IDLE": "Klicke auf eine markierte Karte, um sie zu spielen, oder wechsle die Phase.",
+    "BATTLE": "Wähle einen Angreifer, aktiviere einen Effekt oder verlasse die Battle Phase.",
+    "waiting": "Warte auf den Gegner…",
+    "CHAIN": {
+      "title": "Karte oder Effekt aktivieren?",
+      "forced": "Du musst einen dieser Effekte aktivieren.",
+      "pass": "Nicht aktivieren"
+    },
+    "YESNO": {
+      "title": "Bestätigen",
+      "yes": "Ja",
+      "no": "Nein"
+    },
+    "OPTION": {
+      "title": "Wähle eine Option"
+    },
+    "SELECT_CARDS": {
+      "CARD": "Wähle Karten",
+      "TRIBUTE": "Wähle die Monster, die du als Tribut anbietest",
+      "SUM": "Wähle Karten, deren Summe {sum} erreicht",
+      "selected": "{count} gewählt",
+      "total": "Summe: {total} / {sum}",
+      "confirm": "Bestätigen",
+      "cancel": "Abbrechen",
+      "always": "Immer enthalten"
+    },
+    "range": {
+      "exact": "Wähle {count}",
+      "between": "Wähle {min} bis {max}",
+      "upTo": "Wähle bis zu {max}"
+    },
+    "SELECT_UNSELECT": {
+      "title": "Wähle die Karten nacheinander",
+      "selected": "Gewählt (zum Entfernen klicken)",
+      "finish": "Fertig",
+      "cancel": "Abbrechen"
+    },
+    "PLACE": {
+      "title": "Wähle eine Zone auf dem Spielfeld",
+      "titleMany": "Wähle {count} Zonen auf dem Spielfeld",
+      "disable": "Wähle eine Zone, die unbenutzbar wird"
+    },
+    "POSITION": {
+      "title": "Wähle eine Kampfposition"
+    },
+    "ANNOUNCE_NUMBER": {
+      "title": "Nenne eine Zahl"
+    },
+    "ANNOUNCE_RACE": {
+      "title": "Nenne einen Monstertyp"
+    },
+    "ANNOUNCE_ATTRIBUTE": {
+      "title": "Nenne eine Eigenschaft"
+    },
+    "ANNOUNCE_CARD": {
+      "title": "Nenne einen Kartennamen",
+      "search": "Karte suchen…"
+    },
+    "SORT": {
+      "title": "Wähle die Reihenfolge",
+      "hint": "Klicke die Karten in der gewünschten Reihenfolge an (erste = oben).",
+      "keep": "Diese Reihenfolge behalten",
+      "reset": "Zurücksetzen",
+      "confirm": "Bestätigen"
+    },
+    "choose": "Wähle {count, plural, one {# Wert} other {# Werte}}",
+    "confirm": "Bestätigen"
+  },
+  "positions": {
+    "ATK": "Offene Angriffsposition",
+    "DEF": "Offene Verteidigungsposition",
+    "FD_ATK": "Verdeckte Angriffsposition",
+    "FD_DEF": "Verdeckte Verteidigungsposition"
+  },
+  "locations": {
+    "DECK": "Deck",
+    "HAND": "Hand",
+    "MZONE": "Monsterzone",
+    "SZONE": "Zauber- & Fallenzone",
+    "GRAVE": "Friedhof",
+    "BANISHED": "Verbannung",
+    "EXTRA": "Extra-Deck",
+    "OVERLAY": "Xyz-Material"
+  },
+  "races": {
+    "WARRIOR": "Krieger",
+    "SPELLCASTER": "Hexer",
+    "FAIRY": "Fee",
+    "FIEND": "Unterweltler",
+    "ZOMBIE": "Zombie",
+    "MACHINE": "Maschine",
+    "AQUA": "Aqua",
+    "PYRO": "Pyro",
+    "ROCK": "Fels",
+    "WINGEDBEAST": "Geflügeltes Ungeheuer",
+    "PLANT": "Pflanze",
+    "INSECT": "Insekt",
+    "THUNDER": "Donner",
+    "DRAGON": "Drache",
+    "BEAST": "Ungeheuer",
+    "BEASTWARRIOR": "Ungeheuer-Krieger",
+    "DINOSAUR": "Dinosaurier",
+    "FISH": "Fisch",
+    "SEASERPENT": "Seeschlange",
+    "REPTILE": "Reptil",
+    "PSYCHIC": "Psi",
+    "DIVINE": "Göttliches Ungeheuer",
+    "CREATORGOD": "Schöpfergott",
+    "WYRM": "Wyrm",
+    "CYBERSE": "Cyberse",
+    "ILLUSION": "Illusion",
+    "CYBORG": "Cyborg",
+    "MAGICALKNIGHT": "Magischer Ritter",
+    "HIGHDRAGON": "Hochdrache",
+    "OMEGAPSYCHIC": "Omega-Psi",
+    "CELESTIALWARRIOR": "Himmelskrieger",
+    "GALAXY": "Galaxie"
+  },
+  "attributes": {
+    "EARTH": "ERDE",
+    "WATER": "WASSER",
+    "FIRE": "FEUER",
+    "WIND": "WIND",
+    "LIGHT": "LICHT",
+    "DARK": "FINSTERNIS",
+    "DIVINE": "GÖTTLICH"
+  },
+  "log": {
+    "title": "Duellprotokoll",
+    "empty": "Noch nichts.",
+    "hidden": "eine Karte",
+    "TURN": "Spielzug {turn} — {player, select, you {dein Zug} other {Zug des Gegners}}",
+    "PHASE": "{phase}",
+    "DRAW": "{player, select, you {Du ziehst} other {Dein Gegner zieht}} {cards}",
+    "DRAW_hidden": "{player, select, you {Du ziehst} other {Dein Gegner zieht}} {count, plural, one {# Karte} other {# Karten}}",
+    "SUMMON_NORMAL": "{player, select, you {Du beschwörst <c>{card}</c> als Normalbeschwörung} other {Dein Gegner beschwört <c>{card}</c> als Normalbeschwörung}}",
+    "SUMMON_SPECIAL": "{player, select, you {Du beschwörst <c>{card}</c> als Spezialbeschwörung} other {Dein Gegner beschwört <c>{card}</c> als Spezialbeschwörung}}",
+    "SUMMON_FLIP": "{player, select, you {Du beschwörst <c>{card}</c> als Flippbeschwörung} other {Dein Gegner beschwört <c>{card}</c> als Flippbeschwörung}}",
+    "SET": "{player, select, you {Du setzt eine Karte} other {Dein Gegner setzt eine Karte}}",
+    "ACTIVATE": "Kettenglied {link}: {player, select, you {du aktivierst} other {dein Gegner aktiviert}} <c>{card}</c>",
+    "CHAIN_NEGATED": "Kettenglied {link} wird annulliert",
+    "MOVE": "<c>{card}</c>: {from} → {to}",
+    "ATTACK": "<c>{card}</c> greift <t>{target}</t> an",
+    "ATTACK_direct": "<c>{card}</c> greift direkt an",
+    "DAMAGE": "{player, select, you {Du erhältst} other {Dein Gegner erhält}} {amount} Schaden",
+    "DAMAGE_cost": "{player, select, you {Du zahlst} other {Dein Gegner zahlt}} {amount} LP",
+    "RECOVER": "{player, select, you {Du erhältst} other {Dein Gegner erhält}} {amount} LP",
+    "COIN": "Münzwurf: {results}",
+    "DICE": "Würfelwurf: {results}",
+    "heads": "Kopf",
+    "tails": "Zahl",
+    "WIN": "{player, select, you {Du gewinnst das Duell} other {Dein Gegner gewinnt das Duell}}",
+    "WIN_draw": "Das Duell endet unentschieden"
+  },
+  "result": {
+    "win": "Sieg!",
+    "lose": "Niederlage",
+    "draw": "Unentschieden",
+    "rematch": "Mit gleichem Setup neu spielen",
+    "newSetup": "Neues Setup",
+    "review": "Spielfeld ansehen"
+  },
+  "inspector": {
+    "empty": "Fahre über eine Karte oder tippe sie an, um sie zu lesen.",
+    "hidden": "Verdeckte Karte."
+  }
+}

@@ -1,0 +1,298 @@
+{
+  "page": {
+    "title": "Simulateur de duel",
+    "description": "Teste tes combos et joue de vrais duels avec les vrais effets des cartes (moteur EDOPro).",
+    "rules": "Rappel des règles",
+    "source": "Code source (AGPL-3.0)"
+  },
+  "engine": {
+    "loading": "Vérification du moteur de duel…",
+    "downloading": "Le serveur télécharge les scripts des cartes (quelques minutes la première fois). La page se met à jour toute seule.",
+    "unavailable": "Le moteur de duel n’est pas disponible sur ce serveur.",
+    "stats": "{cards, number} cartes · {scripts, number} scripts"
+  },
+  "setup": {
+    "title": "Nouveau duel",
+    "deck": "Ton deck",
+    "deckPlaceholder": "Choisis un deck",
+    "noDecks": "Crée d’abord un deck pour pouvoir le tester ici.",
+    "first": {
+      "label": "Qui commence",
+      "me": "Moi",
+      "opponent": "L’adversaire"
+    },
+    "lp": "Points de Vie",
+    "opponent": {
+      "label": "Adversaire",
+      "PASSIVE": "Passif",
+      "PASSIVE_hint": "Il ne fait rien : idéal pour tester tes combos contre un plateau que tu prépares.",
+      "ME": "Contrôlé par moi",
+      "ME_hint": "Tu fais tous les choix des deux joueurs : interactions, hand traps, lignes de jeu.",
+      "BOT": "Bot",
+      "BOT_hint": "Une IA qui joue son propre deck.",
+      "soon": "Bientôt"
+    },
+    "opponentDeck": {
+      "label": "Deck adverse",
+      "copy": "Une copie de mon deck"
+    },
+    "hand": {
+      "label": "Main de départ",
+      "hint": "Impose des cartes dans ta main de départ (le reste est pioché au hasard).",
+      "count": "{count}/{max} choisies",
+      "clear": "Vider"
+    },
+    "board": {
+      "label": "Plateau adverse",
+      "hint": "Les cartes déjà en place chez l’adversaire au début du duel : monstres, cartes posées, hand traps, Cimetière…",
+      "search": "Cherche une carte à ajouter…",
+      "empty": "Aucune carte : l’adversaire commence avec un Terrain vide.",
+      "noResults": "Aucune carte trouvée.",
+      "remove": "Retirer",
+      "zone": "Zone",
+      "auto": "Auto",
+      "full": "Cette zone est pleine.",
+      "locations": {
+        "MZONE": "Zone Monstre",
+        "SZONE": "Zone Magie & Piège",
+        "FZONE": "Zone Terrain",
+        "HAND": "Main",
+        "GRAVE": "Cimetière",
+        "BANISHED": "Bannie"
+      },
+      "positions": {
+        "ATTACK": "Attaque",
+        "DEFENSE": "Défense",
+        "SET": "Face verso",
+        "FACE_UP": "Face recto"
+      }
+    },
+    "start": "Lancer le duel",
+    "resume": "Reprise du duel…"
+  },
+  "board": {
+    "you": "Toi",
+    "opponent": "Adversaire",
+    "deck": "Deck",
+    "extra": "Extra Deck",
+    "grave": "Cimetière",
+    "banished": "Bannies",
+    "field": "Terrain",
+    "hand": "Main",
+    "emptyPile": "Vide.",
+    "lp": "PV",
+    "materials": "{count, plural, one {# matériel} other {# matériels}}",
+    "counters": "{count, plural, one {# compteur} other {# compteurs}}",
+    "cardCount": "{count, plural, one {# carte} other {# cartes}}",
+    "chain": "Chaîne",
+    "chainLink": "Maillon {link}",
+    "actionable": "Actions disponibles",
+    "turn": "Tour {turn}",
+    "yourTurn": "Ton tour",
+    "opponentTurn": "Tour adverse"
+  },
+  "phases": {
+    "DRAW": "Draw Phase",
+    "STANDBY": "Standby Phase",
+    "MAIN1": "Main Phase 1",
+    "BATTLE": "Battle Phase",
+    "MAIN2": "Main Phase 2",
+    "END": "End Phase"
+  },
+  "phaseShort": {
+    "DRAW": "DP",
+    "STANDBY": "SP",
+    "MAIN1": "M1",
+    "BATTLE": "BP",
+    "MAIN2": "M2",
+    "END": "EP"
+  },
+  "actions": {
+    "SUMMON": "Invocation Normale",
+    "SPSUMMON": "Invocation Spéciale",
+    "REPOSITION": "Changer de position",
+    "SET_MONSTER": "Poser",
+    "SET_SPELL": "Poser",
+    "ACTIVATE": "Activer",
+    "ATTACK": "Attaquer",
+    "ATTACK_DIRECT": "Attaque directe",
+    "inspect": "Voir la carte",
+    "available": "{count, plural, one {# action} other {# actions}}"
+  },
+  "controls": {
+    "battle": "Battle Phase",
+    "main2": "Main Phase 2",
+    "end": "Finir le tour",
+    "leave": "Quitter",
+    "restart": "Recommencer",
+    "thinking": "Le moteur résout…"
+  },
+  "prompt": {
+    "opponent": "Choix de l’adversaire",
+    "IDLE": "Clique une carte en surbrillance pour la jouer, ou change de phase.",
+    "BATTLE": "Choisis un attaquant, active un effet ou quitte la Battle Phase.",
+    "waiting": "L’adversaire réfléchit…",
+    "CHAIN": {
+      "title": "Activer une carte ou un effet ?",
+      "forced": "Tu dois activer l’un de ces effets.",
+      "pass": "Ne rien activer"
+    },
+    "YESNO": {
+      "title": "Confirmer",
+      "yes": "Oui",
+      "no": "Non"
+    },
+    "OPTION": {
+      "title": "Choisis une option"
+    },
+    "SELECT_CARDS": {
+      "CARD": "Sélectionne des cartes",
+      "TRIBUTE": "Sélectionne les monstres à Sacrifier",
+      "SUM": "Sélectionne des cartes dont le total atteint {sum}",
+      "selected": "{count} sélectionnée(s)",
+      "total": "Total : {total} / {sum}",
+      "confirm": "Valider",
+      "cancel": "Annuler",
+      "always": "Toujours incluses"
+    },
+    "range": {
+      "exact": "Choisis-en {count}",
+      "between": "Choisis-en de {min} à {max}",
+      "upTo": "Choisis-en jusqu’à {max}"
+    },
+    "SELECT_UNSELECT": {
+      "title": "Sélectionne les cartes une par une",
+      "selected": "Sélectionnées (clique pour retirer)",
+      "finish": "Terminer",
+      "cancel": "Annuler"
+    },
+    "PLACE": {
+      "title": "Choisis une zone sur le Terrain",
+      "titleMany": "Choisis {count} zones sur le Terrain",
+      "disable": "Choisis une zone qui deviendra inutilisable"
+    },
+    "POSITION": {
+      "title": "Choisis une position de combat"
+    },
+    "ANNOUNCE_NUMBER": {
+      "title": "Déclare un nombre"
+    },
+    "ANNOUNCE_RACE": {
+      "title": "Déclare un Type de monstre"
+    },
+    "ANNOUNCE_ATTRIBUTE": {
+      "title": "Déclare un Attribut"
+    },
+    "ANNOUNCE_CARD": {
+      "title": "Déclare un nom de carte",
+      "search": "Cherche une carte…"
+    },
+    "SORT": {
+      "title": "Choisis l’ordre",
+      "hint": "Clique les cartes dans l’ordre voulu (la première = le dessus).",
+      "keep": "Garder cet ordre",
+      "reset": "Recommencer",
+      "confirm": "Valider"
+    },
+    "choose": "Choisis-en {count}",
+    "confirm": "Valider"
+  },
+  "positions": {
+    "ATK": "Attaque recto",
+    "DEF": "Défense recto",
+    "FD_ATK": "Attaque verso",
+    "FD_DEF": "Défense verso"
+  },
+  "locations": {
+    "DECK": "Deck",
+    "HAND": "main",
+    "MZONE": "Zone Monstre",
+    "SZONE": "Zone Magie & Piège",
+    "GRAVE": "Cimetière",
+    "BANISHED": "bannissement",
+    "EXTRA": "Extra Deck",
+    "OVERLAY": "Matériels Xyz"
+  },
+  "races": {
+    "WARRIOR": "Guerrier",
+    "SPELLCASTER": "Magicien",
+    "FAIRY": "Elfe",
+    "FIEND": "Démon",
+    "ZOMBIE": "Zombie",
+    "MACHINE": "Machine",
+    "AQUA": "Aqua",
+    "PYRO": "Pyro",
+    "ROCK": "Rocher",
+    "WINGEDBEAST": "Bête Ailée",
+    "PLANT": "Plante",
+    "INSECT": "Insecte",
+    "THUNDER": "Tonnerre",
+    "DRAGON": "Dragon",
+    "BEAST": "Bête",
+    "BEASTWARRIOR": "Bête-Guerrier",
+    "DINOSAUR": "Dinosaure",
+    "FISH": "Poisson",
+    "SEASERPENT": "Serpent de Mer",
+    "REPTILE": "Reptile",
+    "PSYCHIC": "Psychique",
+    "DIVINE": "Bête Divine",
+    "CREATORGOD": "Dieu Créateur",
+    "WYRM": "Wyrm",
+    "CYBERSE": "Cyberse",
+    "ILLUSION": "Illusion",
+    "CYBORG": "Cyborg",
+    "MAGICALKNIGHT": "Chevalier Magique",
+    "HIGHDRAGON": "Dragon Suprême",
+    "OMEGAPSYCHIC": "Oméga Psychique",
+    "CELESTIALWARRIOR": "Guerrier Céleste",
+    "GALAXY": "Galaxie"
+  },
+  "attributes": {
+    "EARTH": "TERRE",
+    "WATER": "EAU",
+    "FIRE": "FEU",
+    "WIND": "VENT",
+    "LIGHT": "LUMIÈRE",
+    "DARK": "TÉNÈBRES",
+    "DIVINE": "DIVIN"
+  },
+  "log": {
+    "title": "Journal du duel",
+    "empty": "Rien pour l’instant.",
+    "hidden": "une carte",
+    "TURN": "Tour {turn} — {player, select, you {à toi} other {à l’adversaire}}",
+    "PHASE": "{phase}",
+    "DRAW": "{player, select, you {Tu pioches} other {L’adversaire pioche}} {cards}",
+    "DRAW_hidden": "{player, select, you {Tu pioches} other {L’adversaire pioche}} {count, plural, one {# carte} other {# cartes}}",
+    "SUMMON_NORMAL": "{player, select, you {Tu Invoques Normalement} other {L’adversaire Invoque Normalement}} <c>{card}</c>",
+    "SUMMON_SPECIAL": "{player, select, you {Tu Invoques Spécialement} other {L’adversaire Invoque Spécialement}} <c>{card}</c>",
+    "SUMMON_FLIP": "{player, select, you {Tu Invoques par Flip} other {L’adversaire Invoque par Flip}} <c>{card}</c>",
+    "SET": "{player, select, you {Tu poses une carte} other {L’adversaire pose une carte}}",
+    "ACTIVATE": "Maillon {link} : {player, select, you {tu actives} other {l’adversaire active}} <c>{card}</c>",
+    "CHAIN_NEGATED": "Le Maillon {link} est annulé",
+    "MOVE": "<c>{card}</c> passe de {from} à {to}",
+    "ATTACK": "<c>{card}</c> attaque <t>{target}</t>",
+    "ATTACK_direct": "<c>{card}</c> attaque directement",
+    "DAMAGE": "{player, select, you {Tu subis} other {L’adversaire subit}} {amount} points de dégâts",
+    "DAMAGE_cost": "{player, select, you {Tu paies} other {L’adversaire paie}} {amount} PV",
+    "RECOVER": "{player, select, you {Tu gagnes} other {L’adversaire gagne}} {amount} PV",
+    "COIN": "Pile ou face : {results}",
+    "DICE": "Lancer de dé : {results}",
+    "heads": "Face",
+    "tails": "Pile",
+    "WIN": "{player, select, you {Tu remportes le duel} other {L’adversaire remporte le duel}}",
+    "WIN_draw": "Le duel se termine sur une égalité"
+  },
+  "result": {
+    "win": "Victoire !",
+    "lose": "Défaite",
+    "draw": "Égalité",
+    "rematch": "Rejouer avec la même config",
+    "newSetup": "Nouvelle config",
+    "review": "Regarder le Terrain"
+  },
+  "inspector": {
+    "empty": "Survole ou touche une carte pour la lire.",
+    "hidden": "Carte face verso."
+  }
+}

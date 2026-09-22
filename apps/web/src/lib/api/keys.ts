@@ -22,5 +22,6 @@ export const qk = {
   metaStatus: ['meta-status'] as const,
   playable: ['suggestions', 'playable'] as const,
   officialDecks: (kind: string) => ['suggestions', 'official', kind] as const,
+  duelEngine: ['duel', 'engine'] as const,
   guide: (fingerprint: string, ai: boolean) => ['guide', fingerprint, ai] as const,
 };
