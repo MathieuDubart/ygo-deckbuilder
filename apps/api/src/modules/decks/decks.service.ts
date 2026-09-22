@@ -32,9 +32,12 @@ export class DecksService {
     const decks = await this.prisma.deck.findMany({
       where: { userId },
       orderBy: { updatedAt: 'desc' },
-      include: { cards: { include: { card: { select: { imageUrlSmall: true } } } } },
+      include: {
+        cards: { include: { card: { select: { imageUrl: true, imageUrlSmall: true } } } },
+      },
     });
     return decks.map((d) => {
+      const cover = d.cards.find((c) => c.zone === 'MAIN')?.card;
       const count = (zone: string) =>
         d.cards.filter((c) => c.zone === zone).reduce((s, c) => s + c.quantity, 0);
       return {
@@ -45,7 +48,7 @@ export class DecksService {
         mainCount: count('MAIN'),
         extraCount: count('EXTRA'),
         sideCount: count('SIDE'),
-        coverImageUrl: d.cards.find((c) => c.zone === 'MAIN')?.card.imageUrlSmall ?? null,
+        coverImageUrl: cover ? (cover.imageUrl ?? cover.imageUrlSmall) : null,
       };
     });
   }

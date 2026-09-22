@@ -65,6 +65,7 @@ export function CardDetailDialog({
                   alt={card.name}
                   fill
                   sizes="192px"
+                  quality={90}
                   className="object-cover"
                 />
               )}
