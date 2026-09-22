@@ -16,7 +16,7 @@ and generated play guides.
 - **Deck builder** — search limited to your cards (or the whole catalog), live validation (40–60 cards, 3 copies, banlist, Extra Deck), missing copies flagged, auto-save, `.ydk` import/export. Clicking a card opens its details with +/− per zone.
 - **Card interactions** — on every card: what it searches, summons or uses as material, and which cards search, summon or use it. Your cards first, click to jump from card to card.
 - **Automatic meta** — recent tournament top decks are clustered into archetypes by content, with a consensus list, flex cards, a tier and the meta share.
-- **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
+- **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; **official preconstructed decks** (structure decks, starters, the decks inside boxes such as *Legendary 5D's Decks* or the *2-Player Starter Set*) with what you own of each; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
 - **Synergy & play guides** — card effects are read (who searches, summons or sends what; starters, extenders, hand traps; which Extra Deck monsters are actually reachable). Generated decks favour cards that work together, and every deck gets a **play guide**: game plan, key cards, step-by-step combos, going first/second, mistakes to avoid. Optionally rewritten by an AI model (OpenAI-compatible or Anthropic, local models welcome).
 - **Wishlist** — target print, max budget, priority, link to the deck that needs it, "Got it" moves it to the collection.
 
@@ -177,6 +177,12 @@ per product, so the official copy counts are read on demand from the Yugipedia *
 stored in `CardPrint.setQuantity` (1 copy per card when unknown). The product page shows what is still
 in your collection, a copyable list to rebuild it, and — for structure and starter decks — the play
 guide and one-click deck creation.
+
+The same set lists feed the **official decks**: every section of a product page titled "… Deck"
+becomes a `ProductDeck` (a structure deck is one deck, *Legendary Decks II* is three). A daily job
+reads the structure decks, starters and boxes that have not been read yet. The Suggestions page lists
+them with your coverage (filter: structure / starter / box) and builds them from the official list or
+from your cards only.
 
 ## Quality
 
