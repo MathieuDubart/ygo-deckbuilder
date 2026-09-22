@@ -7,7 +7,7 @@ import type {
 } from '@ygo/shared';
 import { AlertTriangle, Check, Layers, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/feedback';
 import { Field, Input } from '@/components/ui/input';
 import { useCreateDeck } from '@/lib/api/decks';
 import { useGeneratedDeck, type GenerationTarget } from '@/lib/api/suggestions';
+import { DeckGuide } from '@/features/guide/deck-guide';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { cn, formatPrice } from '@/lib/utils';
 import { ScoreBadge, ScoreBreakdown } from './playable-decks';
@@ -67,6 +68,10 @@ export function GenerateDeckDialog({
   }, [target]);
 
   const missing = deck?.cards.filter((c) => c.quantity > c.owned) ?? [];
+  const guideCards = useMemo(
+    () => deck?.cards.map((c) => ({ cardId: c.card.id, zone: c.zone, quantity: c.quantity })) ?? [],
+    [deck],
+  );
 
   async function create() {
     if (!deck) return;
@@ -216,6 +221,13 @@ export function GenerateDeckDialog({
                   </section>
                 );
               })}
+
+              <DeckGuide
+                cards={guideCards}
+                name={deck.name}
+                onInspect={setInspect}
+                className="border-t border-border pt-5"
+              />
 
               <div className="sticky -bottom-5 -mx-5 -mb-5 space-y-3 border-t border-border bg-bg-elevated/95 px-5 py-4 backdrop-blur">
                 <Field label="Nom du deck">
