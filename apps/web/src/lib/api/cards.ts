@@ -2,6 +2,7 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import type {
   CardDetailDto,
+  CardInteractionsDto,
   CardSearchInput,
   CardSetDto,
   CardSummaryDto,
@@ -26,6 +27,15 @@ export const useCard = (id: number | null) =>
     queryKey: qk.card(id ?? 0),
     queryFn: () => api<CardDetailDto>(`/cards/${id}`),
     enabled: id !== null,
+  });
+
+/** Interactions de la carte avec le reste du catalogue (index calculé côté API). */
+export const useCardInteractions = (id: number | null) =>
+  useQuery({
+    queryKey: qk.cardInteractions(id ?? 0),
+    queryFn: () => api<CardInteractionsDto>(`/cards/${id}/interactions`),
+    enabled: id !== null,
+    staleTime: 5 * 60_000,
   });
 
 export const useArchetypes = () =>

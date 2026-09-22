@@ -7,18 +7,20 @@ import {
   type CardCondition,
   type CardLanguage,
 } from '@ygo/shared';
-import { Check, Heart, Plus } from 'lucide-react';
+import { ArrowLeft, Check, Heart, Plus } from 'lucide-react';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
 import { Field, Input, Select } from '@/components/ui/input';
+import { useMe } from '@/lib/api/auth';
 import { useCard } from '@/lib/api/cards';
 import { useAddToCollection } from '@/lib/api/collection';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { formatPrice } from '@/lib/utils';
+import { CardInteractions } from './card-interactions';
 
 const CONDITION_LABELS: Record<CardCondition, string> = {
   MINT: 'Mint',
@@ -41,12 +43,25 @@ export function CardDetailDialog({
   /** Code tapé par l'utilisateur ("SDBE-FR001") : pré-sélectionne l'édition et la langue. */
   printCodeHint?: string;
 }) {
-  const { data: card, isLoading } = useCard(cardId);
-  const hint = printCodeHint ? parsePrintCode(printCodeHint) : null;
+  // Navigation entre fiches depuis les interactions (historique propre à la fiche ouverte)
+  const [trail, setTrail] = useState<number[]>([]);
+  useEffect(() => setTrail([]), [cardId]);
+  const currentId = trail.at(-1) ?? cardId;
+  const top = useRef<HTMLDivElement>(null);
+  const go = (id: number) => {
+    setTrail((t) => [...t, id]);
+    top.current?.scrollIntoView({ block: 'start' });
+  };
+  const back = () => setTrail((t) => t.slice(0, -1));
+
+  const { data: me } = useMe();
+  const { data: card, isLoading } = useCard(currentId);
+  // L'indice de code imprimé ne vaut que pour la carte ouverte au départ
+  const hint = printCodeHint && !trail.length ? parsePrintCode(printCodeHint) : null;
   const hintedPrintId = hint
     ? card?.prints.find((p) => matchesPrintCode(p.printCode, hint))?.id
     : undefined;
-  const hintedLanguage = printCodeHint ? languageFromCode(printCodeHint) : undefined;
+  const hintedLanguage = hint ? languageFromCode(printCodeHint!) : undefined;
 
   return (
     <Dialog open={cardId !== null} onClose={onClose} title={card?.name ?? 'Carte'} variant="sheet">
@@ -56,7 +71,16 @@ export function CardDetailDialog({
           <Skeleton className="h-24" />
         </div>
       ) : (
-        <div className="space-y-6">
+        <div ref={top} className="scroll-mt-20 space-y-6">
+          {trail.length > 0 && (
+            <button
+              type="button"
+              onClick={back}
+              className="-mt-2 flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
+            >
+              <ArrowLeft className="size-4" /> Retour
+            </button>
+          )}
           <div className="grid gap-5 sm:grid-cols-[12rem_1fr]">
             <div className="relative mx-auto aspect-(--aspect-card) w-48 overflow-hidden rounded-[4%/3%] bg-bg-sunken">
               {card.imageUrl && (
@@ -106,7 +130,9 @@ export function CardDetailDialog({
             defaultPrintId={hintedPrintId}
             defaultLanguage={hintedLanguage}
           />
-          <AddToWishlistForm cardId={card.id} prints={card.prints} />
+          <AddToWishlistForm key={`w-${card.id}`} cardId={card.id} prints={card.prints} />
+
+          <CardInteractions key={card.id} cardId={card.id} onOpen={go} signedIn={!!me} />
 
           {card.prints.length > 0 && (
             <section>
