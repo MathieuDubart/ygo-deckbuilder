@@ -1,15 +1,10 @@
 'use client';
 import { DECK_RULES, maxCopiesFor, type CardSummaryDto, type DeckZone } from '@ygo/shared';
 import { Minus, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { BuilderEntry } from './use-deck-builder';
-
-const LABELS: Record<DeckZone, string> = {
-  MAIN: 'Main Deck',
-  EXTRA: 'Extra Deck',
-  SIDE: 'Side Deck',
-};
 
 /**
  * Bloc « Dans ce deck » de la fiche carte (deck builder) : exemplaires par zone, + / −,
@@ -31,6 +26,8 @@ export function DeckCardActions({
   onAdd: (card: CardSummaryDto, zone: DeckZone) => { ok: boolean; reason?: string };
   onRemove: (zone: DeckZone, cardId: number) => void;
 }) {
+  const t = useTranslations('deckBuilder.actions');
+  const tc = useTranslations('common');
   const [error, setError] = useState<string | null>(null);
   const zones: DeckZone[] = card.isExtraDeck ? ['EXTRA', 'SIDE'] : ['MAIN', 'SIDE'];
   const qty = (z: DeckZone) => byZone[z].find((e) => e.card.id === card.id)?.quantity ?? 0;
@@ -42,13 +39,13 @@ export function DeckCardActions({
 
   return (
     <section
-      aria-label="Dans ce deck"
+      aria-label={t('inDeck')}
       className="space-y-3 rounded-xl border border-accent/30 bg-accent/5 p-4"
     >
       <header className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 className="text-sm font-semibold">Dans ce deck</h3>
+        <h3 className="text-sm font-semibold">{t('inDeck')}</h3>
         <span className="font-mono text-xs text-fg-muted tabular-nums">
-          {total}/{limit} exemplaire{limit > 1 ? 's' : ''}
+          {t('copies', { total, limit })}
           {!ocg && card.banTcg ? ` · ${card.banTcg}` : ''}
         </span>
         <span
@@ -57,27 +54,27 @@ export function DeckCardActions({
             owned >= total ? 'text-success' : 'text-danger',
           )}
         >
-          {owned} possédée{owned > 1 ? 's' : ''}
-          {total > owned && ` · ${total - owned} à acheter`}
+          {t('owned', { owned, toBuy: Math.max(0, total - owned) })}
         </span>
       </header>
 
       <div className="grid gap-2 sm:grid-cols-2">
         {zones.map((z) => {
           const n = qty(z);
+          const label = tc(`zones.${z}`);
           return (
             <div
               key={z}
               className="flex items-center gap-2 rounded-lg border border-border bg-bg-elevated px-3 py-2"
             >
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{LABELS[z]}</p>
+                <p className="text-sm font-medium">{label}</p>
                 <p className="font-mono text-[11px] text-fg-subtle tabular-nums">
-                  {counts[z]}/{DECK_RULES[z].max} cartes
+                  {t('zoneCount', { count: counts[z], max: DECK_RULES[z].max })}
                 </p>
               </div>
               <StepButton
-                label={`Retirer un exemplaire du ${LABELS[z]}`}
+                label={t('removeOne', { zone: label })}
                 disabled={n === 0}
                 onClick={() => {
                   setError(null);
@@ -90,12 +87,12 @@ export function DeckCardActions({
                 {n}
               </span>
               <StepButton
-                label={`Ajouter un exemplaire au ${LABELS[z]}`}
+                label={t('addOne', { zone: label })}
                 disabled={total >= limit}
                 primary
                 onClick={() => {
                   const r = onAdd(card, z);
-                  setError(r.ok ? null : (r.reason ?? 'Impossible d’ajouter'));
+                  setError(r.ok ? null : (r.reason ?? t('cannotAdd')));
                 }}
               >
                 <Plus className="size-4" />

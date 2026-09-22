@@ -1,0 +1,62 @@
+{
+  "view": {
+    "title": "La mia collezione",
+    "description": "Tutto quello che possiedi, per stampa, condizione e lingua.",
+    "addProduct": "Aggiungi un prodotto",
+    "addCards": "Aggiungi carte",
+    "stats": {
+      "copies": "Copie",
+      "distinctCards": "Carte uniche",
+      "estimatedValue": "Valore stimato"
+    },
+    "tabs": {
+      "label": "Vista collezione",
+      "cards": "Carte",
+      "products": "Prodotti"
+    },
+    "filterPlaceholder": "Filtra la collezione…",
+    "empty": {
+      "noMatch": "Nessun risultato",
+      "title": "La tua collezione è vuota",
+      "description": "Aggiungi carte dal catalogo, oppure importa un intero Structure Deck in un colpo."
+    }
+  },
+  "row": {
+    "unknownPrint": "Stampa ?",
+    "removeCopy": "Togli una copia",
+    "addCopy": "Aggiungi una copia"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "import": {
+    "title": "Aggiungi un prodotto intero",
+    "searchPlaceholder": "Filtra: «drago», «2022», codice del set (SDBE)…",
+    "kindsLabel": "Tipo di prodotto",
+    "kinds": {
+      "ALL": "Tutti",
+      "STRUCTURE": "Structure Deck",
+      "TIN": "Tin",
+      "STARTER": "Starter Deck",
+      "BOX": "Box set",
+      "OTHER": "Buste e altro"
+    },
+    "noResults": "Nessun prodotto trovato. Prova un altro tipo, una parola chiave o il codice stampato sulle tue carte.",
+    "cardCount": "{count, plural, one {# carta} other {# carte}}",
+    "confirm": {
+      "releasedOn": "uscito il {date}",
+      "description": "Le sue <strong>{count, plural, one {# carta} other {# carte}}</strong> verranno aggiunte alla tua collezione, con le quantità ufficiali del prodotto quando le troviamo (lista Yugipedia), altrimenti 1 copia di ciascuna. Il prodotto comparirà nella scheda «Prodotti» della tua collezione.",
+      "copiesEach": "Copie di ciascuna",
+      "language": "Lingua",
+      "add": "Aggiungi questo prodotto",
+      "toast": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}»",
+      "toastVerified": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}» (quantità ufficiali)"
+    }
+  }
+}

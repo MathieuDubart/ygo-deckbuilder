@@ -1,0 +1,77 @@
+{
+  "ban": {
+    "Forbidden": "Verboten",
+    "Banned": "Verboten",
+    "Limited": "Limitiert",
+    "Semi-Limited": "Semi-Limitiert"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "detail": {
+    "fallbackTitle": "Karte",
+    "banTcg": "TCG: {status}",
+    "level": "Stufe {level}",
+    "scale": "Skala {scale}",
+    "ownedPrice": "Im Besitz: <strong>{owned}</strong> · Cardmarket ab <strong>{price}</strong>",
+    "prints": "Drucke ({count})",
+    "printUnspecified": "Druck nicht angegeben"
+  },
+  "collectionForm": {
+    "title": "Zu meiner Sammlung hinzufügen",
+    "print": "Druck",
+    "quantity": "Anz.",
+    "condition": "Zustand",
+    "language": "Sprache",
+    "firstEdition": "1. Auflage",
+    "success": "{count, plural, one {# Exemplar zu deiner Sammlung hinzugefügt} other {# Exemplare zu deiner Sammlung hinzugefügt}}"
+  },
+  "wishlistForm": {
+    "open": "Auf die Wunschliste",
+    "success": "Zu deiner Wunschliste hinzugefügt",
+    "title": "Ich suche sie",
+    "print": "Gewünschter Druck",
+    "quantity": "Anz.",
+    "maxPrice": "Max. Budget (€)"
+  },
+  "interactions": {
+    "title": "Interaktionen",
+    "ownedLinked": "{count} deiner Karten",
+    "onlyMine": "Nur meine Karten",
+    "emptyIndexed": "Keine konkrete Verbindung in den Kartentexten gefunden: Diese Karte zielt auf keinen bestimmten Namen oder Typ ab, und keine Karte zielt gezielt auf sie ab.",
+    "emptyIndexing": "Der Interaktionsindex wird noch aufgebaut, schau in einer Minute wieder vorbei.",
+    "tabs": {
+      "out": "Was sie macht",
+      "in": "Genutzt von"
+    },
+    "noneMine": "Keine deiner Karten hier.",
+    "none": "Nichts auf dieser Seite.",
+    "generic": "Breite Effekte (funktionieren mit vielen Karten): {list}",
+    "byTraits": "(über ihre Eigenschaften)",
+    "byTraitsTitle": "Diese Karten nennen sie nicht beim Namen: Sie zielen auf ihre Stufe, ihr Attribut oder ihren Typ ab",
+    "out": {
+      "SEARCH": "Sucht",
+      "RECOVER": "Holt zurück",
+      "SPECIAL_SUMMON": "Beschwört",
+      "SUMMON_EXTRA": "Beschwört aus dem Extra Deck",
+      "SEND_GY": "Legt auf den Friedhof",
+      "MATERIAL": "Mögliche Materialien",
+      "MENTION": "Erwähnt"
+    },
+    "in": {
+      "SEARCH": "Gesucht von",
+      "RECOVER": "Zurückgeholt von",
+      "SPECIAL_SUMMON": "Beschworen von",
+      "SUMMON_EXTRA": "Aus dem Extra Deck beschworen von",
+      "SEND_GY": "Auf den Friedhof gelegt von",
+      "MATERIAL": "Material für",
+      "MENTION": "Erwähnt von"
+    }
+  }
+}

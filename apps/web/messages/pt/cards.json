@@ -1,0 +1,77 @@
+{
+  "ban": {
+    "Forbidden": "Proibido",
+    "Banned": "Banido",
+    "Limited": "Limitado",
+    "Semi-Limited": "Semilimitado"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excelente",
+    "GOOD": "Bom",
+    "LIGHT_PLAYED": "Pouco jogado",
+    "PLAYED": "Jogado",
+    "POOR": "Danificado"
+  },
+  "detail": {
+    "fallbackTitle": "Card",
+    "banTcg": "TCG: {status}",
+    "level": "Nv. {level}",
+    "scale": "Escala {scale}",
+    "ownedPrice": "Na coleção: <strong>{owned}</strong> · Cardmarket a partir de <strong>{price}</strong>",
+    "prints": "Impressões ({count})",
+    "printUnspecified": "Impressão não especificada"
+  },
+  "collectionForm": {
+    "title": "Adicionar à minha coleção",
+    "print": "Impressão",
+    "quantity": "Qtd.",
+    "condition": "Estado",
+    "language": "Idioma",
+    "firstEdition": "1ª ed.",
+    "success": "{count, plural, one {# cópia adicionada à sua coleção} other {# cópias adicionadas à sua coleção}}"
+  },
+  "wishlistForm": {
+    "open": "Adicionar à wishlist",
+    "success": "Adicionado à sua wishlist",
+    "title": "Estou procurando",
+    "print": "Impressão desejada",
+    "quantity": "Qtd.",
+    "maxPrice": "Orçamento máx. (€)"
+  },
+  "interactions": {
+    "title": "Interações",
+    "ownedLinked": "{count} dos seus cards",
+    "onlyMine": "Só meus cards",
+    "emptyIndexed": "Nenhuma ligação específica encontrada nos textos dos cards: este card não visa nenhum nome ou tipo em particular, e nenhum card visa ele especificamente.",
+    "emptyIndexing": "O índice de interações ainda está sendo gerado, volte daqui a um minuto.",
+    "tabs": {
+      "out": "O que ele faz",
+      "in": "Usado por"
+    },
+    "noneMine": "Nenhum dos seus cards aqui.",
+    "none": "Nada deste lado.",
+    "generic": "Efeitos amplos (funcionam com muitos cards): {list}",
+    "byTraits": "(pelas características)",
+    "byTraitsTitle": "Estes cards não citam o nome dele: eles visam o Nível, Atributo ou Tipo",
+    "out": {
+      "SEARCH": "Busca",
+      "RECOVER": "Recupera",
+      "SPECIAL_SUMMON": "Invoca",
+      "SUMMON_EXTRA": "Invoca do Deck Adicional",
+      "SEND_GY": "Envia para o Cemitério",
+      "MATERIAL": "Matérias possíveis",
+      "MENTION": "Menciona"
+    },
+    "in": {
+      "SEARCH": "Buscado por",
+      "RECOVER": "Recuperado por",
+      "SPECIAL_SUMMON": "Invocado por",
+      "SUMMON_EXTRA": "Invocado do Deck Adicional por",
+      "SEND_GY": "Enviado para o Cemitério por",
+      "MATERIAL": "Matéria para",
+      "MENTION": "Mencionado por"
+    }
+  }
+}

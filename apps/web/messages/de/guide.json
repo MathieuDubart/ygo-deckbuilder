@@ -1,0 +1,44 @@
+{
+  "title": "Deck-Guide",
+  "source": {
+    "ai": "Von KI geschrieben",
+    "aiWithModel": "Von KI geschrieben · {model}",
+    "rules": "Aus den Karteneffekten berechnet"
+  },
+  "writing": "Die KI schreibt den Guide… (ein lokales Modell kann ein, zwei Minuten brauchen) – so lange siehst du die berechnete Version.",
+  "aiError": "{error} – stattdessen wird der berechnete Guide angezeigt.",
+  "mode": {
+    "label": "Guide-Version",
+    "RULES": "Berechnet",
+    "AI": "Von KI"
+  },
+  "sections": {
+    "gamePlan": "Spielplan",
+    "combos": "Wichtige Combos ({count})",
+    "combosDisclaimer": "Vorgeschlagene Lines, ermittelt aus den Karteneffekten: Prüf immer den genauen Kartentext (Bedingungen, Kosten, „einmal pro Spielzug“).",
+    "keyCards": "Schlüsselkarten",
+    "firstSecond": "Als Erster / als Zweiter",
+    "goingFirst": "Als Erster",
+    "goingSecond": "Als Zweiter",
+    "mistakes": "Fehler, die du vermeiden solltest",
+    "tips": "Tipps"
+  },
+  "nothing": "Nichts Besonderes.",
+  "combo": {
+    "hand": "Auf der Hand",
+    "endBoard": "End Board"
+  },
+  "roles": {
+    "STARTER": "Starter",
+    "SEARCHER": "Searcher",
+    "EXTENDER": "Extender",
+    "HAND_TRAP": "Hand Trap",
+    "INTERRUPTION": "Unterbrechung",
+    "REMOVAL": "Removal",
+    "DRAW": "Ziehen",
+    "RECOVERY": "Recovery",
+    "FUSION_ENABLER": "Fusion",
+    "RITUAL_ENABLER": "Ritual",
+    "BOSS": "Boss"
+  }
+}

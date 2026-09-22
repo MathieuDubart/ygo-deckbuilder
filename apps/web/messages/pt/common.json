@@ -1,0 +1,40 @@
+{
+  "actions": {
+    "close": "Fechar",
+    "cancel": "Cancelar",
+    "back": "Voltar",
+    "retry": "Tentar de novo",
+    "save": "Salvar",
+    "add": "Adicionar",
+    "remove": "Remover",
+    "delete": "Excluir",
+    "create": "Criar",
+    "copy": "Copiar",
+    "copied": "Copiado"
+  },
+  "pagination": {
+    "label": "Paginação",
+    "previous": "← Anterior",
+    "next": "Próxima →"
+  },
+  "status": {
+    "loading": "Carregando…",
+    "error": "Algo deu errado",
+    "none": "—"
+  },
+  "zones": {
+    "MAIN": "Deck Principal",
+    "EXTRA": "Deck Adicional",
+    "SIDE": "Side Deck"
+  },
+  "categories": {
+    "MONSTER": "Monstros",
+    "SPELL": "Magias",
+    "TRAP": "Armadilhas",
+    "SKILL": "Habilidades",
+    "TOKEN": "Fichas"
+  },
+  "locale": {
+    "label": "Idioma"
+  }
+}

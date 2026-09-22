@@ -1,0 +1,23 @@
+{
+  "appName": "Deck Builder",
+  "metaTitle": "YGO Deck Builder",
+  "metaDescription": "Deine Yu-Gi-Oh!-Sammlung, deine Decks und was dir fehlt, um Meta zu spielen.",
+  "nav": {
+    "collection": "Sammlung",
+    "decks": "Decks",
+    "suggestions": "Vorschläge",
+    "catalog": "Katalog",
+    "wishlist": "Wunschliste"
+  },
+  "logout": "Abmelden",
+  "pages": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "collection": "Sammlung",
+    "decks": "Decks",
+    "catalog": "Katalog",
+    "suggestions": "Vorschläge",
+    "wishlist": "Wunschliste",
+    "deckNotFound": "Deck nicht gefunden."
+  }
+}

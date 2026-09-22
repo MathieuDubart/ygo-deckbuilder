@@ -1,14 +1,17 @@
 'use client';
 import type { CardSummaryDto } from '@ygo/shared';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { CardImage } from './card-image';
 
-const banTone: Record<string, string> = {
+const banTone = {
   Forbidden: 'bg-danger',
   Banned: 'bg-danger',
   Limited: 'bg-warning',
   'Semi-Limited': 'bg-accent',
-};
+} as const;
+type BanStatus = keyof typeof banTone;
+const isBanStatus = (v: string | null | undefined): v is BanStatus => !!v && v in banTone;
 
 /**
  * Vignette de carte. Le badge de quantité possédée est LE signal clé de l'app :
@@ -27,7 +30,9 @@ export function CardTile({
   dimmed?: boolean;
   className?: string;
 }) {
+  const t = useTranslations('cards.ban');
   const owned = card.ownedQuantity;
+  const ban = isBanStatus(card.banTcg) ? card.banTcg : null;
   return (
     <div className={cn('group relative flex flex-col gap-1.5', className)}>
       <button
@@ -41,15 +46,15 @@ export function CardTile({
         title={card.name}
       >
         <CardImage card={card} />
-        {card.banTcg && banTone[card.banTcg] && (
+        {ban && (
           <span
             className={cn(
               'absolute top-1.5 left-1.5 grid size-5 place-items-center rounded-full font-mono text-[10px] font-bold text-black',
-              banTone[card.banTcg],
+              banTone[ban],
             )}
-            title={card.banTcg}
+            title={t(ban)}
           >
-            {card.banTcg === 'Limited' ? 1 : card.banTcg === 'Semi-Limited' ? 2 : 0}
+            {ban === 'Limited' ? 1 : ban === 'Semi-Limited' ? 2 : 0}
           </span>
         )}
         {owned !== undefined && owned > 0 && (

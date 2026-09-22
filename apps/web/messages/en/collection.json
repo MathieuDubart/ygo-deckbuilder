@@ -1,0 +1,62 @@
+{
+  "view": {
+    "title": "My collection",
+    "description": "Everything you own, by print, condition and language.",
+    "addProduct": "Add a product",
+    "addCards": "Add cards",
+    "stats": {
+      "copies": "Copies",
+      "distinctCards": "Unique cards",
+      "estimatedValue": "Estimated value"
+    },
+    "tabs": {
+      "label": "Collection view",
+      "cards": "Cards",
+      "products": "Products"
+    },
+    "filterPlaceholder": "Filter my collection…",
+    "empty": {
+      "noMatch": "No matches",
+      "title": "Your collection is empty",
+      "description": "Add cards from the catalog, or import a whole Structure Deck at once."
+    }
+  },
+  "row": {
+    "unknownPrint": "Print ?",
+    "removeCopy": "Remove one copy",
+    "addCopy": "Add one copy"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "import": {
+    "title": "Add a whole product",
+    "searchPlaceholder": "Filter: “dragon”, “2022”, set code (SDBE)…",
+    "kindsLabel": "Product type",
+    "kinds": {
+      "ALL": "All",
+      "STRUCTURE": "Structure Decks",
+      "TIN": "Tins",
+      "STARTER": "Starter Decks",
+      "BOX": "Box sets",
+      "OTHER": "Boosters & more"
+    },
+    "noResults": "No products found. Try another type, a keyword or the code printed on your cards.",
+    "cardCount": "{count, plural, one {# card} other {# cards}}",
+    "confirm": {
+      "releasedOn": "released {date}",
+      "description": "Its <strong>{count, plural, one {# card} other {# cards}}</strong> will be added to your collection, using the product’s official quantities when we can find them (Yugipedia list), otherwise 1 copy of each. The product will show up in the “Products” tab of your collection.",
+      "copiesEach": "Copies of each",
+      "language": "Language",
+      "add": "Add this product",
+      "toast": "{count, plural, one {# card} other {# cards}} added from “{set}”",
+      "toastVerified": "{count, plural, one {# card} other {# cards}} added from “{set}” (official quantities)"
+    }
+  }
+}

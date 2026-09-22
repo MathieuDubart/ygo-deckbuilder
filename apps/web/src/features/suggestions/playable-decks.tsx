@@ -1,12 +1,14 @@
 'use client';
 import type { DeckScoreDto, PlayableDeckDto } from '@ygo/shared';
 import { PackageOpen, ShieldCheck, Wand2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { CardImage } from '@/components/cards/card-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState, Skeleton } from '@/components/ui/feedback';
 import { usePlayableDecks, type GenerationTarget } from '@/lib/api/suggestions';
+import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 /**
@@ -14,6 +16,7 @@ import { cn } from '@/lib/utils';
  * du plus solide au moins solide. Calculés automatiquement, pas besoin de chercher.
  */
 export function PlayableDecks({ onOpen }: { onOpen: (target: GenerationTarget) => void }) {
+  const t = useTranslations('suggestions.playable.empty');
   const { data, isLoading } = usePlayableDecks();
 
   if (isLoading) {
@@ -30,12 +33,12 @@ export function PlayableDecks({ onOpen }: { onOpen: (target: GenerationTarget) =
     return (
       <EmptyState
         icon={PackageOpen}
-        title="Pas encore de deck complet avec ta collection"
-        description="Il faut un archétype assez fourni (une dizaine de cartes différentes) ou une bonne partie d’un deck du meta. Un Structure Deck est souvent le meilleur point de départ."
+        title={t('title')}
+        description={t('description')}
         action={
           <Link href="/collection">
             <Button variant="secondary">
-              <PackageOpen className="size-4" /> Ajouter un produit
+              <PackageOpen className="size-4" /> {t('action')}
             </Button>
           </Link>
         }
@@ -66,6 +69,7 @@ function PlayableDeckCard({
   best: boolean;
   onOpen: (target: GenerationTarget) => void;
 }) {
+  const t = useTranslations('suggestions.playable');
   return (
     <li
       className={cn(
@@ -90,8 +94,12 @@ function PlayableDeckCard({
           );
         })}
         <div className="absolute top-3 left-3 flex gap-1.5">
-          {best && <Badge tone="accent">Meilleur choix</Badge>}
-          {deck.tier !== null ? <Badge>Meta · Tier {deck.tier}</Badge> : <Badge>Deck maison</Badge>}
+          {best && <Badge tone="accent">{t('best')}</Badge>}
+          {deck.tier !== null ? (
+            <Badge>{t('metaTier', { tier: deck.tier })}</Badge>
+          ) : (
+            <Badge>{t('homebrew')}</Badge>
+          )}
         </div>
       </div>
 
@@ -102,8 +110,8 @@ function PlayableDeckCard({
               {deck.name}
             </p>
             <p className="flex items-center gap-1 text-xs text-success">
-              <ShieldCheck className="size-3.5" /> 100 % tes cartes · {deck.counts.MAIN} main ·{' '}
-              {deck.counts.EXTRA} extra
+              <ShieldCheck className="size-3.5" />{' '}
+              {t('composition', { main: deck.counts.MAIN, extra: deck.counts.EXTRA })}
             </p>
           </div>
           <ScoreBadge score={deck.score.score} />
@@ -116,7 +124,7 @@ function PlayableDeckCard({
           variant={best ? 'primary' : 'secondary'}
           onClick={() => onOpen(deck.target)}
         >
-          <Wand2 className="size-4" /> Voir et créer
+          <Wand2 className="size-4" /> {t('open')}
         </Button>
       </div>
     </li>
@@ -124,6 +132,7 @@ function PlayableDeckCard({
 }
 
 export function ScoreBadge({ score }: { score: number }) {
+  const t = useTranslations('suggestions.score');
   const tone =
     score >= 70
       ? 'text-success border-success/40'
@@ -133,48 +142,33 @@ export function ScoreBadge({ score }: { score: number }) {
   return (
     <div
       className={cn('flex shrink-0 flex-col items-center rounded-xl border px-2.5 py-1', tone)}
-      title="Note de solidité : synergie entre les cartes, moteur, staples, régularité, part de compléments génériques"
+      title={t('hint')}
     >
       <span className="font-mono text-lg leading-none font-bold tabular-nums">{score}</span>
-      <span className="text-[9px] tracking-wide uppercase">solidité</span>
+      <span className="text-[9px] tracking-wide uppercase">{t('label')}</span>
     </div>
   );
 }
 
+type CriterionKey = 'engine' | 'synergy' | 'starters' | 'staples' | 'consistency' | 'filler';
+
 /** Les critères de la note, en mots. */
 export function ScoreBreakdown({ score }: { score: DeckScoreDto }) {
-  const pct = (x: number) => `${Math.round(x * 100)} %`;
+  const t = useTranslations('suggestions.score.criteria');
+  const { percent, number } = useFormat();
+  const item = (key: CriterionKey, value: string) => ({
+    label: t(`${key}.label`),
+    hint: t(`${key}.hint`),
+    value,
+  });
   const items = [
-    { label: 'Moteur', value: pct(score.engineShare), hint: 'Part du main tenue par l’archétype' },
+    item('engine', percent(score.engineShare)),
     ...(score.synergy !== null
-      ? [
-          {
-            label: 'Synergie',
-            value: pct(score.synergy),
-            hint: 'Cartes qui se cherchent / s’invoquent entre elles, starters, Extra Deck vraiment invocable',
-          },
-          {
-            label: 'Starters',
-            value: String(score.starters ?? 0),
-            hint: 'Exemplaires de cartes qui lancent le jeu toutes seules',
-          },
-        ]
+      ? [item('synergy', percent(score.synergy)), item('starters', number(score.starters ?? 0))]
       : []),
-    {
-      label: 'Staples',
-      value: String(score.staples),
-      hint: 'Hand traps et cartes génériques du meta',
-    },
-    {
-      label: 'Régularité',
-      value: pct(score.consistency),
-      hint: 'Cartes moteur jouées en 3 exemplaires',
-    },
-    {
-      label: 'Compléments',
-      value: pct(score.fillerShare),
-      hint: 'Cartes génériques ajoutées pour atteindre 40',
-    },
+    item('staples', number(score.staples)),
+    item('consistency', percent(score.consistency)),
+    item('filler', percent(score.fillerShare)),
   ];
   return (
     <dl className={cn('grid gap-1 text-center', items.length > 4 ? 'grid-cols-3' : 'grid-cols-4')}>

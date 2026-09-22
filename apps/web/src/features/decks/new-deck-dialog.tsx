@@ -2,6 +2,7 @@
 import { DECK_FORMATS, type DeckFormat } from '@ygo/shared';
 import { FileUp } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 
 /** Nouveau deck : vide, ou importé depuis un .ydk (EDOPro, YGO Omega, Master Duel exports…). */
 export function NewDeckDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const t = useTranslations('decks');
   const router = useRouter();
   const create = useCreateDeck();
   const importYdk = useImportYdk();
@@ -26,7 +28,7 @@ export function NewDeckDialog({ open, onClose }: { open: boolean; onClose: () =>
   const error = (mode === 'empty' ? create.error : importYdk.error)?.message;
 
   return (
-    <Dialog open={open} onClose={onClose} title="Nouveau deck">
+    <Dialog open={open} onClose={onClose} title={t('new.title')}>
       <form
         className="space-y-4"
         onSubmit={(e) => {
@@ -46,12 +48,12 @@ export function NewDeckDialog({ open, onClose }: { open: boolean; onClose: () =>
                 mode === m ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted',
               )}
             >
-              {m === 'empty' ? 'Deck vide' : 'Importer un .ydk'}
+              {t(`new.modes.${m}`)}
             </button>
           ))}
         </div>
         <div className="grid grid-cols-[1fr_7rem] gap-3">
-          <Field label="Nom">
+          <Field label={t('new.name')}>
             <Input
               autoFocus
               required
@@ -60,16 +62,18 @@ export function NewDeckDialog({ open, onClose }: { open: boolean; onClose: () =>
               onChange={(e) => setName(e.target.value)}
             />
           </Field>
-          <Field label="Format">
+          <Field label={t('new.format')}>
             <Select value={format} onChange={(e) => setFormat(e.target.value as DeckFormat)}>
               {DECK_FORMATS.map((f) => (
-                <option key={f}>{f}</option>
+                <option key={f} value={f}>
+                  {t(`formats.${f}`)}
+                </option>
               ))}
             </Select>
           </Field>
         </div>
         {mode === 'ydk' && (
-          <Field label="Fichier .ydk" hint="Choisis un fichier ou colle son contenu.">
+          <Field label={t('new.file')} hint={t('new.fileHint')}>
             <input
               type="file"
               accept=".ydk,text/plain"
@@ -101,7 +105,7 @@ export function NewDeckDialog({ open, onClose }: { open: boolean; onClose: () =>
           disabled={!name || (mode === 'ydk' && !content)}
         >
           {mode === 'ydk' && <FileUp className="size-4" />}
-          {mode === 'empty' ? 'Créer et construire' : 'Importer'}
+          {t(`new.submit.${mode}`)}
         </Button>
       </form>
     </Dialog>

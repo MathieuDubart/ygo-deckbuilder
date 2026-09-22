@@ -1,0 +1,61 @@
+{
+  "kinds": {
+    "STRUCTURE": "Deck de structure",
+    "STARTER": "Deck de démarrage",
+    "TIN": "Tin",
+    "BOX": "Coffret",
+    "OTHER": "Produit"
+  },
+  "tab": {
+    "empty": {
+      "title": "Aucun produit pour l’instant",
+      "description": "Ajoute un Structure Deck, un tin ou un coffret : il apparaîtra ici avec tout son contenu, et un guide de jeu pour les decks."
+    },
+    "addProduct": "Ajouter un produit",
+    "deck": "Deck",
+    "cardCount": "{count, plural, one {# carte} other {# cartes}}",
+    "complete": "Toutes ses cartes sont dans ta collection",
+    "missing": "{count, plural, one {# exemplaire n’est plus} other {# exemplaires ne sont plus}} dans ta collection"
+  },
+  "dialog": {
+    "fallbackTitle": "Produit",
+    "tabs": {
+      "content": "Contenu",
+      "guide": "Comment le jouer"
+    },
+    "header": {
+      "productCount": "{count, plural, one {# produit} other {# produits}} · {language}",
+      "cardCount": "{total, plural, one {# carte} other {# cartes}} · {distinct} différentes",
+      "verified": "Quantités officielles",
+      "unverified": "Quantités non vérifiées",
+      "unverifiedHint": "Liste officielle introuvable : 1 exemplaire compté par carte",
+      "addedOn": "Ajouté le {date}",
+      "complete": "Toutes ses cartes sont dans ta collection.",
+      "missing": "{count, plural, one {# exemplaire n’est plus} other {# exemplaires ne sont plus}} dans ta collection (vendus, échangés, mal saisis…).",
+      "createDeck": "Créer un deck avec",
+      "copyList": "Copier la liste",
+      "listCopied": "Liste copiée",
+      "remove": "Retirer",
+      "copyFailed": "Copie impossible (le navigateur l’a refusée).",
+      "confirmRemove": "Retirer « {name} » de tes produits ?",
+      "removeCardsToo": "Retirer aussi ses {count, plural, one {# carte} other {# cartes}} de ma collection (sinon elles restent, seul le produit disparaît de la liste)"
+    },
+    "content": {
+      "forCopies": "Quantités pour {count} produits.",
+      "all": "Tout le contenu du produit, avec ce que tu as encore.",
+      "missingOnly": "Seulement ce qui manque ({count})",
+      "ownedOf": "{owned} possédé(s) sur {needed}"
+    },
+    "groups": {
+      "MONSTER": "Monstres",
+      "SPELL": "Magies",
+      "TRAP": "Pièges",
+      "EXTRA": "Extra Deck",
+      "OTHER": "Autres"
+    },
+    "guideIntro": "Guide du deck tel qu’il sort de la boîte. Pour l’améliorer avec le reste de ta collection, crée un deck avec et ouvre ses suggestions.",
+    "text": {
+      "header": "{name} — {count, plural, one {# produit} other {# produits}}"
+    }
+  }
+}

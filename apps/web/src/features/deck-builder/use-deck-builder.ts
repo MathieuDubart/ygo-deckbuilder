@@ -7,6 +7,7 @@ import {
   type DeckDto,
   type DeckZone,
 } from '@ygo/shared';
+import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useUpdateDeck } from '@/lib/api/decks';
 
@@ -26,6 +27,8 @@ const key = (zone: DeckZone, cardId: number) => `${zone}:${cardId}`;
  * partagées, et sauvegarde automatique debouncée vers l'API.
  */
 export function useDeckBuilder(deck: DeckDto) {
+  const t = useTranslations('deckBuilder.add');
+  const tc = useTranslations('common');
   const update = useUpdateDeck(deck.id);
   const [entries, setEntries] = useState<Map<string, BuilderEntry>>(() => fromDeck(deck));
   const [status, setStatus] = useState<SaveStatus>('saved');
@@ -74,13 +77,12 @@ export function useDeckBuilder(deck: DeckDto) {
     (card: CardSummaryDto, zone?: DeckZone): { ok: boolean; reason?: string } => {
       const target: DeckZone = zone ?? (card.isExtraDeck ? 'EXTRA' : 'MAIN');
       if (target === 'MAIN' && card.isExtraDeck)
-        return { ok: false, reason: 'Ce monstre va dans l’Extra Deck' };
-      if (target === 'EXTRA' && !card.isExtraDeck)
-        return { ok: false, reason: 'Seuls les monstres Fusion/Synchro/Xyz/Link vont en Extra' };
+        return { ok: false, reason: t('extraDeckMonster') };
+      if (target === 'EXTRA' && !card.isExtraDeck) return { ok: false, reason: t('notExtraDeck') };
       const limit = deck.format === 'OCG' ? DECK_RULES.MAX_COPIES : maxCopiesFor(card.banTcg);
-      if (totalCopiesOf(card.id) >= limit)
-        return { ok: false, reason: `Maximum ${limit} exemplaire(s)` };
-      if (counts[target] >= DECK_RULES[target].max) return { ok: false, reason: `${target} plein` };
+      if (totalCopiesOf(card.id) >= limit) return { ok: false, reason: t('maxCopies', { limit }) };
+      if (counts[target] >= DECK_RULES[target].max)
+        return { ok: false, reason: t('zoneFull', { zone: tc(`zones.${target}`) }) };
 
       setEntries((prev) => {
         const next = new Map(prev);
@@ -96,7 +98,7 @@ export function useDeckBuilder(deck: DeckDto) {
       });
       return { ok: true };
     },
-    [counts, deck.format, totalCopiesOf],
+    [counts, deck.format, totalCopiesOf, t, tc],
   );
 
   const removeOne = useCallback((zone: DeckZone, cardId: number) => {
@@ -120,7 +122,7 @@ export function useDeckBuilder(deck: DeckDto) {
     }
     setStatus('dirty');
     const v = ++version.current;
-    const t = setTimeout(() => {
+    const timer = setTimeout(() => {
       setStatus('saving');
       update.mutate(
         { cards: list.map((e) => ({ cardId: e.card.id, zone: e.zone, quantity: e.quantity })) },
@@ -130,7 +132,7 @@ export function useDeckBuilder(deck: DeckDto) {
         },
       );
     }, 800);
-    return () => clearTimeout(t);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [entries]);
 

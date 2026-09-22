@@ -2,6 +2,7 @@
 import { maxCopiesFor, type OwnedProductCardDto, type OwnedProductDetailDto } from '@ygo/shared';
 import { BookOpen, Check, ClipboardCopy, ListChecks, Trash2, Wand2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
@@ -13,18 +14,22 @@ import { Skeleton } from '@/components/ui/feedback';
 import { DeckGuide } from '@/features/guide/deck-guide';
 import { useOwnedProduct, useRemoveProduct } from '@/lib/api/collection';
 import { useCreateDeck } from '@/lib/api/decks';
+import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { KIND_LABEL } from './products-tab';
 
 type Tab = 'content' | 'guide';
+type DialogT = ReturnType<typeof useTranslations<'products.dialog'>>;
 
-const GROUPS: { label: string; match: (c: OwnedProductCardDto) => boolean }[] = [
-  { label: 'Monstres', match: (c) => c.zone === 'MAIN' && c.card.category === 'MONSTER' },
-  { label: 'Magies', match: (c) => c.zone === 'MAIN' && c.card.category === 'SPELL' },
-  { label: 'Pièges', match: (c) => c.zone === 'MAIN' && c.card.category === 'TRAP' },
-  { label: 'Extra Deck', match: (c) => c.zone === 'EXTRA' },
+const GROUPS: {
+  key: 'MONSTER' | 'SPELL' | 'TRAP' | 'EXTRA' | 'OTHER';
+  match: (c: OwnedProductCardDto) => boolean;
+}[] = [
+  { key: 'MONSTER', match: (c) => c.zone === 'MAIN' && c.card.category === 'MONSTER' },
+  { key: 'SPELL', match: (c) => c.zone === 'MAIN' && c.card.category === 'SPELL' },
+  { key: 'TRAP', match: (c) => c.zone === 'MAIN' && c.card.category === 'TRAP' },
+  { key: 'EXTRA', match: (c) => c.zone === 'EXTRA' },
   {
-    label: 'Autres',
+    key: 'OTHER',
     match: (c) => c.zone === 'MAIN' && !['MONSTER', 'SPELL', 'TRAP'].includes(c.card.category),
   },
 ];
@@ -40,6 +45,7 @@ export function ProductDialog({
   productId: string | null;
   onClose: () => void;
 }) {
+  const t = useTranslations('products.dialog');
   const { data: product, isLoading, error } = useOwnedProduct(productId);
   const [tab, setTab] = useState<Tab>('content');
   const [inspect, setInspect] = useState<number | null>(null);
@@ -54,7 +60,7 @@ export function ProductDialog({
       <Dialog
         open={productId !== null}
         onClose={close}
-        title={product?.set.name ?? 'Produit'}
+        title={product?.set.name ?? t('fallbackTitle')}
         variant="sheet"
         className="w-[min(100vw,46rem)]"
       >
@@ -76,8 +82,8 @@ export function ProductDialog({
               >
                 {(
                   [
-                    ['content', 'Contenu', ListChecks],
-                    ['guide', 'Comment le jouer', BookOpen],
+                    ['content', t('tabs.content'), ListChecks],
+                    ['guide', t('tabs.guide'), BookOpen],
                   ] as const
                 ).map(([value, label, Icon]) => (
                   <button
@@ -111,6 +117,10 @@ export function ProductDialog({
 }
 
 function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone: () => void }) {
+  const t = useTranslations('products');
+  const td = useTranslations('products.dialog');
+  const tc = useTranslations('common.actions');
+  const { date } = useFormat();
   const router = useRouter();
   const createDeck = useCreateDeck();
   const remove = useRemoveProduct();
@@ -122,11 +132,11 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
 
   async function copyList() {
     try {
-      await navigator.clipboard.writeText(listAsText(p));
+      await navigator.clipboard.writeText(listAsText(p, td));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      setActionError('Copie impossible (le navigateur l’a refusée).');
+      setActionError(td('header.copyFailed'));
     }
   }
 
@@ -151,29 +161,27 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
         <ProductCover set={p.set} sizes="144px" className="mx-auto aspect-[3/4] w-36 sm:w-full" />
         <div className="min-w-0 space-y-2 text-sm">
           <p className="font-mono text-xs text-fg-subtle">
-            {KIND_LABEL[p.set.kind]} · {p.set.code ?? '—'}
+            {t(`kinds.${p.set.kind}`)} · {p.set.code ?? '—'}
             {p.set.tcgDate && ` · ${p.set.tcgDate.slice(0, 4)}`}
           </p>
           <div className="flex flex-wrap gap-1.5">
             <Badge tone="accent">
-              {p.copies} produit{p.copies > 1 ? 's' : ''} · {p.language}
+              {td('header.productCount', { count: p.copies, language: p.language })}
             </Badge>
             <Badge>
-              {p.totalCards} cartes · {p.distinctCards} différentes
+              {td('header.cardCount', { total: p.totalCards, distinct: p.distinctCards })}
             </Badge>
             {p.quantitiesVerified ? (
               <Badge tone="success">
-                <Check className="size-3" /> Quantités officielles
+                <Check className="size-3" /> {td('header.verified')}
               </Badge>
             ) : (
-              <span title="Liste officielle introuvable : 1 exemplaire compté par carte">
-                <Badge tone="warning">Quantités non vérifiées</Badge>
+              <span title={td('header.unverifiedHint')}>
+                <Badge tone="warning">{td('header.unverified')}</Badge>
               </span>
             )}
           </div>
-          <p className="text-fg-subtle">
-            Ajouté le {new Date(p.addedAt).toLocaleDateString('fr-FR')}
-          </p>
+          <p className="text-fg-subtle">{td('header.addedOn', { date: date(p.addedAt) })}</p>
           <div className="space-y-1">
             <div className="h-2 overflow-hidden rounded-full bg-bg-sunken">
               <div
@@ -182,9 +190,7 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
               />
             </div>
             <p className={cn('text-xs', complete ? 'text-success' : 'text-warning')}>
-              {complete
-                ? 'Toutes ses cartes sont dans ta collection.'
-                : `${p.missingCopies} exemplaire(s) ne sont plus dans ta collection (vendus, échangés, mal saisis…).`}
+              {complete ? td('header.complete') : td('header.missing', { count: p.missingCopies })}
             </p>
           </div>
         </div>
@@ -193,12 +199,12 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
       <div className="flex flex-wrap gap-2">
         {p.isDeck && (
           <Button size="sm" onClick={createFromProduct} loading={createDeck.isPending}>
-            <Wand2 className="size-4" /> Créer un deck avec
+            <Wand2 className="size-4" /> {td('header.createDeck')}
           </Button>
         )}
         <Button size="sm" variant="secondary" onClick={copyList}>
           {copied ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
-          {copied ? 'Liste copiée' : 'Copier la liste'}
+          {copied ? td('header.listCopied') : td('header.copyList')}
         </Button>
         <Button
           size="sm"
@@ -206,13 +212,13 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
           className="ml-auto"
           onClick={() => setConfirmRemove((v) => !v)}
         >
-          <Trash2 className="size-4" /> Retirer
+          <Trash2 className="size-4" /> {td('header.remove')}
         </Button>
       </div>
 
       {confirmRemove && (
         <div className="space-y-3 rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm">
-          <p>Retirer « {p.set.name} » de tes produits ?</p>
+          <p>{td('header.confirmRemove', { name: p.set.name })}</p>
           <label className="flex items-start gap-2 text-fg-muted">
             <input
               type="checkbox"
@@ -220,14 +226,11 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
               checked={removeCards}
               onChange={(e) => setRemoveCards(e.target.checked)}
             />
-            <span>
-              Retirer aussi ses {p.totalCards * p.copies} cartes de ma collection (sinon elles
-              restent, seul le produit disparaît de la liste)
-            </span>
+            <span>{td('header.removeCardsToo', { count: p.totalCards * p.copies })}</span>
           </label>
           <div className="flex gap-2">
             <Button size="sm" variant="ghost" onClick={() => setConfirmRemove(false)}>
-              Annuler
+              {tc('cancel')}
             </Button>
             <Button
               size="sm"
@@ -240,7 +243,7 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
                 )
               }
             >
-              <Trash2 className="size-4" /> Retirer
+              <Trash2 className="size-4" /> {td('header.remove')}
             </Button>
           </div>
         </div>
@@ -262,6 +265,7 @@ function Content({
   product: OwnedProductDetailDto;
   onInspect: (id: number) => void;
 }) {
+  const t = useTranslations('products.dialog');
   const [missingOnly, setMissingOnly] = useState(false);
   const cards = missingOnly ? p.cards.filter((c) => c.owned < c.needed) : p.cards;
   const missing = p.cards.filter((c) => c.owned < c.needed).length;
@@ -270,9 +274,7 @@ function Content({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2 text-sm">
         <p className="text-fg-muted">
-          {p.copies > 1
-            ? `Quantités pour ${p.copies} produits.`
-            : 'Tout le contenu du produit, avec ce que tu as encore.'}
+          {p.copies > 1 ? t('content.forCopies', { count: p.copies }) : t('content.all')}
         </p>
         {missing > 0 && (
           <label className="flex shrink-0 items-center gap-1.5 text-xs text-fg-muted">
@@ -281,18 +283,18 @@ function Content({
               checked={missingOnly}
               onChange={(e) => setMissingOnly(e.target.checked)}
             />
-            Seulement ce qui manque ({missing})
+            {t('content.missingOnly', { count: missing })}
           </label>
         )}
       </div>
 
-      {GROUPS.map(({ label, match }) => {
+      {GROUPS.map(({ key, match }) => {
         const group = cards.filter(match);
         if (!group.length) return null;
         return (
-          <section key={label}>
+          <section key={key}>
             <h3 className="mb-1.5 flex items-baseline justify-between text-sm font-semibold">
-              {label}
+              {t(`groups.${key}`)}
               <span className="font-mono text-xs font-normal text-fg-subtle tabular-nums">
                 {group.reduce((s, c) => s + c.needed, 0)}
               </span>
@@ -316,6 +318,7 @@ function ContentRow({
   entry: OwnedProductCardDto;
   onInspect: (id: number) => void;
 }) {
+  const t = useTranslations('products.dialog');
   const ok = c.owned >= c.needed;
   return (
     <li>
@@ -339,7 +342,7 @@ function ContentRow({
             'shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums',
             ok ? 'bg-success/15 text-success' : 'bg-danger/15 text-danger',
           )}
-          title={`${c.owned} possédé(s) sur ${c.needed}`}
+          title={t('content.ownedOf', { owned: c.owned, needed: c.needed })}
         >
           {ok ? <Check className="inline size-3" /> : `${c.owned}/${c.needed}`}
         </span>
@@ -356,13 +359,11 @@ function ProductGuide({
   product: OwnedProductDetailDto;
   onInspect: (id: number) => void;
 }) {
+  const t = useTranslations('products.dialog');
   const cards = useMemo(() => deckCards(p), [p]);
   return (
     <div className="space-y-3">
-      <p className="text-xs text-fg-subtle">
-        Guide du deck tel qu’il sort de la boîte. Pour l’améliorer avec le reste de ta collection,
-        crée un deck avec et ouvre ses suggestions.
-      </p>
+      <p className="text-xs text-fg-subtle">{t('guideIntro')}</p>
       <DeckGuide cards={cards} name={p.set.name} onInspect={onInspect} />
     </div>
   );
@@ -380,12 +381,13 @@ function deckCards(p: OwnedProductDetailDto) {
 }
 
 /** Liste texte pour reconstituer le produit (à coller dans une note, un message…). */
-function listAsText(p: OwnedProductDetailDto): string {
-  const lines = [`${p.set.name}${p.set.code ? ` (${p.set.code})` : ''} — ${p.copies} produit(s)`];
-  for (const { label, match } of GROUPS) {
+function listAsText(p: OwnedProductDetailDto, t: DialogT): string {
+  const name = `${p.set.name}${p.set.code ? ` (${p.set.code})` : ''}`;
+  const lines = [t('text.header', { name, count: p.copies })];
+  for (const { key, match } of GROUPS) {
     const group = p.cards.filter(match);
     if (!group.length) continue;
-    lines.push('', `${label} (${group.reduce((s, c) => s + c.needed, 0)})`);
+    lines.push('', `${t(`groups.${key}`)} (${group.reduce((s, c) => s + c.needed, 0)})`);
     for (const c of group) lines.push(`${c.needed}x ${c.card.name} — ${c.printCode} (${c.rarity})`);
   }
   return lines.join('\n');

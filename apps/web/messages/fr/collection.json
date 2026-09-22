@@ -1,0 +1,62 @@
+{
+  "view": {
+    "title": "Ma collection",
+    "description": "Tout ce que tu possèdes, par édition, état et langue.",
+    "addProduct": "Ajouter un produit",
+    "addCards": "Ajouter des cartes",
+    "stats": {
+      "copies": "Exemplaires",
+      "distinctCards": "Cartes uniques",
+      "estimatedValue": "Valeur estimée"
+    },
+    "tabs": {
+      "label": "Vue de la collection",
+      "cards": "Cartes",
+      "products": "Produits"
+    },
+    "filterPlaceholder": "Filtrer ma collection…",
+    "empty": {
+      "noMatch": "Rien ne correspond",
+      "title": "Ta collection est vide",
+      "description": "Ajoute tes cartes depuis le catalogue, ou importe directement un Structure Deck."
+    }
+  },
+  "row": {
+    "unknownPrint": "Édition ?",
+    "removeCopy": "Retirer un exemplaire",
+    "addCopy": "Ajouter un exemplaire"
+  },
+  "conditions": {
+    "MINT": "mint",
+    "NEAR_MINT": "near mint",
+    "EXCELLENT": "excellent",
+    "GOOD": "good",
+    "LIGHT_PLAYED": "light played",
+    "PLAYED": "played",
+    "POOR": "poor"
+  },
+  "import": {
+    "title": "Ajouter un produit entier",
+    "searchPlaceholder": "Filtrer : « dragon », « 2022 », code du set (SDBE)…",
+    "kindsLabel": "Type de produit",
+    "kinds": {
+      "ALL": "Tout",
+      "STRUCTURE": "Decks de structure",
+      "TIN": "Boîtes (tins)",
+      "STARTER": "Decks de démarrage",
+      "BOX": "Coffrets",
+      "OTHER": "Boosters & autres"
+    },
+    "noResults": "Aucun produit trouvé. Essaie un autre type, un mot-clé ou le code imprimé sur tes cartes.",
+    "cardCount": "{count, plural, one {# carte} other {# cartes}}",
+    "confirm": {
+      "releasedOn": "sorti le {date}",
+      "description": "Ses <strong>{count, plural, one {# carte} other {# cartes}}</strong> seront ajoutées à ta collection, avec les quantités officielles du produit quand on les trouve (liste Yugipedia), sinon 1 exemplaire de chaque. Le produit apparaîtra dans l’onglet « Produits » de ta collection.",
+      "copiesEach": "Exemplaires de chaque",
+      "language": "Langue",
+      "add": "Ajouter ce produit",
+      "toast": "{count, plural, one {# carte ajoutée} other {# cartes ajoutées}} depuis « {set} »",
+      "toastVerified": "{count, plural, one {# carte ajoutée} other {# cartes ajoutées}} depuis « {set} » (quantités officielles)"
+    }
+  }
+}

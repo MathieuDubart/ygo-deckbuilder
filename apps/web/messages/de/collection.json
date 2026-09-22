@@ -1,0 +1,62 @@
+{
+  "view": {
+    "title": "Meine Sammlung",
+    "description": "Alles, was du besitzt – nach Druck, Zustand und Sprache.",
+    "addProduct": "Produkt hinzufügen",
+    "addCards": "Karten hinzufügen",
+    "stats": {
+      "copies": "Exemplare",
+      "distinctCards": "Einzigartige Karten",
+      "estimatedValue": "Geschätzter Wert"
+    },
+    "tabs": {
+      "label": "Sammlungsansicht",
+      "cards": "Karten",
+      "products": "Produkte"
+    },
+    "filterPlaceholder": "Sammlung filtern…",
+    "empty": {
+      "noMatch": "Keine Treffer",
+      "title": "Deine Sammlung ist leer",
+      "description": "Füge Karten aus dem Katalog hinzu oder importiere ein ganzes Structure Deck auf einmal."
+    }
+  },
+  "row": {
+    "unknownPrint": "Druck ?",
+    "removeCopy": "Ein Exemplar entfernen",
+    "addCopy": "Ein Exemplar hinzufügen"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "import": {
+    "title": "Ganzes Produkt hinzufügen",
+    "searchPlaceholder": "Filter: „Drache“, „2022“, Set-Code (SDBE)…",
+    "kindsLabel": "Produkttyp",
+    "kinds": {
+      "ALL": "Alle",
+      "STRUCTURE": "Structure Decks",
+      "TIN": "Tins",
+      "STARTER": "Starter Decks",
+      "BOX": "Box-Sets",
+      "OTHER": "Booster & mehr"
+    },
+    "noResults": "Keine Produkte gefunden. Versuch einen anderen Typ, ein Stichwort oder den Code, der auf deinen Karten steht.",
+    "cardCount": "{count, plural, one {# Karte} other {# Karten}}",
+    "confirm": {
+      "releasedOn": "erschienen am {date}",
+      "description": "Die <strong>{count, plural, one {# Karte} other {# Karten}}</strong> werden deiner Sammlung hinzugefügt – mit den offiziellen Mengen des Produkts, wenn wir sie finden (Yugipedia-Liste), sonst 1 Exemplar pro Karte. Das Produkt erscheint im Tab „Produkte“ deiner Sammlung.",
+      "copiesEach": "Exemplare von jeder",
+      "language": "Sprache",
+      "add": "Produkt hinzufügen",
+      "toast": "{count, plural, one {# Karte} other {# Karten}} aus „{set}“ hinzugefügt",
+      "toastVerified": "{count, plural, one {# Karte} other {# Karten}} aus „{set}“ hinzugefügt (offizielle Mengen)"
+    }
+  }
+}

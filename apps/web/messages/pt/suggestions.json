@@ -1,0 +1,125 @@
+{
+  "page": {
+    "title": "Sugestões",
+    "description": "Os decks do momento, o que sua coleção já consegue montar e decks montados para você.",
+    "sections": {
+      "playable": "Prontos para jogar · 100% seus cards",
+      "meta": "Decks do meta · os mais acessíveis para você",
+      "archetypes": "Da sua coleção · um deck automático por arquétipo"
+    },
+    "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# cópia} other {# cópias}}",
+    "archetypesEmpty": "Adicione cards à sua coleção para ver arquétipos que você pode montar."
+  },
+  "meta": {
+    "empty": {
+      "title": "Ainda sem dados de torneio",
+      "description": "O meta é calculado automaticamente a partir dos top decks de torneios recentes (YGOPRODeck). A primeira atualização roda quando a API inicia, depois toda segunda-feira."
+    },
+    "status": {
+      "ok": "Meta atualizado em {date} · {count, plural, one {# lista} other {# listas}}",
+      "failed": "Meta atualizado em {date} · falhou",
+      "refresh": "Atualizar",
+      "synced": "{archetypes} arquétipos calculados a partir de {lists} listas"
+    },
+    "card": {
+      "tier": "Tier {tier}",
+      "share": "{share} do meta",
+      "listCount": "{count, plural, one {# lista de torneio} other {# listas de torneio}}",
+      "imported": "Lista importada",
+      "variant": "também “{name}”",
+      "playable": "Você pode jogar com ele do jeito que está.",
+      "missing": "{owned}/{required} cópias · <strong>{cost}</strong> para completar",
+      "build": "Montar este deck",
+      "coverage": "Parte da lista de referência que você já tem"
+    }
+  },
+  "playable": {
+    "empty": {
+      "title": "Ainda nenhum deck completo com a sua coleção",
+      "description": "Você precisa de um arquétipo bem abastecido (uns dez cards diferentes) ou de boa parte de um deck do meta. Um Structure Deck costuma ser o melhor ponto de partida.",
+      "action": "Adicionar produto"
+    },
+    "best": "Melhor opção",
+    "metaTier": "Meta · Tier {tier}",
+    "homebrew": "Homebrew",
+    "composition": "100% seus cards · {main} main · {extra} extra",
+    "open": "Ver e criar"
+  },
+  "score": {
+    "hint": "Nota de força: sinergia entre os cards, engine, staples, consistência, parte de cards genéricos de preenchimento",
+    "label": "força",
+    "criteria": {
+      "engine": {
+        "label": "Engine",
+        "hint": "Parte do Deck Principal ocupada pelo arquétipo"
+      },
+      "synergy": {
+        "label": "Sinergia",
+        "hint": "Cards que se buscam / se invocam entre si, starters, Deck Adicional que dá para invocar de verdade"
+      },
+      "starters": {
+        "label": "Starters",
+        "hint": "Cópias de cards que começam seus combos sozinhos"
+      },
+      "staples": {
+        "label": "Staples",
+        "hint": "Hand traps e cards genéricos do meta"
+      },
+      "consistency": {
+        "label": "Consistência",
+        "hint": "Cards da engine jogados com 3 cópias"
+      },
+      "filler": {
+        "label": "Preenchimento",
+        "hint": "Cards genéricos adicionados para chegar a 40"
+      }
+    }
+  },
+  "generate": {
+    "titleMeta": "Montar: {name}",
+    "titleArchetype": "Deck automático: {archetype}",
+    "modes": {
+      "OWNED": {
+        "label": "Com meus cards",
+        "hint": "Só o que você tem, completado com os seus staples"
+      },
+      "META": {
+        "label": "Lista meta completa",
+        "hint": "A lista de referência dos torneios, com o que falta para você"
+      }
+    },
+    "status": {
+      "playable": "Completo e jogável com os seus cards",
+      "fragile": "Completo, mas frágil",
+      "incomplete": "Incompleto com a sua coleção"
+    },
+    "zoneCount": "{count, plural, one {# card} other {# cards}}",
+    "nameLabel": "Nome do deck",
+    "wishlistMissing": "{count, plural, one {Pôr a cópia que falta na minha wishlist} other {Pôr as # cópias que faltam na minha wishlist}}",
+    "create": "Criar este deck",
+    "created": "Deck “{name}” criado",
+    "summary": {
+      "counts": "Main / Extra / Side",
+      "playable": "Jogável",
+      "yes": "Sim",
+      "missingMain": "{count, plural, one {falta # card} other {faltam # cards}}",
+      "toBuy": "Para comprar",
+      "toBuyValue": "{count, plural, one {# cópia} other {# cópias}}",
+      "nothing": "Nada",
+      "cost": "Custo estimado"
+    },
+    "card": {
+      "inclusion": "Usado em {percent} das listas",
+      "toBuy": "{count, plural, one {# cópia para comprar} other {# cópias para comprar}}",
+      "allOwned": "Tudo na coleção",
+      "missingBadge": "FALTA"
+    },
+    "sources": {
+      "FLEX": "Flex",
+      "STAPLE": "Staple",
+      "ARCHETYPE": "Arquétipo",
+      "SUPPORT": "Suporte",
+      "FILLER": "Preenchimento"
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "header": {
+    "nameLabel": "Nome do deck",
+    "guide": "Guia",
+    "guideHint": "Como jogar com este deck: plano de jogo, combos, erros a evitar",
+    "guideDialogTitle": "Guia: {name}"
+  },
+  "save": {
+    "saved": "Salvo",
+    "dirty": "Alterações não salvas",
+    "saving": "Salvando…",
+    "error": "Falha ao salvar — tente de novo"
+  },
+  "issues": {
+    "title": "Deck irregular",
+    "zoneTooSmall": "{zone}: {count, plural, one {# card} other {# cards}} (mínimo {limit})",
+    "zoneTooLarge": "{zone}: {count, plural, one {# card} other {# cards}} (máximo {limit})",
+    "tooManyCopies": "{name}: {count, plural, one {# cópia} other {# cópias}} (máx. {limit})",
+    "wrongZone": "{name} não pode ir no {zone}"
+  },
+  "missing": {
+    "summary": "<strong>{count, plural, one {# cópia} other {# cópias}}</strong> que você não tem · cerca de <strong>{cost}</strong>",
+    "addAll": "Pôr tudo na wishlist",
+    "added": "{count, plural, one {# card adicionado à sua wishlist} other {# cards adicionados à sua wishlist}}"
+  },
+  "add": {
+    "extraDeckMonster": "Este monstro vai no Deck Adicional",
+    "notExtraDeck": "Só monstros de Fusão, Sincro, Xyz e Link vão no Deck Adicional",
+    "maxCopies": "{limit, plural, one {Máximo de # cópia} other {Máximo de # cópias}}",
+    "zoneFull": "{zone} está cheio"
+  },
+  "picker": {
+    "search": "Buscar",
+    "suggestions": "Sugestões",
+    "suggestionsCount": "Sugestões ({count})",
+    "tileTitle": "{name}\nClique: detalhes · Ctrl/⌘+clique: adicionar · Shift+clique: adicionar ao Side Deck",
+    "noOwnedResults": "Nenhum card seu corresponde. Desmarque “Na coleção” para buscar em todos os cards.",
+    "noResults": "Nenhum resultado.",
+    "suggestionsHint": "Cards da sua coleção que compartilham um arquétipo com o seu deck ou são mencionados por ele.",
+    "suggestionsEmpty": "Adicione alguns cards ao deck: as sugestões se baseiam nos arquétipos dele."
+  },
+  "zone": {
+    "emptySide": "Abra um card e adicione ao Side Deck, ou use Shift+clique para adicionar direto",
+    "empty": "Clique em um card à esquerda para ver os detalhes e adicioná-lo",
+    "copyTitle": "{name}\nClique: detalhes · Ctrl/⌘+clique: remover",
+    "copyTitleMissing": "{name} — você não tem\nClique: detalhes · Ctrl/⌘+clique: remover",
+    "missingBadge": "FALTA"
+  },
+  "actions": {
+    "inDeck": "Neste deck",
+    "copies": "{total}/{limit, plural, one {# cópia} other {# cópias}}",
+    "owned": "{owned} na coleção{toBuy, plural, =0 {} other { · # para comprar}}",
+    "zoneCount": "{count}/{max} cards",
+    "removeOne": "Remover uma cópia do {zone}",
+    "addOne": "Adicionar uma cópia ao {zone}",
+    "cannotAdd": "Não dá para adicionar este card"
+  }
+}

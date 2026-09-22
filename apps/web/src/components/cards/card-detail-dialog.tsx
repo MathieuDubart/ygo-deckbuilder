@@ -1,4 +1,5 @@
 'use client';
+import { cardLanguageFor } from '@/lib/format';
 import {
   CARD_CONDITIONS,
   CARD_LANGUAGES,
@@ -9,6 +10,7 @@ import {
   type CardLanguage,
 } from '@ygo/shared';
 import { ArrowLeft, Check, Heart, Plus } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -20,18 +22,10 @@ import { useMe } from '@/lib/api/auth';
 import { useCard } from '@/lib/api/cards';
 import { useAddToCollection } from '@/lib/api/collection';
 import { useAddToWishlist } from '@/lib/api/wishlist';
-import { formatPrice } from '@/lib/utils';
+import { useFormat } from '@/lib/format';
 import { CardInteractions } from './card-interactions';
 
-const CONDITION_LABELS: Record<CardCondition, string> = {
-  MINT: 'Mint',
-  NEAR_MINT: 'Near Mint',
-  EXCELLENT: 'Excellent',
-  GOOD: 'Good',
-  LIGHT_PLAYED: 'Light Played',
-  PLAYED: 'Played',
-  POOR: 'Poor',
-};
+type BanStatus = 'Forbidden' | 'Banned' | 'Limited' | 'Semi-Limited';
 
 /** Fiche carte : infos, éditions/prix, et actions "je l'ai" / "je la veux". */
 export function CardDetailDialog({
@@ -50,6 +44,12 @@ export function CardDetailDialog({
   /** Code tapé par l'utilisateur ("SDBE-FR001") : pré-sélectionne l'édition et la langue. */
   printCodeHint?: string;
 }) {
+  const t = useTranslations('cards');
+  const tCommon = useTranslations('common.actions');
+  const { price } = useFormat();
+  // Statut TCG inconnu → affiché tel quel
+  const banLabel = (status: string) =>
+    t.has(`ban.${status as BanStatus}`) ? t(`ban.${status as BanStatus}`) : status;
   // Navigation entre fiches depuis les interactions (historique propre à la fiche ouverte)
   const [trail, setTrail] = useState<number[]>([]);
   useEffect(() => setTrail([]), [cardId]);
@@ -71,7 +71,12 @@ export function CardDetailDialog({
   const hintedLanguage = hint ? languageFromCode(printCodeHint!) : undefined;
 
   return (
-    <Dialog open={cardId !== null} onClose={onClose} title={card?.name ?? 'Carte'} variant="sheet">
+    <Dialog
+      open={cardId !== null}
+      onClose={onClose}
+      title={card?.name ?? t('detail.fallbackTitle')}
+      variant="sheet"
+    >
       {isLoading || !card ? (
         <div className="space-y-4">
           <Skeleton className="mx-auto aspect-(--aspect-card) w-56" />
@@ -85,7 +90,7 @@ export function CardDetailDialog({
               onClick={back}
               className="-mt-2 flex items-center gap-1.5 text-sm text-fg-muted hover:text-fg"
             >
-              <ArrowLeft className="size-4" /> Retour
+              <ArrowLeft className="size-4" /> {tCommon('back')}
             </button>
           )}
           <div className="grid gap-5 sm:grid-cols-[12rem_1fr]">
@@ -107,25 +112,31 @@ export function CardDetailDialog({
                 {card.attribute && <Badge>{card.attribute}</Badge>}
                 {card.race && <Badge>{card.race}</Badge>}
                 {card.archetype && <Badge tone="accent">{card.archetype}</Badge>}
-                {card.banTcg && <Badge tone="danger">TCG : {card.banTcg}</Badge>}
+                {card.banTcg && (
+                  <Badge tone="danger">
+                    {t('detail.banTcg', { status: banLabel(card.banTcg) })}
+                  </Badge>
+                )}
               </div>
               {card.category === 'MONSTER' && (
                 <p className="font-mono text-fg-muted tabular-nums">
                   {card.linkVal
                     ? `LINK-${card.linkVal}`
                     : card.level !== null
-                      ? `Niv. ${card.level}`
+                      ? t('detail.level', { level: card.level })
                       : ''}
-                  {card.scale !== null && ` · Échelle ${card.scale}`}
+                  {card.scale !== null && ` · ${t('detail.scale', { scale: card.scale })}`}
                   {' · '}ATK {card.atk ?? '?'}
                   {!card.linkVal && ` / DEF ${card.def ?? '?'}`}
                 </p>
               )}
               <p className="leading-relaxed whitespace-pre-line text-fg-muted">{card.desc}</p>
               <p className="text-fg-subtle">
-                Possédées : <strong className="text-fg">{card.ownedQuantity ?? 0}</strong> ·
-                Cardmarket dès{' '}
-                <strong className="text-fg">{formatPrice(card.priceCardmarket)}</strong>
+                {t.rich('detail.ownedPrice', {
+                  owned: card.ownedQuantity ?? 0,
+                  price: price(card.priceCardmarket),
+                  strong: (chunks) => <strong className="text-fg">{chunks}</strong>,
+                })}
               </p>
             </div>
           </div>
@@ -146,7 +157,7 @@ export function CardDetailDialog({
           {card.prints.length > 0 && (
             <section>
               <h3 className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">
-                Éditions ({card.prints.length})
+                {t('detail.prints', { count: card.prints.length })}
               </h3>
               <ul className="divide-y divide-border rounded-xl border border-border text-sm">
                 {card.prints.map((p) => (
@@ -157,7 +168,7 @@ export function CardDetailDialog({
                         {p.printCode} · {p.rarity}
                       </p>
                     </div>
-                    <span className="font-mono text-xs tabular-nums">{formatPrice(p.price)}</span>
+                    <span className="font-mono text-xs tabular-nums">{price(p.price)}</span>
                   </li>
                 ))}
               </ul>
@@ -180,9 +191,10 @@ function PrintSelect({
   value: string;
   onChange: (v: string) => void;
 }) {
+  const t = useTranslations('cards.detail');
   return (
     <Select value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">Édition non précisée</option>
+      <option value="">{t('printUnspecified')}</option>
       {prints.map((p) => (
         <option key={p.id} value={p.id}>
           {p.printCode} — {p.rarity} ({p.setName})
@@ -209,11 +221,17 @@ function AddToCollectionForm({
   defaultPrintId?: string;
   defaultLanguage?: CardLanguage;
 }) {
+  const t = useTranslations('cards.collectionForm');
+  const tc = useTranslations('cards.conditions');
+  const tCommon = useTranslations('common.actions');
   const add = useAddToCollection();
   const [printId, setPrintId] = useState(defaultPrintId ?? '');
   const [quantity, setQuantity] = useState(1);
   const [condition, setCondition] = useState<CardCondition>('NEAR_MINT');
-  const [language, setLanguage] = useState<CardLanguage>(defaultLanguage ?? 'FR');
+  const uiLocale = useLocale();
+  const [language, setLanguage] = useState<CardLanguage>(
+    defaultLanguage ?? cardLanguageFor(uiLocale),
+  );
   const [firstEdition, setFirstEdition] = useState(false);
   const [added, setAdded] = useState(0);
 
@@ -228,12 +246,12 @@ function AddToCollectionForm({
         );
       }}
     >
-      <h3 className="text-sm font-semibold">Ajouter à ma collection</h3>
+      <h3 className="text-sm font-semibold">{t('title')}</h3>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Field label="Édition" className="col-span-2 sm:col-span-4">
+        <Field label={t('print')} className="col-span-2 sm:col-span-4">
           <PrintSelect prints={prints} value={printId} onChange={setPrintId} />
         </Field>
-        <Field label="Qté">
+        <Field label={t('quantity')}>
           <Input
             type="number"
             min={1}
@@ -242,16 +260,16 @@ function AddToCollectionForm({
             onChange={(e) => setQuantity(+e.target.value)}
           />
         </Field>
-        <Field label="État">
+        <Field label={t('condition')}>
           <Select value={condition} onChange={(e) => setCondition(e.target.value as CardCondition)}>
             {CARD_CONDITIONS.map((c) => (
               <option key={c} value={c}>
-                {CONDITION_LABELS[c]}
+                {tc(c)}
               </option>
             ))}
           </Select>
         </Field>
-        <Field label="Langue">
+        <Field label={t('language')}>
           <Select value={language} onChange={(e) => setLanguage(e.target.value as CardLanguage)}>
             {CARD_LANGUAGES.map((l) => (
               <option key={l}>{l}</option>
@@ -264,21 +282,23 @@ function AddToCollectionForm({
             checked={firstEdition}
             onChange={(e) => setFirstEdition(e.target.checked)}
           />
-          1ère éd.
+          {t('firstEdition')}
         </label>
       </div>
       <Button type="submit" loading={add.isPending} className="w-full">
-        <Plus className="size-4" /> Ajouter
+        <Plus className="size-4" /> {tCommon('add')}
       </Button>
       <FormStatus
         error={add.error?.message}
-        success={added > 0 ? `${added} exemplaire(s) ajouté(s) à ta collection` : undefined}
+        success={added > 0 ? t('success', { count: added }) : undefined}
       />
     </form>
   );
 }
 
 function AddToWishlistForm({ cardId, prints }: { cardId: number; prints: Prints }) {
+  const t = useTranslations('cards.wishlistForm');
+  const tCommon = useTranslations('common.actions');
   const add = useAddToWishlist();
   const [open, setOpen] = useState(false);
   const [printId, setPrintId] = useState('');
@@ -290,9 +310,9 @@ function AddToWishlistForm({ cardId, prints }: { cardId: number; prints: Prints 
     return (
       <div className="space-y-2">
         <Button variant="secondary" className="w-full" onClick={() => setOpen(true)}>
-          <Heart className="size-4" /> Ajouter à la wishlist
+          <Heart className="size-4" /> {t('open')}
         </Button>
-        <FormStatus success={done ? 'Ajoutée à ta wishlist' : undefined} />
+        <FormStatus success={done ? t('success') : undefined} />
       </div>
     );
   }
@@ -318,12 +338,12 @@ function AddToWishlistForm({ cardId, prints }: { cardId: number; prints: Prints 
         );
       }}
     >
-      <h3 className="text-sm font-semibold">Je la cherche</h3>
-      <Field label="Édition visée">
+      <h3 className="text-sm font-semibold">{t('title')}</h3>
+      <Field label={t('print')}>
         <PrintSelect prints={prints} value={printId} onChange={setPrintId} />
       </Field>
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Qté">
+        <Field label={t('quantity')}>
           <Input
             type="number"
             min={1}
@@ -332,7 +352,7 @@ function AddToWishlistForm({ cardId, prints }: { cardId: number; prints: Prints 
             onChange={(e) => setQuantity(+e.target.value)}
           />
         </Field>
-        <Field label="Budget max (€)">
+        <Field label={t('maxPrice')}>
           <Input
             type="number"
             min={0}
@@ -344,10 +364,10 @@ function AddToWishlistForm({ cardId, prints }: { cardId: number; prints: Prints 
       </div>
       <div className="flex gap-2">
         <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-          Annuler
+          {tCommon('cancel')}
         </Button>
         <Button type="submit" loading={add.isPending} className="flex-1">
-          <Heart className="size-4" /> Ajouter
+          <Heart className="size-4" /> {tCommon('add')}
         </Button>
       </div>
       <FormStatus error={add.error?.message} />

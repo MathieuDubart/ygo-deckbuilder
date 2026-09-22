@@ -20,6 +20,7 @@ import {
   Swords,
   Workflow,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { CardImage } from '@/components/cards/card-image';
 import { Badge } from '@/components/ui/badge';
@@ -27,20 +28,6 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/feedback';
 import { useDeckGuide, type GuideCard } from '@/lib/api/guide';
 import { cn } from '@/lib/utils';
-
-const ROLE_LABEL: Record<GuideRole, string> = {
-  STARTER: 'Starter',
-  SEARCHER: 'Chercheur',
-  EXTENDER: 'Extender',
-  HAND_TRAP: 'Hand trap',
-  INTERRUPTION: 'Interruption',
-  REMOVAL: 'Destruction',
-  DRAW: 'Pioche',
-  RECOVERY: 'Récupération',
-  FUSION_ENABLER: 'Fusion',
-  RITUAL_ENABLER: 'Rituel',
-  BOSS: 'Boss',
-};
 
 const ROLE_TONE: Partial<Record<GuideRole, 'accent' | 'success' | 'warning' | 'danger'>> = {
   STARTER: 'success',
@@ -66,6 +53,8 @@ export function DeckGuide({
   onInspect?: (cardId: number) => void;
   className?: string;
 }) {
+  const t = useTranslations('guide');
+  const tc = useTranslations('common');
   // Guide calculé (instantané) ; version IA à la demande, via le switch (mémorisé)
   const [mode, setModeState] = useState<GuideMode>('RULES');
   // Lu après le montage : pas d'écart entre rendu serveur et client
@@ -93,13 +82,15 @@ export function DeckGuide({
     <section className={cn('space-y-4', className)} aria-labelledby="deck-guide-title">
       <header className="flex flex-wrap items-center gap-2">
         <h3 id="deck-guide-title" className="flex items-center gap-2 text-sm font-semibold">
-          <BookOpen className="size-4 text-accent" /> Guide du deck
+          <BookOpen className="size-4 text-accent" /> {t('title')}
         </h3>
         {guide && (
           <Badge tone={guide.source === 'AI' ? 'accent' : 'neutral'}>
             {guide.source === 'AI'
-              ? `Rédigé par IA${guide.model ? ` · ${guide.model}` : ''}`
-              : 'Calculé à partir des effets'}
+              ? guide.model
+                ? t('source.aiWithModel', { model: guide.model })
+                : t('source.ai')
+              : t('source.rules')}
           </Badge>
         )}
         {aiAvailable && <ModeSwitch mode={mode} onChange={setMode} writing={writing} />}
@@ -107,17 +98,16 @@ export function DeckGuide({
 
       {writing && (
         <p className="flex items-center gap-1.5 text-xs text-fg-muted" aria-live="polite">
-          <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide… (un modèle local peut
-          prendre une minute ou deux) — version calculée en attendant.
+          <Loader2 className="size-3.5 animate-spin" /> {t('writing')}
         </p>
       )}
 
       {aiError && !writing && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
           <AlertTriangle className="size-3.5 shrink-0" />
-          <span className="min-w-0 flex-1">{aiError} — guide calculé affiché à la place.</span>
+          <span className="min-w-0 flex-1">{t('aiError', { error: aiError })}</span>
           <Button size="sm" variant="ghost" onClick={() => ai.refetch()}>
-            <RotateCw className="size-3.5" /> Réessayer
+            <RotateCw className="size-3.5" /> {tc('actions.retry')}
           </Button>
         </div>
       )}
@@ -171,17 +161,18 @@ function ModeSwitch({
   onChange: (m: GuideMode) => void;
   writing: boolean;
 }) {
-  const options: { value: GuideMode; label: string; icon: typeof BookOpen }[] = [
-    { value: 'RULES', label: 'Calculé', icon: Calculator },
-    { value: 'AI', label: 'Rédigé par IA', icon: Sparkles },
+  const t = useTranslations('guide.mode');
+  const options: { value: GuideMode; icon: typeof BookOpen }[] = [
+    { value: 'RULES', icon: Calculator },
+    { value: 'AI', icon: Sparkles },
   ];
   return (
     <div
       role="radiogroup"
-      aria-label="Version du guide"
+      aria-label={t('label')}
       className="ml-auto grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-xs"
     >
-      {options.map(({ value, label, icon: Icon }) => (
+      {options.map(({ value, icon: Icon }) => (
         <button
           key={value}
           type="button"
@@ -198,7 +189,7 @@ function ModeSwitch({
           ) : (
             <Icon className="size-3.5" />
           )}
-          {label}
+          {t(value)}
         </button>
       ))}
     </div>
@@ -214,6 +205,7 @@ function GuideBody({
   onInspect?: (cardId: number) => void;
   dimmed: boolean;
 }) {
+  const t = useTranslations('guide');
   const card = (id: number) => guide.cards[String(id)];
   return (
     <div className={cn('space-y-4 transition', dimmed && 'opacity-60')}>
@@ -237,27 +229,28 @@ function GuideBody({
       )}
 
       {guide.gamePlan.length > 0 && (
-        <Section icon={Route} title="Plan de jeu" defaultOpen>
+        <Section icon={Route} title={t('sections.gamePlan')} defaultOpen>
           <Bullets items={guide.gamePlan} />
         </Section>
       )}
 
       {guide.combos.length > 0 && (
-        <Section icon={Workflow} title={`Combos à connaître (${guide.combos.length})`} defaultOpen>
+        <Section
+          icon={Workflow}
+          title={t('sections.combos', { count: guide.combos.length })}
+          defaultOpen
+        >
           <div className="space-y-3">
             {guide.combos.map((c, i) => (
               <Combo key={i} combo={c} card={card} onInspect={onInspect} />
             ))}
-            <p className="text-xs text-fg-subtle">
-              Lignes indicatives trouvées en lisant les effets : vérifie toujours le texte exact des
-              cartes (conditions, coûts, « 1 fois par tour »).
-            </p>
+            <p className="text-xs text-fg-subtle">{t('sections.combosDisclaimer')}</p>
           </div>
         </Section>
       )}
 
       {guide.keyCards.length > 0 && (
-        <Section icon={Star} title="Cartes clés">
+        <Section icon={Star} title={t('sections.keyCards')}>
           <ul className="grid gap-2 sm:grid-cols-2">
             {guide.keyCards.map((k) => {
               const c = card(k.cardId);
@@ -272,7 +265,7 @@ function GuideBody({
                     <div className="flex flex-wrap gap-1">
                       {k.roles.slice(0, 3).map((r) => (
                         <Badge key={r} tone={ROLE_TONE[r] ?? 'neutral'} className="text-[10px]">
-                          {ROLE_LABEL[r]}
+                          {t(`roles.${r}`)}
                         </Badge>
                       ))}
                     </div>
@@ -286,17 +279,17 @@ function GuideBody({
       )}
 
       {guide.goingFirst.length + guide.goingSecond.length > 0 && (
-        <Section icon={Swords} title="En premier / en second">
+        <Section icon={Swords} title={t('sections.firstSecond')}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <p className="mb-1 text-xs font-semibold tracking-wide text-fg-subtle uppercase">
-                Tu commences
+                {t('sections.goingFirst')}
               </p>
               <Bullets items={guide.goingFirst} />
             </div>
             <div>
               <p className="mb-1 text-xs font-semibold tracking-wide text-fg-subtle uppercase">
-                Tu joues second
+                {t('sections.goingSecond')}
               </p>
               <Bullets items={guide.goingSecond} />
             </div>
@@ -304,12 +297,12 @@ function GuideBody({
         </Section>
       )}
 
-      <Section icon={AlertTriangle} title="Erreurs à éviter" defaultOpen tone="warning">
+      <Section icon={AlertTriangle} title={t('sections.mistakes')} defaultOpen tone="warning">
         <Bullets items={guide.mistakes} />
       </Section>
 
       {guide.tips.length > 0 && (
-        <Section icon={Lightbulb} title="Astuces">
+        <Section icon={Lightbulb} title={t('sections.tips')}>
           <Bullets items={guide.tips} />
         </Section>
       )}
@@ -367,7 +360,8 @@ function Section({
 }
 
 function Bullets({ items }: { items: string[] }) {
-  if (!items.length) return <p className="text-sm text-fg-subtle">Rien de particulier.</p>;
+  const t = useTranslations('guide');
+  if (!items.length) return <p className="text-sm text-fg-subtle">{t('nothing')}</p>;
   return (
     <ul className="space-y-1.5 text-sm leading-relaxed text-fg-muted">
       {items.map((t, i) => (
@@ -389,6 +383,7 @@ function Combo({
   card: (id: number) => CardSummaryDto | undefined;
   onInspect?: (cardId: number) => void;
 }) {
+  const t = useTranslations('guide.combo');
   const hand = combo.handIds.map(card).filter(Boolean) as CardSummaryDto[];
   const board = combo.endBoardIds.map(card).filter(Boolean) as CardSummaryDto[];
   return (
@@ -405,7 +400,7 @@ function Combo({
           ))}
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">En main</p>
+          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{t('hand')}</p>
           <p className="truncate text-sm font-medium">{combo.title}</p>
         </div>
       </div>
@@ -421,7 +416,7 @@ function Combo({
       </ol>
       {board.length > 0 && (
         <div className="mt-2 flex items-center gap-2 border-t border-border pt-2">
-          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">Terrain final</p>
+          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{t('endBoard')}</p>
           <div className="flex gap-1">
             {board.map((c, i) => (
               <CardThumb key={`${c.id}-${i}`} card={c} onInspect={onInspect} className="w-8" />

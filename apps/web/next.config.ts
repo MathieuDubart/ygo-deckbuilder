@@ -1,4 +1,8 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+// Langue de chaque requête : src/i18n/request.ts
+const withNextIntl = createNextIntlPlugin();
 
 /**
  * Le navigateur ne parle qu'au front (même origine) : /api/* est relayé vers l'API NestJS.
@@ -28,4 +32,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

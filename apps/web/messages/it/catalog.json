@@ -1,0 +1,27 @@
+{
+  "title": "Catalogo",
+  "count": "{count, plural, one {# carta} other {# carte}}",
+  "allCards": "Tutte le carte Yu-Gi-Oh!",
+  "empty": {
+    "title": "Nessuna carta trovata",
+    "description": "Prova un altro nome o togli qualche filtro. Se il catalogo è vuoto, avvia la sincronizzazione (pnpm cards:sync)."
+  },
+  "approximate": "Nessun risultato esatto per «{query}» — ecco le carte più simili.",
+  "filters": {
+    "searchPlaceholder": "Nome IT o EN, archetipo o codice stampato (SDBE-IT001)…",
+    "searchPlaceholderCompact": "Nome, archetipo…",
+    "archetype": "Archetipo",
+    "allArchetypes": "Tutti gli archetipi",
+    "sortLabel": "Ordina",
+    "sortOption": "Ordina: {label}",
+    "sort": {
+      "relevance": "Pertinenza",
+      "name": "Nome",
+      "newest": "Più recenti",
+      "atk": "ATK",
+      "def": "DEF",
+      "level": "Livello"
+    },
+    "owned": "Possedute"
+  }
+}

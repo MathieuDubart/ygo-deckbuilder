@@ -1,6 +1,7 @@
 'use client';
 import { Check, Heart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
@@ -16,34 +17,30 @@ import {
   useWishlist,
   type WishlistItemDto,
 } from '@/lib/api/wishlist';
-import { cn, formatPrice } from '@/lib/utils';
+import { useFormat } from '@/lib/format';
+import { cn } from '@/lib/utils';
 
-const PRIORITY_LABEL = { HIGH: 'Urgent', MEDIUM: 'Normal', LOW: 'Un jour' } as const;
+const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'] as const;
 
 export function WishlistView() {
+  const t = useTranslations('wishlist.view');
+  const { price } = useFormat();
   const { data, isLoading } = useWishlist();
   const [selected, setSelected] = useState<number | null>(null);
 
   return (
     <>
-      <PageHeader
-        title="Wishlist"
-        description="Les cartes à chasser, avec l’édition visée et ton budget."
-      />
+      <PageHeader title={t('title')} description={t('description')} />
       {data && data.items.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:max-w-md">
-          <Stat label="Cartes" value={data.items.reduce((s, i) => s + i.quantity, 0)} />
-          <Stat label="Coût estimé" value={formatPrice(data.totalEstimated)} />
+          <Stat label={t('stats.cards')} value={data.items.reduce((s, i) => s + i.quantity, 0)} />
+          <Stat label={t('stats.estimatedCost')} value={price(data.totalEstimated)} />
         </div>
       )}
       {isLoading ? (
         <Skeleton className="h-64" />
       ) : !data?.items.length ? (
-        <EmptyState
-          icon={Heart}
-          title="Wishlist vide"
-          description="Ajoute des cartes depuis leur fiche, ou envoie d’un clic tout ce qui manque à un deck."
-        />
+        <EmptyState icon={Heart} title={t('empty.title')} description={t('empty.description')} />
       ) : (
         <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-bg-elevated">
           {data.items.map((item) => (
@@ -57,6 +54,8 @@ export function WishlistView() {
 }
 
 function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }) {
+  const t = useTranslations('wishlist');
+  const { price } = useFormat();
   const update = useUpdateWishlistItem();
   const remove = useRemoveWishlistItem();
   const acquired = useMarkAcquired();
@@ -86,7 +85,7 @@ function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }
           )}
           {item.maxPrice !== null && (
             <Badge tone={overBudget ? 'danger' : 'success'}>
-              budget {formatPrice(item.maxPrice)}
+              {t('row.budget', { price: price(item.maxPrice) })}
             </Badge>
           )}
         </div>
@@ -97,19 +96,19 @@ function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }
           overBudget ? 'text-danger' : 'text-fg-muted',
         )}
       >
-        {formatPrice(item.unitPrice)}
+        {price(item.unitPrice)}
       </span>
       <Select
-        aria-label="Priorité"
+        aria-label={t('row.priority')}
         value={item.priority}
         onChange={(e) =>
           update.mutate({ id: item.id, priority: e.target.value as WishlistItemDto['priority'] })
         }
         className="h-8 w-28 text-xs"
       >
-        {Object.entries(PRIORITY_LABEL).map(([v, l]) => (
+        {PRIORITIES.map((v) => (
           <option key={v} value={v}>
-            {l}
+            {t(`priorities.${v}`)}
           </option>
         ))}
       </Select>
@@ -120,16 +119,16 @@ function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }
           loading={acquired.isPending}
           onClick={() =>
             acquired.mutate(item.id, {
-              onSuccess: () => toast.success('Ajoutée à ta collection 🎉'),
+              onSuccess: () => toast.success(t('row.acquiredToast')),
             })
           }
         >
-          <Check className="size-4" /> Je l’ai
+          <Check className="size-4" /> {t('row.acquired')}
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Retirer"
+          aria-label={t('row.remove')}
           onClick={() => remove.mutate(item.id)}
         >
           <Trash2 className="size-4" />

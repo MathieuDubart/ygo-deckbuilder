@@ -1,0 +1,44 @@
+{
+  "title": "Guia do deck",
+  "source": {
+    "ai": "Escrito por IA",
+    "aiWithModel": "Escrito por IA · {model}",
+    "rules": "Calculado a partir dos efeitos"
+  },
+  "writing": "A IA está escrevendo o guia… (um modelo local pode levar um ou dois minutos) — mostrando a versão calculada enquanto isso.",
+  "aiError": "{error} — mostrando o guia calculado no lugar.",
+  "mode": {
+    "label": "Versão do guia",
+    "RULES": "Calculado",
+    "AI": "Escrito por IA"
+  },
+  "sections": {
+    "gamePlan": "Plano de jogo",
+    "combos": "Combos para conhecer ({count})",
+    "combosDisclaimer": "Linhas sugeridas a partir da leitura dos efeitos: sempre confira o texto exato dos cards (condições, custos, “uma vez por turno”).",
+    "keyCards": "Cards-chave",
+    "firstSecond": "Jogando primeiro / jogando segundo",
+    "goingFirst": "Jogando primeiro",
+    "goingSecond": "Jogando segundo",
+    "mistakes": "Erros a evitar",
+    "tips": "Dicas"
+  },
+  "nothing": "Nada em especial.",
+  "combo": {
+    "hand": "Na mão",
+    "endBoard": "Campo final"
+  },
+  "roles": {
+    "STARTER": "Starter",
+    "SEARCHER": "Buscador",
+    "EXTENDER": "Extender",
+    "HAND_TRAP": "Hand trap",
+    "INTERRUPTION": "Interrupção",
+    "REMOVAL": "Remoção",
+    "DRAW": "Compra",
+    "RECOVERY": "Recuperação",
+    "FUSION_ENABLER": "Fusão",
+    "RITUAL_ENABLER": "Ritual",
+    "BOSS": "Boss"
+  }
+}

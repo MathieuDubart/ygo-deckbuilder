@@ -2,15 +2,19 @@
 import { Copy, Layers, Plus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState, PageHeader, Skeleton } from '@/components/ui/feedback';
 import { useDecks, useDeleteDeck, useDuplicateDeck } from '@/lib/api/decks';
+import { useFormat } from '@/lib/format';
 import { NewDeckDialog } from './new-deck-dialog';
 
 export function DecksView() {
+  const t = useTranslations('decks');
+  const { date } = useFormat();
   const { data: decks, isLoading } = useDecks();
   const remove = useDeleteDeck();
   const duplicate = useDuplicateDeck();
@@ -19,11 +23,11 @@ export function DecksView() {
   return (
     <>
       <PageHeader
-        title="Mes decks"
-        description="Construis avec ce que tu as, vois ce qui manque."
+        title={t('view.title')}
+        description={t('view.description')}
         actions={
           <Button onClick={() => setOpen(true)}>
-            <Plus className="size-4" /> Nouveau deck
+            <Plus className="size-4" /> {t('view.newDeck')}
           </Button>
         }
       />
@@ -37,11 +41,11 @@ export function DecksView() {
       ) : !decks?.length ? (
         <EmptyState
           icon={Layers}
-          title="Aucun deck pour l’instant"
-          description="Pars de zéro, importe un .ydk, ou regarde les suggestions pour voir ce que ta collection permet déjà."
+          title={t('view.empty.title')}
+          description={t('view.empty.description')}
           action={
             <Button onClick={() => setOpen(true)}>
-              <Plus className="size-4" /> Nouveau deck
+              <Plus className="size-4" /> {t('view.newDeck')}
             </Button>
           }
         />
@@ -67,15 +71,17 @@ export function DecksView() {
                 <div className="min-w-0 space-y-2">
                   <p className="truncate font-semibold">{d.name}</p>
                   <div className="flex flex-wrap gap-1.5">
-                    <Badge>{d.format}</Badge>
+                    <Badge>{t(`formats.${d.format}`)}</Badge>
                     <Badge tone={d.mainCount >= 40 && d.mainCount <= 60 ? 'success' : 'warning'}>
-                      {d.mainCount} main
+                      {t('view.counts.main', { count: d.mainCount })}
                     </Badge>
-                    <Badge>{d.extraCount} extra</Badge>
-                    {d.sideCount > 0 && <Badge>{d.sideCount} side</Badge>}
+                    <Badge>{t('view.counts.extra', { count: d.extraCount })}</Badge>
+                    {d.sideCount > 0 && (
+                      <Badge>{t('view.counts.side', { count: d.sideCount })}</Badge>
+                    )}
                   </div>
                   <p className="text-xs text-fg-subtle">
-                    Modifié le {new Date(d.updatedAt).toLocaleDateString('fr-FR')}
+                    {t('view.updatedOn', { date: date(d.updatedAt) })}
                   </p>
                 </div>
               </Link>
@@ -83,9 +89,9 @@ export function DecksView() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Dupliquer"
+                  aria-label={t('view.duplicate')}
                   onClick={() =>
-                    duplicate.mutate(d.id, { onSuccess: () => toast.success('Deck dupliqué') })
+                    duplicate.mutate(d.id, { onSuccess: () => toast.success(t('view.duplicated')) })
                   }
                 >
                   <Copy className="size-4" />
@@ -93,9 +99,9 @@ export function DecksView() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Supprimer"
+                  aria-label={t('view.delete')}
                   onClick={() => {
-                    if (confirm(`Supprimer « ${d.name} » ?`)) remove.mutate(d.id);
+                    if (confirm(t('view.confirmDelete', { name: d.name }))) remove.mutate(d.id);
                   }}
                 >
                   <Trash2 className="size-4" />

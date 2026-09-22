@@ -1,32 +1,13 @@
 'use client';
-import type { CardInteractionGroupDto, InteractionVerb } from '@ygo/shared';
+import type { CardInteractionGroupDto } from '@ygo/shared';
 import { ArrowDownLeft, ArrowUpRight, Network } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/feedback';
 import { useCardInteractions } from '@/lib/api/cards';
 import { cn } from '@/lib/utils';
 import { CardImage } from './card-image';
-
-const OUT_LABEL: Record<InteractionVerb, string> = {
-  SEARCH: 'Va chercher',
-  RECOVER: 'Récupère',
-  SPECIAL_SUMMON: 'Invoque',
-  SUMMON_EXTRA: 'Invoque depuis l’Extra Deck',
-  SEND_GY: 'Envoie au cimetière',
-  MATERIAL: 'Matériaux possibles',
-  MENTION: 'Cite',
-};
-
-const IN_LABEL: Record<InteractionVerb, string> = {
-  SEARCH: 'Cherchée par',
-  RECOVER: 'Récupérée par',
-  SPECIAL_SUMMON: 'Invoquée par',
-  SUMMON_EXTRA: 'Invoquée depuis l’Extra Deck par',
-  SEND_GY: 'Envoyée au cimetière par',
-  MATERIAL: 'Matériau pour',
-  MENTION: 'Citée par',
-};
 
 type Tab = 'OUT' | 'IN';
 
@@ -43,6 +24,7 @@ export function CardInteractions({
   onOpen: (cardId: number) => void;
   signedIn: boolean;
 }) {
+  const t = useTranslations('cards.interactions');
   const { data, isLoading } = useCardInteractions(cardId);
   const [tab, setTab] = useState<Tab | null>(null);
   const [mine, setMine] = useState(false);
@@ -62,22 +44,22 @@ export function CardInteractions({
     <section className="space-y-3" aria-labelledby="interactions-title">
       <header className="flex flex-wrap items-center gap-2">
         <h3 id="interactions-title" className="flex items-center gap-2 text-sm font-semibold">
-          <Network className="size-4 text-accent" /> Interactions
+          <Network className="size-4 text-accent" /> {t('title')}
         </h3>
-        {data.ownedLinked > 0 && <Badge tone="success">{data.ownedLinked} de tes cartes</Badge>}
+        {data.ownedLinked > 0 && (
+          <Badge tone="success">{t('ownedLinked', { count: data.ownedLinked })}</Badge>
+        )}
         {signedIn && !empty && (
           <label className="ml-auto flex items-center gap-1.5 text-xs text-fg-muted">
             <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} />
-            Seulement mes cartes
+            {t('onlyMine')}
           </label>
         )}
       </header>
 
       {empty ? (
         <p className="text-sm text-fg-subtle">
-          {data.indexed
-            ? 'Aucun lien précis trouvé dans les textes : cette carte ne vise aucun nom ni type particulier, et aucune carte ne la vise spécifiquement.'
-            : 'L’index des interactions est en cours de construction, reviens dans une minute.'}
+          {data.indexed ? t('emptyIndexed') : t('emptyIndexing')}
         </p>
       ) : (
         <>
@@ -89,14 +71,14 @@ export function CardInteractions({
               active={current === 'OUT'}
               onClick={() => setTab('OUT')}
               icon={ArrowUpRight}
-              label="Ce qu’elle fait"
+              label={t('tabs.out')}
               count={out.length}
             />
             <TabButton
               active={current === 'IN'}
               onClick={() => setTab('IN')}
               icon={ArrowDownLeft}
-              label="Qui l’utilise"
+              label={t('tabs.in')}
               count={inc.length}
             />
           </div>
@@ -112,17 +94,18 @@ export function CardInteractions({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-fg-subtle">
-              {mine ? 'Aucune de tes cartes ici.' : 'Rien de ce côté-là.'}
-            </p>
+            <p className="text-sm text-fg-subtle">{mine ? t('noneMine') : t('none')}</p>
           )}
         </>
       )}
 
       {current === 'OUT' && data.generic.length > 0 && (
         <p className="text-xs text-fg-subtle">
-          Effets larges (compatibles avec beaucoup de cartes) :{' '}
-          {data.generic.map((g) => `${OUT_LABEL[g.verb].toLowerCase()} ${g.target}`).join(' · ')}
+          {t('generic', {
+            list: data.generic
+              .map((g) => `${t(`out.${g.verb}`).toLowerCase()} ${g.target}`)
+              .join(' · '),
+          })}
         </p>
       )}
     </section>
@@ -167,7 +150,8 @@ function Group({
   group: CardInteractionGroupDto;
   onOpen: (cardId: number) => void;
 }) {
-  const label = group.direction === 'OUT' ? OUT_LABEL[group.verb] : IN_LABEL[group.verb];
+  const t = useTranslations('cards.interactions');
+  const label = t(`${group.direction === 'OUT' ? 'out' : 'in'}.${group.verb}`);
   const more = group.total - group.cards.length;
   return (
     <div>
@@ -175,11 +159,8 @@ function Group({
         <span className="font-medium">{label}</span>
         {group.target && <span className="text-fg-muted">{group.target}</span>}
         {group.direction === 'IN' && group.precision === 'PRECISE' && (
-          <span
-            className="text-xs text-fg-subtle"
-            title="Ces cartes ne la citent pas : elles visent son niveau, son attribut ou son type"
-          >
-            (par ses caractéristiques)
+          <span className="text-xs text-fg-subtle" title={t('byTraitsTitle')}>
+            {t('byTraits')}
           </span>
         )}
         <span className="ml-auto font-mono text-xs text-fg-subtle tabular-nums">{group.total}</span>

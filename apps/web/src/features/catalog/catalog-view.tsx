@@ -1,5 +1,6 @@
 'use client';
 import { SearchX } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
@@ -11,6 +12,7 @@ import { useCardSearch, type CardSearchParams } from '@/lib/api/cards';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 
 export function CatalogView() {
+  const t = useTranslations('catalog');
   const initialArchetype = useSearchParams().get('archetype') ?? undefined;
   const [params, setParams] = useState<CardSearchParams>({
     page: 1,
@@ -24,10 +26,8 @@ export function CatalogView() {
   return (
     <>
       <PageHeader
-        title="Catalogue"
-        description={
-          data ? `${data.total.toLocaleString('fr-FR')} cartes` : 'Toutes les cartes Yu-Gi-Oh!'
-        }
+        title={t('title')}
+        description={data ? t('count', { count: data.total }) : t('allCards')}
       />
       <div className="sticky top-0 z-20 -mx-4 mb-6 bg-bg/85 px-4 py-3 backdrop-blur md:-mx-10 md:px-10">
         <CardFilters value={params} onChange={setParams} />
@@ -40,16 +40,12 @@ export function CatalogView() {
           ))}
         </CardGrid>
       ) : !data?.items.length ? (
-        <EmptyState
-          icon={SearchX}
-          title="Aucune carte trouvée"
-          description="Essaie un autre nom, ou retire des filtres. Si le catalogue est vide, lance la synchronisation (pnpm cards:sync)."
-        />
+        <EmptyState icon={SearchX} title={t('empty.title')} description={t('empty.description')} />
       ) : (
         <div className={isFetching ? 'opacity-70 transition' : 'transition'}>
           {data.approximate && (
             <p className="mb-4 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-fg-muted">
-              Aucun résultat exact pour « {debounced.q} » — voici les cartes qui s’en approchent.
+              {t('approximate', { query: debounced.q ?? '' })}
             </p>
           )}
           <CardGrid>

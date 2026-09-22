@@ -1,0 +1,58 @@
+{
+  "header": {
+    "nameLabel": "Nome del deck",
+    "guide": "Guida",
+    "guideHint": "Come giocare questo deck: piano di gioco, combo, errori da evitare",
+    "guideDialogTitle": "Guida: {name}"
+  },
+  "save": {
+    "saved": "Salvato",
+    "dirty": "Modifiche non salvate",
+    "saving": "Salvataggio…",
+    "error": "Salvataggio fallito — riprova"
+  },
+  "issues": {
+    "title": "Deck non valido",
+    "zoneTooSmall": "{zone}: {count, plural, one {# carta} other {# carte}} (minimo {limit})",
+    "zoneTooLarge": "{zone}: {count, plural, one {# carta} other {# carte}} (massimo {limit})",
+    "tooManyCopies": "{name}: {count, plural, one {# copia} other {# copie}} (max {limit})",
+    "wrongZone": "{name} non può andare in {zone}"
+  },
+  "missing": {
+    "summary": "<strong>{count, plural, one {# copia} other {# copie}}</strong> non {count, plural, one {posseduta} other {possedute}} · circa <strong>{cost}</strong>",
+    "addAll": "Metti tutto in wishlist",
+    "added": "{count, plural, one {# carta aggiunta alla wishlist} other {# carte aggiunte alla wishlist}}"
+  },
+  "add": {
+    "extraDeckMonster": "Questo mostro va nell’Extra Deck",
+    "notExtraDeck": "Solo i mostri Fusione, Synchro, Xyz e Link vanno nell’Extra Deck",
+    "maxCopies": "{limit, plural, one {Massimo # copia} other {Massimo # copie}}",
+    "zoneFull": "{zone} pieno"
+  },
+  "picker": {
+    "search": "Cerca",
+    "suggestions": "Suggerimenti",
+    "suggestionsCount": "Suggerimenti ({count})",
+    "tileTitle": "{name}\nClic: dettagli · Ctrl/⌘+clic: aggiungi · Maiusc+clic: aggiungi al Side Deck",
+    "noOwnedResults": "Nessuna delle tue carte corrisponde. Togli la spunta a «Possedute» per cercare tra tutte le carte.",
+    "noResults": "Nessun risultato.",
+    "suggestionsHint": "Carte della tua collezione che condividono un archetipo con il deck o che vi sono nominate.",
+    "suggestionsEmpty": "Aggiungi qualche carta al deck: i suggerimenti si basano sui suoi archetipi."
+  },
+  "zone": {
+    "emptySide": "Apri una carta e aggiungila al Side Deck, oppure Maiusc+clic per aggiungerla subito",
+    "empty": "Clicca una carta a sinistra per vederne i dettagli e aggiungerla",
+    "copyTitle": "{name}\nClic: dettagli · Ctrl/⌘+clic: togli",
+    "copyTitleMissing": "{name} — non posseduta\nClic: dettagli · Ctrl/⌘+clic: togli",
+    "missingBadge": "MANCA"
+  },
+  "actions": {
+    "inDeck": "In questo deck",
+    "copies": "{total}/{limit, plural, one {# copia} other {# copie}}",
+    "owned": "{owned} possedute{toBuy, plural, =0 {} other { · # da comprare}}",
+    "zoneCount": "{count}/{max} carte",
+    "removeOne": "Togli una copia da {zone}",
+    "addOne": "Aggiungi una copia in {zone}",
+    "cannotAdd": "Impossibile aggiungere questa carta"
+  }
+}

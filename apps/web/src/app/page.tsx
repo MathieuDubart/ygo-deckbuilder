@@ -1,8 +1,11 @@
+import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Logo } from '@/components/layout/app-shell';
+import { LocaleSwitcher } from '@/components/layout/locale-switcher';
 
 /** Landing minimale (les utilisateurs connectés sont redirigés par le proxy). */
-export default function Home() {
+export default async function Home() {
+  const t = await getTranslations('auth.landing');
   return (
     <main className="relative grid min-h-dvh place-items-center overflow-hidden px-6">
       <div
@@ -12,28 +15,26 @@ export default function Home() {
       <div className="relative max-w-2xl space-y-8 text-center">
         <Logo className="mx-auto size-12" />
         <h1 className="text-4xl font-semibold tracking-tight text-balance md:text-6xl">
-          Ta collection. Tes decks.
-          <span className="block text-fg-muted">Ce qu’il te manque.</span>
+          {t.rich('title', {
+            muted: (chunks) => <span className="block text-fg-muted">{chunks}</span>,
+          })}
         </h1>
-        <p className="mx-auto max-w-lg text-fg-muted text-pretty">
-          Saisis tes cartes et tes structure decks, construis tes listes avec ce que tu possèdes
-          vraiment, et découvre quels decks meta tu peux monter — avec le prix de ce qu’il reste à
-          acheter.
-        </p>
+        <p className="mx-auto max-w-lg text-fg-muted text-pretty">{t('description')}</p>
         <div className="flex justify-center gap-3">
           <Link
             href="/register"
             className="rounded-lg bg-accent px-5 py-3 text-sm font-medium text-accent-fg hover:brightness-110"
           >
-            Créer un compte
+            {t('register')}
           </Link>
           <Link
             href="/login"
             className="rounded-lg border border-border px-5 py-3 text-sm font-medium hover:border-border-strong"
           >
-            Se connecter
+            {t('login')}
           </Link>
         </div>
+        <LocaleSwitcher className="mx-auto w-fit" />
       </div>
     </main>
   );

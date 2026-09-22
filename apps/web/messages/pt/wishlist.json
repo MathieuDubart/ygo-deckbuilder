@@ -1,0 +1,26 @@
+{
+  "view": {
+    "title": "Wishlist",
+    "description": "Cards para caçar, com a impressão que você quer e o seu orçamento.",
+    "stats": {
+      "cards": "Cards",
+      "estimatedCost": "Custo estimado"
+    },
+    "empty": {
+      "title": "Sua wishlist está vazia",
+      "description": "Adicione cards pela página de detalhes ou mande tudo o que falta em um deck com um clique."
+    }
+  },
+  "priorities": {
+    "HIGH": "Urgente",
+    "MEDIUM": "Normal",
+    "LOW": "Um dia"
+  },
+  "row": {
+    "budget": "orçamento {price}",
+    "priority": "Prioridade",
+    "acquired": "Consegui",
+    "acquiredToast": "Adicionado à sua coleção 🎉",
+    "remove": "Remover"
+  }
+}
