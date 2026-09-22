@@ -50,6 +50,33 @@ export const envSchema = z.object({
     .optional()
     .transform((v) => v?.trim() || undefined),
   AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(600_000).default(180_000),
+  /** Simulateur de duel (moteur EDOPro + scripts ProjectIgnis, téléchargés au démarrage). */
+  DUEL_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+  DUEL_DATA_DIR: z.string().default('data/duel'),
+  /** Mise à jour des scripts et des bases de cartes. Vide = jamais. Défaut : mardi 3h. */
+  DUEL_DATA_CRON: z.string().optional().default('0 3 * * 2'),
+  DUEL_SCRIPTS_URL: z
+    .url()
+    .default('https://codeload.github.com/ProjectIgnis/CardScripts/tar.gz/refs/heads/master'),
+  DUEL_CDB_URL: z
+    .url()
+    .default('https://codeload.github.com/ProjectIgnis/BabelCDB/tar.gz/refs/heads/master'),
+  DUEL_STRINGS_URL: z
+    .url()
+    .default(
+      'https://raw.githubusercontent.com/ProjectIgnis/Distribution/master/config/strings.conf',
+    ),
+  /** Duels simultanés (tous utilisateurs) et fermeture des duels inactifs */
+  DUEL_MAX_SESSIONS: z.coerce.number().int().min(1).max(500).default(20),
+  DUEL_IDLE_MINUTES: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 60)
+    .default(30),
   ADMIN_EMAIL: z
     .string()
     .optional()

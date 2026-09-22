@@ -14,3 +14,6 @@ next-env.d.ts
 # Fichiers générés par `next dev` (règles pour agents IA)
 apps/web/AGENTS.md
 apps/web/CLAUDE.md
+
+# Données du simulateur de duel (scripts et bases ProjectIgnis, téléchargés au démarrage)
+apps/api/data
