@@ -4,10 +4,16 @@ import type {
   CardSuggestionDto,
   MetaDeckSuggestionDto,
   MetaSuggestionQuery,
+  CardSetDto,
+  OfficialDeckQuery,
+  OfficialDeckSuggestionDto,
 } from '@ygo/shared';
+import { SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
+import { Prisma } from '../../generated/prisma/client';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import { OwnershipService } from '../collection/ownership.service';
+import { officialDeckKind } from '../products/product-kind';
 import { computeCoverage } from './coverage';
 import { t } from '../../common/i18n/locale-context';
 
@@ -75,6 +81,84 @@ export class SuggestionsService {
       .filter((s) => s.coverage >= q.minCoverage)
       .sort(
         (a, b) => b.coverage - a.coverage || a.estimatedCostToComplete - b.estimatedCostToComplete,
+      )
+      .slice(0, q.limit);
+  }
+
+  /**
+   * Decks préconstruits officiels (structure decks, starters, decks de coffrets) et ce que
+   * la collection en couvre : « quel deck de la boîte je peux remonter avec mes cartes ? ».
+   */
+  async officialDecks(userId: string, q: OfficialDeckQuery): Promise<OfficialDeckSuggestionDto[]> {
+    const [decks, owned, ownedProducts] = await Promise.all([
+      this.prisma.productDeck.findMany({
+        include: {
+          cards: {
+            include: {
+              card: { select: { isExtraDeck: true, archetype: true, priceCardmarket: true } },
+            },
+          },
+        },
+      }),
+      this.ownership.quantities(userId),
+      this.prisma.ownedProduct.findMany({ where: { userId }, select: { setId: true } }),
+    ]);
+    if (!decks.length) return [];
+    const sets = await this.prisma.$queryRaw<
+      (Omit<CardSetDto, 'tcgDate'> & { tcgDate: Date | null })[]
+    >`
+      SELECT ${SET_DTO_COLUMNS} FROM "CardSet" s
+      WHERE s.id IN (${Prisma.join([...new Set(decks.map((d) => d.setId))])})`;
+    const setById = new Map(
+      sets.map((r) => [r.id, { ...r, tcgDate: r.tcgDate?.toISOString().slice(0, 10) ?? null }]),
+    );
+    const ownedSets = new Set(ownedProducts.map((p) => p.setId));
+    const decksPerSet = new Map<string, number>();
+    for (const d of decks) decksPerSet.set(d.setId, (decksPerSet.get(d.setId) ?? 0) + 1);
+
+    return decks
+      .flatMap((deck): OfficialDeckSuggestionDto[] => {
+        const product = setById.get(deck.setId);
+        if (!product) return [];
+        const kind = officialDeckKind(product.kind, decksPerSet.get(deck.setId) ?? 1);
+        if (q.kind && kind !== q.kind) return [];
+        const result = computeCoverage(
+          deck.cards.map((c) => ({
+            cardId: c.cardId,
+            zone: c.card.isExtraDeck ? ('EXTRA' as const) : ('MAIN' as const),
+            quantity: c.quantity,
+            unitPrice: toNumber(c.card.priceCardmarket),
+          })),
+          owned,
+        );
+        const copies = new Map<string, number>();
+        for (const c of deck.cards) {
+          if (c.card.archetype) {
+            copies.set(c.card.archetype, (copies.get(c.card.archetype) ?? 0) + c.quantity);
+          }
+        }
+        const [archetype, n] = [...copies].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
+        return [
+          {
+            productDeckId: deck.id,
+            deckName: deck.name,
+            kind,
+            product,
+            archetype: n >= 5 ? archetype : null,
+            coverage: result.coverage,
+            ownedCopies: result.ownedCopies,
+            requiredCopies: result.requiredCopies,
+            estimatedCostToComplete: result.estimatedCostToComplete,
+            productOwned: ownedSets.has(deck.setId),
+          },
+        ];
+      })
+      .filter((d) => d.coverage >= q.minCoverage)
+      .sort(
+        (a, b) =>
+          b.coverage - a.coverage ||
+          a.estimatedCostToComplete - b.estimatedCostToComplete ||
+          (b.product.tcgDate ?? '').localeCompare(a.product.tcgDate ?? ''),
       )
       .slice(0, q.limit);
   }

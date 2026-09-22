@@ -12,6 +12,7 @@ export const it: DeepPartialMessages = {
     cardNotFound: 'Carta non trovata',
     deckNotFound: 'Deck non trovato',
     metaDeckNotFound: 'Deck meta non trovato',
+    officialDeckNotFound: 'Deck ufficiale non trovato',
     productNotFound: 'Prodotto non trovato',
     productNotOwned: 'Prodotto non trovato nella tua collezione',
     productEmpty: 'Questo prodotto non contiene nessuna carta conosciuta',
@@ -40,14 +41,15 @@ export const it: DeepPartialMessages = {
   },
 
   generator: {
+    officialBasedOn: 'Lista ufficiale di «{name}» (Yugipedia).',
     ownedName: '{name} (la mia collezione)',
     autoName: '{name} (auto)',
     composition:
       'Composizione: {engine} carte dell’engine, {staples} staple, {fillers} riempitivi generici.',
     incomplete: {
-      one: 'Manca {count} carta per arrivare a 40 con la tua collezione: passa alla lista meta per vedere cosa comprare.',
+      one: 'Manca {count} carta per arrivare a 40 con la tua collezione: passa alla lista completa per vedere cosa comprare.',
       other:
-        'Mancano {count} carte per arrivare a 40 con la tua collezione: passa alla lista meta per vedere cosa comprare.',
+        'Mancano {count} carte per arrivare a 40 con la tua collezione: passa alla lista completa per vedere cosa comprare.',
     },
     fragile:
       'Completo ma fragile: troppe carte generiche rispetto all’engine. Rinforza l’archetipo per renderlo davvero giocabile.',

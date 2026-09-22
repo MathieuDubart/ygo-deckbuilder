@@ -31,8 +31,18 @@ const MIN_ARCHETYPE_CARDS = 6;
 /** En dessous de cette couverture, inutile d'essayer de monter le deck meta avec la collection. */
 const MIN_META_COVERAGE = 0.2;
 const MAX_PROPOSALS = 8;
+/** Decks officiels évalués pour les propositions (les mieux couverts d'abord). */
+const MAX_OFFICIAL_CANDIDATES = 15;
 
 type MetaWithCards = NonNullable<Awaited<ReturnType<DeckGeneratorService['loadMeta']>>>;
+type OfficialWithCards = NonNullable<Awaited<ReturnType<DeckGeneratorService['loadOfficial']>>>;
+
+/** Liste de référence d'une génération : la liste, son archétype, et la part déjà possédée. */
+interface TemplateSource {
+  template: DeckTemplate;
+  archetype: string | null;
+  coverage: number;
+}
 
 interface Shared {
   owned: Map<number, number>;
@@ -82,6 +92,29 @@ export class DeckGeneratorService {
       mode,
       metaDeckId: meta.id,
       archetype: meta.archetype,
+      notes,
+    });
+  }
+
+  /** Deck officiel d'un produit : liste complète, ou version « avec mes cartes ». */
+  async fromOfficial(
+    userId: string,
+    productDeckId: string,
+    mode: GenerationMode,
+  ): Promise<GeneratedDeckDto> {
+    const deck = await this.loadOfficial(productDeckId);
+    if (!deck) throw new NotFoundException(t('errors.officialDeckNotFound'));
+    const shared = await this.shared(userId);
+    const { result, score } = await this.buildOfficial(userId, deck, mode, shared);
+    const name = officialName(deck);
+    const notes = mode === 'OWNED' ? explain(result, score) : [];
+    notes.push(t('generator.officialBasedOn', { name: deck.set.name }));
+
+    return this.toDto(result, score, {
+      name: mode === 'OWNED' ? t('generator.ownedName', { name }) : name,
+      mode,
+      metaDeckId: null,
+      archetype: officialSource(deck, shared.owned).archetype,
       notes,
     });
   }
@@ -138,7 +171,29 @@ export class DeckGeneratorService {
       });
     }
 
-    // 2. Archétypes bien fournis de la collection, sans équivalent meta déjà proposé
+    // 2. Decks officiels (structure decks, starters, decks de coffrets) les mieux couverts
+    const officials = (await this.prisma.productDeck.findMany(this.officialQuery))
+      .map((deck) => ({ deck, source: officialSource(deck, shared.owned) }))
+      .filter((o) => o.source.coverage >= MIN_META_COVERAGE)
+      .sort((a, b) => b.source.coverage - a.source.coverage)
+      .slice(0, MAX_OFFICIAL_CANDIDATES);
+    for (const { deck, source } of officials) {
+      const built = await this.buildTemplate(userId, source, 'OWNED', shared);
+      if (!built.score.playable) continue;
+      const name = officialName(deck);
+      proposals.push({
+        target: { kind: 'official', productDeckId: deck.id, name },
+        name,
+        archetype: source.archetype,
+        tier: null,
+        score: toScoreDto(built.score),
+        counts: built.result.counts,
+        highlights: [],
+        result: built.result,
+      });
+    }
+
+    // 3. Archétypes bien fournis de la collection, sans équivalent déjà proposé
     const covered = new Set(proposals.map((p) => p.archetype?.toLowerCase()).filter(Boolean));
     for (const archetype of await this.ownedArchetypes(userId)) {
       if (covered.has(archetype.toLowerCase())) continue;
@@ -167,12 +222,18 @@ export class DeckGeneratorService {
     return this.prisma.metaDeck.findUnique({ where: { id }, include: { cards: true } });
   }
 
-  private async buildMeta(
-    userId: string,
-    meta: MetaWithCards,
-    mode: GenerationMode,
-    shared: Shared,
-  ): Promise<Built> {
+  private officialQuery = {
+    include: {
+      set: { select: { name: true } },
+      cards: { include: { card: { select: { isExtraDeck: true, archetype: true } } } },
+    },
+  } as const;
+
+  loadOfficial(id: string) {
+    return this.prisma.productDeck.findUnique({ where: { id }, ...this.officialQuery });
+  }
+
+  private buildMeta(userId: string, meta: MetaWithCards, mode: GenerationMode, shared: Shared) {
     const template: DeckTemplate = {
       cards: meta.cards.filter((c) => !c.flex),
       flex: meta.cards.filter((c) => c.flex),
@@ -181,10 +242,39 @@ export class DeckGeneratorService {
         meta.cards.filter((c) => c.zone === 'MAIN' && !c.flex).reduce((s, c) => s + c.quantity, 0),
       ),
     };
+    return this.buildTemplate(
+      userId,
+      { template, archetype: meta.archetype, coverage: metaCoverage(meta, shared.owned) },
+      mode,
+      shared,
+    );
+  }
+
+  /** Deck officiel (structure deck, starter, deck de coffret) comme liste de référence. */
+  private buildOfficial(
+    userId: string,
+    deck: OfficialWithCards,
+    mode: GenerationMode,
+    shared: Shared,
+  ) {
+    return this.buildTemplate(userId, officialSource(deck, shared.owned), mode, shared);
+  }
+
+  /**
+   * Construit un deck à partir d'une liste de référence (meta ou officielle) :
+   *  - META : la liste telle quelle (on indique ce qui manque)
+   *  - OWNED : uniquement les cartes possédées, complétées par l'archétype, les staples et
+   *    des compléments, en gardant en priorité ce qui s'emboîte avec le cœur de la liste
+   */
+  private async buildTemplate(
+    userId: string,
+    source: TemplateSource,
+    mode: GenerationMode,
+    shared: Shared,
+  ): Promise<Built> {
+    const { template, archetype, coverage } = source;
     const archetypeCards =
-      mode === 'OWNED' && meta.archetype
-        ? await this.ownedArchetypeCards(userId, meta.archetype)
-        : [];
+      mode === 'OWNED' && archetype ? await this.ownedArchetypeCards(userId, archetype) : [];
     const templateIds = [...template.cards, ...template.flex].map((c) => c.cardId);
     const cards = await this.cardInfo(shared, [
       ...templateIds,
@@ -193,7 +283,6 @@ export class DeckGeneratorService {
         : []),
     ]);
     const stapleIds = new Set(shared.staples.map((s) => s.cardId));
-    const coverage = metaCoverage(meta, shared.owned);
 
     if (mode === 'META') {
       const result = generateFromTemplate(template, {
@@ -207,7 +296,6 @@ export class DeckGeneratorService {
       return this.evaluate(result, cards, { metaCoverage: coverage, stapleIds });
     }
 
-    // Avec mes cartes : on garde en priorité ce qui s'emboîte avec le cœur de la liste type
     const core = pick(
       cards,
       template.cards
@@ -453,6 +541,42 @@ function metaCoverage(meta: MetaWithCards, owned: Map<number, number>): number {
       .map((c) => ({ cardId: c.cardId, zone: c.zone, quantity: c.quantity, unitPrice: null })),
     owned,
   ).coverage;
+}
+
+/** Nom affiché d'un deck officiel : le produit, et le deck quand le produit en contient plusieurs. */
+const officialName = (deck: OfficialWithCards) =>
+  deck.name ? `${deck.set.name} — ${deck.name}` : deck.set.name;
+
+function officialSource(deck: OfficialWithCards, owned: Map<number, number>): TemplateSource {
+  const cards = deck.cards.map((c) => ({
+    cardId: c.cardId,
+    zone: c.card.isExtraDeck ? ('EXTRA' as const) : ('MAIN' as const),
+    quantity: c.quantity,
+    // Pas de taux de jeu pour un deck officiel : on priorise les cartes en plusieurs exemplaires
+    inclusion: Math.min(1, c.quantity / 3),
+  }));
+  // Archétype dominant (au moins 5 exemplaires) : sert à compléter avec les cartes possédées
+  const copies = new Map<string, number>();
+  for (const c of deck.cards) {
+    if (c.card.archetype)
+      copies.set(c.card.archetype, (copies.get(c.card.archetype) ?? 0) + c.quantity);
+  }
+  const [archetype, n] = [...copies].sort((a, b) => b[1] - a[1])[0] ?? [null, 0];
+  return {
+    template: {
+      cards,
+      flex: [],
+      mainSize: Math.max(
+        40,
+        cards.filter((c) => c.zone === 'MAIN').reduce((s, c) => s + c.quantity, 0),
+      ),
+    },
+    archetype: n >= 5 ? archetype : null,
+    coverage: computeCoverage(
+      cards.map((c) => ({ ...c, unitPrice: null })),
+      owned,
+    ).coverage,
+  };
 }
 
 const without = (ids: number[], exclude: Set<number>) =>

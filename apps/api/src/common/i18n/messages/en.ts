@@ -15,6 +15,7 @@ export const en = {
     cardNotFound: 'Card not found',
     deckNotFound: 'Deck not found',
     metaDeckNotFound: 'Meta deck not found',
+    officialDeckNotFound: 'Official deck not found',
     productNotFound: 'Product not found',
     productNotOwned: 'Product not found in your collection',
     productEmpty: 'This product contains no known card',
@@ -44,13 +45,14 @@ export const en = {
 
   generator: {
     ownedName: '{name} (my collection)',
+    officialBasedOn: 'Official list of “{name}” (Yugipedia).',
     autoName: '{name} (auto)',
     composition:
       'Composition: {engine} engine cards, {staples} staples, {fillers} generic fillers.',
     incomplete: {
-      one: '{count} card missing to reach 40 with your collection: switch to the meta list to see what to buy.',
+      one: '{count} card missing to reach 40 with your collection: switch to the full list to see what to buy.',
       other:
-        '{count} cards missing to reach 40 with your collection: switch to the meta list to see what to buy.',
+        '{count} cards missing to reach 40 with your collection: switch to the full list to see what to buy.',
     },
     fragile:
       'Complete but fragile: too many generic cards compared to the engine. Strengthen the archetype to make it really playable.',
