@@ -11,8 +11,9 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:deploy": "prisma migrate deploy",
     "prisma:studio": "prisma studio",
-    "cards:sync": "prisma generate && tsx scripts/sync-cards.ts",
-    "generate": "prisma generate"
+    "cards:sync": "nest build && node dist/cli/sync-cards.js",
+    "generate": "prisma generate",
+    "meta:sync": "nest build && node dist/cli/sync-meta.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
@@ -41,7 +42,6 @@
     "@types/express": "^5.0.3",
     "@types/node": "^22.18.0",
     "@ygo/tsconfig": "workspace:*",
-    "tsx": "^4.20.0",
     "typescript": "~5.9.3",
     "vitest": "^3.2.4"
   }
