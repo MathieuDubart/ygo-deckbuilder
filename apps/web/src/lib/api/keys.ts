@@ -3,6 +3,7 @@ export const qk = {
   me: ['me'] as const,
   cards: (params: object) => ['cards', params] as const,
   card: (id: number) => ['card', id] as const,
+  cardInteractions: (id: number) => ['card', id, 'interactions'] as const,
   archetypes: ['archetypes'] as const,
   sets: (params: object) => ['sets', params] as const,
   collection: (params: object) => ['collection', params] as const,
