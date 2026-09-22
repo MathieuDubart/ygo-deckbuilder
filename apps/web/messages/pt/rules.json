@@ -1,0 +1,271 @@
+{
+  "title": "Regras",
+  "description": "As regras oficiais do Yu-Gi-Oh! Estampas Ilustradas de acordo com a Master Rule atual, da preparação de um duelo à resolução de Correntes.",
+  "source": "Esta página resume o livro de regras oficial (Master Rule atual); quando o texto de uma carta ou uma decisão oficial disser o contrário, a carta e a decisão têm prioridade.",
+  "tocLabel": "Nesta página",
+  "sections": [
+    {
+      "id": "basics",
+      "title": "Fundamentos",
+      "icon": "BookOpen",
+      "paragraphs": [
+        "Yu-Gi-Oh! é um duelo entre dois jogadores. Cada jogador começa com 8000 Pontos de Vida (PV) e compra 5 cartas. Seu objetivo é reduzir os PV do seu oponente a 0 usando monstros, Magias e Armadilhas.",
+        "Antes do primeiro duelo, decidam aleatoriamente (por exemplo, no cara ou coroa) qual jogador escolhe começar primeiro ou segundo. Em uma Partida, quem perdeu o duelo anterior faz essa escolha para o próximo."
+      ],
+      "points": [
+        "Você vence quando os PV do seu oponente chegam a 0. Se os dois jogadores chegarem a 0 ao mesmo tempo, o duelo termina empatado.",
+        "Você vence quando seu oponente precisa comprar uma carta, mas o Deck dele está vazio.",
+        "Algumas cartas têm sua própria condição de vitória, como ter na mão as cinco peças de Exodia.",
+        "Deck Principal: 40 a 60 cartas. Deck Adicional: 0 a 15 cartas. Side Deck: 0 a 15 cartas.",
+        "Você pode ter no máximo 3 cópias de uma carta com o mesmo nome somando Deck Principal, Deck Adicional e Side Deck.",
+        "A Lista de Cartas Proibidas e Limitadas restringe algumas cartas ainda mais: Proibida (0 cópias), Limitada (1 cópia), Semilimitada (2 cópias)."
+      ],
+      "example": ""
+    },
+    {
+      "id": "field",
+      "title": "O campo",
+      "icon": "LayoutGrid",
+      "paragraphs": [
+        "Seu lado do campo tem 5 Zonas de Monstros Principais, 5 Zonas de Magias & Armadilhas e 1 Zona de Campo. As 2 Zonas de Monstros Adicionais ficam entre os dois jogadores e são compartilhadas.",
+        "Você só pode usar uma Zona de Monstros Adicional por vez, a menos que o efeito de uma carta permita usar a outra. Quando seu monstro sai dela, você pode usar qualquer uma das duas novamente.",
+        "Sua Zona de Magias & Armadilhas mais à esquerda e a mais à direita também são suas Zonas do Pêndulo. A Zona de Campo abriga sua Magia de Campo."
+      ],
+      "points": [
+        "Deck: pilha com a face para baixo; você compra a carta do topo.",
+        "Deck Adicional: contém seus Monstros de Fusão, Sincro, Xyz e Link, além de Monstros Pêndulo enviados para lá com a face para cima durante o duelo.",
+        "Cemitério: pilha com a face para cima das cartas usadas e destruídas; os dois jogadores podem vê-la a qualquer momento.",
+        "Cartas banidas são removidas do jogo, geralmente com a face para cima, e ficam separadas do Cemitério.",
+        "Os monstros ficam em Posição de Ataque (vertical) ou em Posição de Defesa (horizontal). Um monstro com a face para baixo está sempre em Posição de Defesa, e você pode olhar suas próprias cartas com a face para baixo."
+      ],
+      "example": ""
+    },
+    {
+      "id": "turn",
+      "title": "Estrutura do turno",
+      "icon": "Clock",
+      "paragraphs": [
+        "Cada turno passa pelas fases abaixo, nesta ordem. O jogador de quem é o turno é o “jogador do turno”.",
+        "O primeiro turno do duelo tem duas restrições: o jogador que começa não compra carta, e ninguém pode realizar a Fase de Batalha."
+      ],
+      "points": [
+        "Fase de Compra: compre 1 carta. O jogador que começa não compra no primeiro turno do duelo.",
+        "Fase de Apoio: efeitos que acontecem “durante a Fase de Apoio”, como custos de manutenção, são aplicados ou ativados.",
+        "Fase Principal 1: Invoque ou Baixe monstros, mude posições de batalha, ative cartas e Baixe Magias e Armadilhas.",
+        "Fase de Batalha: opcional. Ataque com seus monstros. Não pode ser realizada no primeiro turno do duelo.",
+        "Fase Principal 2: só se você realizou uma Fase de Batalha. Você pode fazer as mesmas coisas que na Fase Principal 1.",
+        "Fase Final: efeitos que acontecem “durante a Fase Final” são aplicados. Se tiver mais de 6 cartas na mão, descarte até ficar com 6."
+      ],
+      "example": ""
+    },
+    {
+      "id": "normal-summon",
+      "title": "Invocação-Normal e Baixar",
+      "icon": "ArrowUp",
+      "paragraphs": [
+        "Uma vez por turno, durante sua Fase Principal, você pode Invocar-Normalmente um monstro da sua mão em Posição de Ataque com a face para cima ou Baixá-lo em Posição de Defesa com a face para baixo. As duas ações usam sua única Invocação-Normal do turno.",
+        "Monstros de Nível mais alto exigem Tributos: você envia ao Cemitério monstros que você controla. Isso é uma Invocação-Tributo (ou um Baixar por Tributo), que é uma forma de Invocação-Normal.",
+        "Durante sua Fase Principal, você também pode Baixar Magias e Armadilhas com a face para baixo nas suas Zonas de Magias & Armadilhas, quantas tiver zonas livres."
+      ],
+      "points": [
+        "Nível 1 a 4: nenhum Tributo.",
+        "Nível 5 ou 6: 1 Tributo.",
+        "Nível 7 ou mais: 2 Tributos.",
+        "Invocação-Virar: durante sua Fase Principal, mude um monstro em Posição de Defesa com a face para baixo para Posição de Ataque com a face para cima. Não é possível no turno em que esse monstro foi Baixado.",
+        "Durante sua Fase Principal, você pode mudar a posição de batalha de cada monstro uma vez por turno, mas não no turno em que ele foi Invocado ou Baixado, nem depois de ter atacado nesse turno. Uma Invocação-Virar conta como essa mudança."
+      ],
+      "example": "Você controla 1 monstro. Para Invocar-Normalmente um monstro de Nível 6, você oferece esse monstro como Tributo. Isso usa sua Invocação-Normal do turno, então você não pode Baixar outro monstro."
+    },
+    {
+      "id": "special-summon",
+      "title": "Invocação-Especial",
+      "icon": "Sparkles",
+      "paragraphs": [
+        "Uma Invocação-Especial não usa sua Invocação-Normal. Você pode realizar quantas suas cartas permitirem, inclusive durante o turno do seu oponente, se um efeito permitir.",
+        "Alguns monstros têm um procedimento próprio, como “Não pode ser Invocado-Normalmente/Baixado. Deve primeiro ser Invocado-Especialmente…” ou “Você pode Invocar-Especialmente esta carta da sua mão…”. Esse procedimento não inicia uma Corrente, mas cartas que negam Invocações podem impedi-lo.",
+        "As outras Invocações-Especiais são o efeito de uma carta, por exemplo “Invoque-Especialmente 1 monstro do seu Cemitério”. Elas são resolvidas como parte de uma Corrente."
+      ],
+      "points": [
+        "As Invocações-Fusão, Ritual, Sincro, Xyz, Pêndulo e Link são todas Invocações-Especiais.",
+        "Monstros do Deck Adicional, Monstros de Ritual e monstros que “devem primeiro ser Invocados-Especialmente” precisam ser Invocados corretamente antes que outro efeito possa Invocá-los-Especialmente do Cemitério ou de entre as cartas banidas.",
+        "Se o texto de um monstro diz que ele “não pode ser Invocado-Especialmente de outras formas”, ele só pode ser Invocado pelo próprio procedimento."
+      ],
+      "example": "Um monstro diz “Não pode ser Invocado-Normalmente/Baixado. Deve primeiro ser Invocado-Especialmente da sua mão ao banir 2 monstros do seu Cemitério.” Se você o Invocar assim e ele for destruído, uma carta de reviver pode trazê-lo de volta. Se ele só foi descartado da sua mão, não pode ser revivido."
+    },
+    {
+      "id": "fusion",
+      "title": "Invocação-Fusão",
+      "icon": "Combine",
+      "paragraphs": [
+        "Os Monstros de Fusão ficam no seu Deck Adicional. O texto deles indica as Matérias de Fusão necessárias, por exemplo dois monstros pelo nome ou “1 monstro TREVAS + 1 monstro Guerreiro”.",
+        "A maioria das Invocações-Fusão usa uma carta como “Polimerização”: envie ao Cemitério as matérias indicadas da sua mão ou do seu campo e, depois, Invoque-Especialmente o Monstro de Fusão do seu Deck Adicional. A carta de Fusão define de onde as matérias podem vir.",
+        "Alguns Monstros de Fusão descrevem um procedimento próprio (como uma Fusão de Contato que embaralha as matérias no Deck). Siga o texto da carta; é ele que diz também se isso conta como Invocação-Fusão."
+      ],
+      "points": [
+        "As matérias precisam corresponder exatamente ao texto. Uma matéria substituta só funciona se o próprio texto dela disser isso.",
+        "As matérias são enviadas ao Cemitério, a menos que a carta usada diga o contrário, por exemplo bani-las ou embaralhá-las no Deck.",
+        "Se a Invocação-Fusão for negada, as matérias continuam usadas e o Monstro de Fusão é destruído."
+      ],
+      "example": "“Polimerização” permite Invocar-por-Fusão usando monstros da sua mão ou do seu campo. Você envia ao Cemitério, da sua mão, os dois monstros indicados no Monstro de Fusão e, depois, Invoca-Especialmente esse Monstro de Fusão."
+    },
+    {
+      "id": "ritual",
+      "title": "Invocação-Ritual",
+      "icon": "Flame",
+      "paragraphs": [
+        "Os Monstros de Ritual ficam no seu Deck Principal e geralmente são Invocados da sua mão. Você precisa de uma Magia de Ritual capaz de Invocá-los; normalmente as duas cartas citam uma à outra.",
+        "Ative a Magia de Ritual, depois ofereça como Tributo monstros da sua mão e/ou do seu campo cujos Níveis somados cumpram a condição escrita na Magia de Ritual, e Invoque-Especialmente o Monstro de Ritual."
+      ],
+      "points": [
+        "A maioria das Magias de Ritual pede Níveis somados “iguais ou maiores” que o Nível do Monstro de Ritual; algumas pedem “exatamente iguais”. Leia a Magia de Ritual.",
+        "O Monstro de Ritual que você está Invocando não pode ser um dos Tributos.",
+        "Monstros de Ritual não podem ser Invocados-Normalmente nem Baixados.",
+        "Algumas cartas usam outras fontes, como enviar monstros do Deck ou bani-los do Cemitério; siga o texto."
+      ],
+      "example": "Seu Monstro de Ritual é de Nível 8 e a Magia de Ritual pede Níveis somados iguais ou maiores que 8. Você oferece como Tributo um monstro de Nível 4 da sua mão e um monstro de Nível 5 do seu campo (total 9) e, depois, Invoca-Especialmente o Monstro de Ritual."
+    },
+    {
+      "id": "synchro",
+      "title": "Invocação-Sincro",
+      "icon": "Zap",
+      "paragraphs": [
+        "Os Monstros Sincro ficam no seu Deck Adicional. Durante sua Fase Principal, envie ao Cemitério 1 Regulador e 1 ou mais monstros não-Reguladores com a face para cima que você controla. Os Níveis deles somados devem ser exatamente iguais ao Nível do Monstro Sincro. Depois, Invoque-o-Especialmente.",
+        "O texto do Monstro Sincro indica suas matérias, por exemplo “1 Regulador + 1+ monstros não-Reguladores”. Alguns exigem um Regulador ou não-Regulador específico, ou mais de um Regulador."
+      ],
+      "points": [
+        "As matérias devem ser monstros com a face para cima que você controla, a menos que uma carta diga o contrário.",
+        "Um Regulador tem a palavra “Regulador” na sua linha de Tipo.",
+        "Monstros Xyz e Link não têm Nível, então normalmente não podem ser Matérias Sincro.",
+        "Uma Invocação-Sincro não inicia uma Corrente, mas cartas que negam Invocações podem impedi-la."
+      ],
+      "example": "Um Regulador de Nível 3 mais um não-Regulador de Nível 4 somam 7: você pode Invocar-por-Sincro um Monstro Sincro de Nível 7."
+    },
+    {
+      "id": "xyz",
+      "title": "Invocação-Xyz",
+      "icon": "Layers",
+      "paragraphs": [
+        "Os Monstros Xyz ficam no seu Deck Adicional. Durante sua Fase Principal, empilhe os monstros com a face para cima que você controla exigidos pelo Monstro Xyz (geralmente 2 ou mais com o mesmo Nível) e coloque o Monstro Xyz por cima. Os monstros embaixo se tornam Matérias Xyz.",
+        "Monstros Xyz têm Classe, não Nível. Efeitos que se referem a Níveis não se aplicam a eles, e normalmente eles não podem ser usados para uma Invocação-Sincro.",
+        "Matérias Xyz não são monstros no campo. Quando o Monstro Xyz sai do campo, suas matérias são enviadas ao Cemitério."
+      ],
+      "points": [
+        "Muitos Monstros Xyz pagam um custo desassociando Matérias Xyz: você as move de baixo da carta para o Cemitério.",
+        "Fichas não podem ser usadas como Matéria Xyz.",
+        "Um Monstro Xyz sem matérias continua no campo; ele só não pode mais pagar custos de desassociar."
+      ],
+      "example": "Dois monstros de Nível 4 que você controla podem ser usados para Invocar-por-Xyz um Monstro Xyz de Classe 4 que exige “2 monstros de Nível 4”."
+    },
+    {
+      "id": "pendulum",
+      "title": "Invocação-Pêndulo",
+      "icon": "Scale",
+      "paragraphs": [
+        "Os Monstros Pêndulo ficam no seu Deck Principal. Além de serem Invocados como monstros, podem ser ativados como Magias nas suas Zonas do Pêndulo (sua Zona de Magias & Armadilhas mais à esquerda e a mais à direita). Ali, eles são Cartas de Magia e usam sua Escala Pêndulo e seu Efeito de Pêndulo.",
+        "Uma vez por turno, durante sua Fase Principal, se você tiver uma carta em cada Zona do Pêndulo, pode realizar uma Invocação-Pêndulo: Invoque-Especialmente, ao mesmo tempo, qualquer número de monstros da sua mão e/ou de Monstros Pêndulo com a face para cima do seu Deck Adicional cujo Nível esteja estritamente entre as duas Escalas.",
+        "Quando um Monstro Pêndulo no seu campo seria enviado ao Cemitério, em vez disso ele é colocado com a face para cima no seu Deck Adicional."
+      ],
+      "points": [
+        "Com Escalas 1 e 8, você pode Invocar-por-Pêndulo monstros do Nível 2 ao Nível 7.",
+        "Monstros da sua mão vão para Zonas de Monstros Principais. Monstros Pêndulo com a face para cima do seu Deck Adicional vão para uma Zona de Monstros Adicional ou para uma Zona de Monstros Principal apontada por um Monstro Link.",
+        "Uma Invocação-Pêndulo não inicia uma Corrente, mas cartas que negam Invocações podem impedi-la."
+      ],
+      "example": ""
+    },
+    {
+      "id": "link",
+      "title": "Invocação-Link",
+      "icon": "Link",
+      "paragraphs": [
+        "Os Monstros Link ficam no seu Deck Adicional. Durante sua Fase Principal, envie ao Cemitério, como Matérias Link, monstros com a face para cima que você controla e que cumprem os requisitos indicados e, depois, Invoque-Especialmente o Monstro Link.",
+        "O número de matérias deve ser igual à Classificação Link (LINK-1, LINK-2…). Um Monstro Link usado como matéria pode contar como 1 matéria ou como um número de matérias igual à sua Classificação Link.",
+        "As Setas Link apontam para zonas adjacentes. Um monstro em uma zona apontada por uma Seta Link está “conectado” a esse Monstro Link. Dois Monstros Link que apontam um para o outro estão “co-conectados”."
+      ],
+      "points": [
+        "Monstros Link não têm Nível nem DEF; estão sempre em Posição de Ataque com a face para cima.",
+        "Eles não podem ser Baixados, colocados em Posição de Defesa nem virados para baixo.",
+        "Fichas podem ser usadas como Matéria Link.",
+        "A partir de uma Zona de Monstros Adicional, as Setas Link podem apontar para Zonas de Monstros Principais dos dois lados do campo."
+      ],
+      "example": "Um Monstro LINK-3 precisa de 3 matérias: você pode usar 3 monstros, ou um Monstro LINK-2 contando como 2 matérias mais 1 outro monstro."
+    },
+    {
+      "id": "extra-deck-zones",
+      "title": "Deck Adicional e Zonas de Monstros Adicionais",
+      "icon": "LayoutDashboard",
+      "paragraphs": [
+        "Desde a revisão da Master Rule de abril de 2020, a zona que um monstro Invocado do Deck Adicional pode ocupar depende do seu tipo de carta.",
+        "Monstros de Fusão, Sincro e Xyz, incluindo Monstros Pêndulo desses tipos Invocados enquanto estavam com a face para baixo no Deck Adicional, podem ir para qualquer Zona de Monstros Principal livre sua ou para uma Zona de Monstros Adicional.",
+        "Monstros Link, e Monstros Pêndulo Invocados-Especialmente com a face para cima do Deck Adicional, devem ir para uma Zona de Monstros Adicional ou para uma das suas Zonas de Monstros Principais apontada por um Monstro Link."
+      ],
+      "points": [
+        "Você continua podendo usar só uma Zona de Monstros Adicional, a menos que o efeito de uma carta permita o contrário.",
+        "Colocar um Monstro de Fusão, Sincro ou Xyz em uma Zona de Monstros Principal deixa a Zona de Monstros Adicional livre para um Monstro Link.",
+        "Essas restrições valem apenas para monstros Invocados do Deck Adicional; monstros da mão, do Deck ou do Cemitério vão para Zonas de Monstros Principais."
+      ],
+      "example": "Seu campo está vazio. Você Invoca-por-Sincro em uma Zona de Monstros Principal, deixando a Zona de Monstros Adicional livre. Depois, você Invoca-por-Link na Zona de Monstros Adicional um Monstro LINK-2 com setas para baixo à esquerda e para baixo à direita. Essas setas apontam para duas das suas Zonas de Monstros Principais, então seu próximo Monstro Link ou Monstros Pêndulo com a face para cima do seu Deck Adicional podem ser colocados ali."
+    },
+    {
+      "id": "chains",
+      "title": "Correntes e Velocidade de Magia",
+      "icon": "ListOrdered",
+      "paragraphs": [
+        "Quando uma carta ou efeito é ativado, ele se torna o Elo de Corrente 1. Os jogadores podem responder com Velocidade de Magia 2 ou maior, igual ou maior que a do último Elo, adicionando mais Elos. Quando os dois jogadores passam, a Corrente é resolvida na ordem inversa: o último Elo primeiro.",
+        "Os custos (descartar, pagar PV, desassociar, oferecer como Tributo…) são pagos na ativação e não são devolvidos se a ativação for negada. No texto de uma carta, o que vem antes de dois-pontos (:) é uma condição, o que vem antes de ponto e vírgula (;) é um custo ou um alvo, e o resto é o efeito."
+      ],
+      "points": [
+        "Velocidade de Magia 1: Magias Normais, de Equipamento, Contínuas, de Campo e de Ritual; efeitos de Ignição, de Gatilho e VIRAR. Não podem ser ativados em resposta, exceto gatilhos simultâneos.",
+        "Velocidade de Magia 2: Magias Rápidas, Armadilhas Normais e Contínuas, Efeitos Rápidos.",
+        "Velocidade de Magia 3: Armadilhas de Resposta. Só outra Velocidade de Magia 3 pode responder a elas.",
+        "Gatilhos simultâneos (SEGOC) entram na Corrente nesta ordem: obrigatórios do jogador do turno, obrigatórios do oponente, opcionais do jogador do turno, opcionais do oponente.",
+        "Um efeito opcional “Quando… você pode” perde o momento se o seu evento não foi a última coisa a acontecer. Efeitos “Se… você pode” e efeitos obrigatórios não perdem.",
+        "Armadilhas Baixadas e Magias Rápidas Baixadas não podem ser ativadas no turno em que foram Baixadas, a menos que uma carta permita.",
+        "“Uma vez por turno”: cada cópia uma vez por turno, reiniciado se ela sair do campo. “Você só pode usar este efeito de [carta] uma vez por turno”: uma vez por turno para todas as cópias."
+      ],
+      "example": "Você ativa uma Magia Normal (Elo 1). Seu oponente responde com uma Armadilha Normal (Elo 2). Você responde com uma Armadilha de Resposta que a nega (Elo 3). A Armadilha de Resposta é resolvida primeiro e nega a Armadilha; depois, sua Magia é resolvida."
+    },
+    {
+      "id": "battle",
+      "title": "Batalha",
+      "icon": "Swords",
+      "paragraphs": [
+        "A Fase de Batalha tem Etapa Inicial, Etapa de Batalha, Etapa de Dano e Etapa Final. Cada monstro em Posição de Ataque com a face para cima que você controla pode atacar uma vez por Fase de Batalha.",
+        "Etapa de Batalha: escolha um dos seus monstros e declare um ataque a um monstro do oponente. Se o seu oponente não controlar monstros, você pode atacar diretamente e ele sofre dano igual ao ATK do seu monstro. Se o número de monstros que seu oponente controla mudar antes da Etapa de Dano, ocorre um “replay”: escolha um novo alvo, ataque diretamente se ele não tiver mais monstros, ou interrompa o ataque.",
+        "Etapa de Dano: monstros com a face para baixo são virados para cima e, depois, o dano é calculado. Só podem ser ativados Armadilhas de Resposta, cartas que mudam diretamente o ATK ou a DEF, efeitos que negam uma ativação e efeitos cujo texto permita."
+      ],
+      "points": [
+        "Ataque contra Posição de Ataque: o monstro com menor ATK é destruído e seu controlador sofre a diferença. ATK iguais: os dois são destruídos, sem dano. Se os dois tiverem 0 de ATK, nenhum é destruído.",
+        "Ataque contra Posição de Defesa: se o ATK for maior que a DEF, o defensor é destruído e ninguém sofre dano, a menos que o atacante cause dano perfurante. Se o ATK for menor, o controlador do atacante sofre a diferença. Se forem iguais, nada acontece.",
+        "Um monstro com a face para baixo que é atacado é virado para cima; seu efeito VIRAR é ativado após o cálculo de dano.",
+        "Monstros destruídos em batalha são enviados ao Cemitério no fim da Etapa de Dano."
+      ],
+      "example": "Seu monstro de 2000 de ATK ataca um monstro de 1500 de ATK em Posição de Ataque: ele é destruído e seu oponente sofre 500 de dano. Contra um monstro de 2500 de DEF em Posição de Defesa, nada é destruído e você sofre 500 de dano."
+    },
+    {
+      "id": "spells-traps",
+      "title": "Magias e Armadilhas",
+      "icon": "Wand",
+      "paragraphs": [
+        "Ative Magias da sua mão durante sua Fase Principal, ou Baixe-as para ativá-las depois. Armadilhas precisam ser Baixadas primeiro e podem ser ativadas a partir do turno seguinte, durante o turno de qualquer jogador. Magias Normais e Armadilhas Normais vão para o Cemitério depois de resolvidas; cartas Contínuas, de Equipamento e de Campo permanecem no campo.",
+        "“Hand traps” são monstros cujo efeito você ativa da sua mão, muitas vezes descartando-os, normalmente como Efeitos Rápidos durante o turno de qualquer jogador."
+      ],
+      "points": [
+        "Magia Normal: efeito único, Velocidade de Magia 1.",
+        "Magia Rápida: da mão, só durante o seu próprio turno, em qualquer fase; se estiver Baixada, durante o turno de qualquer jogador, mas não no turno em que foi Baixada.",
+        "Magia Contínua: permanece no campo e continua sendo aplicada.",
+        "Magia de Equipamento: equipada a um monstro com a face para cima; é destruída se esse monstro sair do campo ou for virado para baixo.",
+        "Magia de Campo: vai para sua Zona de Campo, 1 por jogador. Se você colocar uma nova, a anterior é enviada ao Cemitério.",
+        "Magia de Ritual: usada para Invocar-por-Ritual.",
+        "Armadilha Normal: efeito único, Velocidade de Magia 2.",
+        "Armadilha Contínua: permanece no campo, Velocidade de Magia 2.",
+        "Armadilha de Resposta: Velocidade de Magia 3, geralmente nega uma ativação ou uma Invocação."
+      ],
+      "example": ""
+    }
+  ],
+  "labels": {
+    "points": "Pontos-chave",
+    "example": "Exemplo",
+    "openDuel": "Experimentar no simulador"
+  }
+}
