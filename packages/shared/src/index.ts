@@ -11,3 +11,4 @@ export * from './schemas/wishlist';
 export * from './schemas/suggestions';
 export * from './schemas/guide';
 export * from './schemas/interactions';
+export * from './schemas/products';

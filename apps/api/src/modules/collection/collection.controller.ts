@@ -2,11 +2,9 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } fr
 import {
   addCollectionItemSchema,
   collectionQuerySchema,
-  importSetSchema,
   updateCollectionItemSchema,
   type AddCollectionItemInput,
   type CollectionQueryInput,
-  type ImportSetInput,
   type UpdateCollectionItemInput,
 } from '@ygo/shared';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator';
@@ -36,14 +34,6 @@ export class CollectionController {
     @Body(new ZodValidationPipe(addCollectionItemSchema)) body: AddCollectionItemInput,
   ) {
     return this.collection.add(user.id, body);
-  }
-
-  @Post('import-set')
-  importSet(
-    @CurrentUser() user: AuthUser,
-    @Body(new ZodValidationPipe(importSetSchema)) body: ImportSetInput,
-  ) {
-    return this.collection.importSet(user.id, body);
   }
 
   @Patch(':id')

@@ -110,8 +110,12 @@ model CardSet {
   coverCheckedAt DateTime?
   /// Nom normalisé pour la recherche (cf. Card.searchText)
   searchText String @default("")
+  /// Dernière lecture de la liste officielle (quantités) ; contentSource = d'où elle vient
+  contentCheckedAt DateTime?
+  contentSource    String?
 
-  prints CardPrint[]
+  prints        CardPrint[]
+  ownedProducts OwnedProduct[]
 
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
 }
@@ -125,6 +129,8 @@ model CardPrint {
   rarity     String
   rarityCode String?
   price      Decimal? @db.Decimal(10, 2)
+  /// Exemplaires de cette impression dans UN produit (liste officielle Yugipedia) ; null = inconnu
+  setQuantity Int?
 
   card            Card             @relation(fields: [cardId], references: [id], onDelete: Cascade)
   set             CardSet          @relation(fields: [setId], references: [id], onDelete: Cascade)
@@ -166,6 +172,7 @@ model User {
   collectionItems CollectionItem[]
   decks           Deck[]
   wishlistItems   WishlistItem[]
+  ownedProducts   OwnedProduct[]
 }
 
 /// Refresh tokens stockés hashés (rotation à chaque refresh, révocables).
@@ -422,4 +429,23 @@ model CardEffectTarget {
   @@index([cardId])
   @@index([keys], type: Gin)
   @@index([precision])
+}
+
+/// Produit ajouté à la collection (structure deck, tin…) : on garde la trace de l'achat pour
+/// retrouver son contenu, le reconstituer, et proposer un guide de jeu pour les decks.
+model OwnedProduct {
+  id        String       @id @default(cuid())
+  userId    String
+  setId     String
+  /// Nombre de produits identiques
+  copies    Int          @default(1)
+  language  CardLanguage @default(FR)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  CardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, setId, language])
+  @@index([userId])
 }
