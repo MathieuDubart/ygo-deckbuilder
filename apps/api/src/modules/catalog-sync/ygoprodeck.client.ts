@@ -17,7 +17,8 @@ export class YgoprodeckClient {
     return this.get<YgoDbVersion[]>('/checkDBVer.php').then((r) => r[0]);
   }
 
-  async allCards(language?: 'fr'): Promise<YgoCard[]> {
+  /** Tout le catalogue ; `language` = noms / textes traduits (fr, de, it, pt). */
+  async allCards(language?: 'fr' | 'de' | 'it' | 'pt'): Promise<YgoCard[]> {
     const params = new URLSearchParams({ misc: 'yes' });
     if (language) params.set('language', language);
     const res = await this.get<{ data: YgoCard[] }>(`/cardinfo.php?${params}`);

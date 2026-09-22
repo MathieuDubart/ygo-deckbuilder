@@ -1,5 +1,7 @@
 import type { CardDetailDto, CardPrintDto, CardSummaryDto } from '@ygo/shared';
+import type { AppLocale } from '@ygo/shared';
 import type { Prisma } from '../../generated/prisma/client';
+import { currentLocale } from '../i18n/locale-context';
 
 type Decimalish = Prisma.Decimal | null | undefined;
 export const toNumber = (d: Decimalish): number | null => (d == null ? null : Number(d));
@@ -23,6 +25,8 @@ export const cardSummarySelect = {
   isExtraDeck: true,
   banTcg: true,
   priceCardmarket: true,
+  // Noms allemand / italien / portugais (le français est dans nameFr)
+  translations: { select: { locale: true, name: true } },
 } satisfies Prisma.CardSelect;
 
 export type CardSummaryRow = Prisma.CardGetPayload<{ select: typeof cardSummarySelect }>;
@@ -30,7 +34,7 @@ export type CardSummaryRow = Prisma.CardGetPayload<{ select: typeof cardSummaryS
 export function toCardSummary(card: CardSummaryRow, ownedQuantity?: number): CardSummaryDto {
   return {
     id: card.id,
-    name: card.nameFr ?? card.name,
+    name: localizedName(card),
     category: card.category,
     type: card.type,
     frameType: card.frameType,
@@ -49,12 +53,32 @@ export function toCardSummary(card: CardSummaryRow, ownedQuantity?: number): Car
   };
 }
 
-type CardDetailRow = Prisma.CardGetPayload<{ include: { prints: { include: { set: true } } } }>;
+type CardDetailRow = Prisma.CardGetPayload<{
+  include: { prints: { include: { set: true } }; translations: true };
+}>;
+
+/** Nom de la carte dans la langue de la requête (anglais si pas de traduction). */
+export function localizedName(
+  card: Pick<CardSummaryRow, 'name' | 'nameFr'> & {
+    translations?: { locale: string; name: string }[];
+  },
+  locale: AppLocale = currentLocale(),
+): string {
+  if (locale === 'en') return card.name;
+  if (locale === 'fr') return card.nameFr ?? card.name;
+  return card.translations?.find((t) => t.locale === locale)?.name ?? card.name;
+}
+
+function localizedDesc(card: CardDetailRow, locale: AppLocale = currentLocale()): string {
+  if (locale === 'en') return card.desc;
+  if (locale === 'fr') return card.descFr ?? card.desc;
+  return card.translations.find((t) => t.locale === locale)?.desc ?? card.desc;
+}
 
 export function toCardDetail(card: CardDetailRow, ownedQuantity?: number): CardDetailDto {
   return {
     ...toCardSummary(card, ownedQuantity),
-    desc: card.descFr ?? card.desc,
+    desc: localizedDesc(card),
     linkVal: card.linkVal,
     linkMarkers: card.linkMarkers,
     scale: card.scale,
