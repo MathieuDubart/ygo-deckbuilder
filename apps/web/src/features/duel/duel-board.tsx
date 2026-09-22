@@ -7,7 +7,10 @@ import type {
   DuelStateDto,
 } from '@ygo/shared';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { LpCounter } from './fx/lp-counter';
+import { Tilt } from './fx/tilt';
 import { CardBack, DuelCardFace, FieldCard } from './duel-card';
 import { refKey, type CardMap } from './duel-utils';
 
@@ -34,15 +37,21 @@ interface BoardProps extends BoardHandlers {
   placeable: Set<string>;
   /** Zones déjà choisies (invite PLACE à plusieurs zones) */
   picked: Set<string>;
+  /** PV affichés pendant le replay (sinon ceux de l'état) */
+  lp?: [number, number] | null;
 }
+
+type ZoneProps = BoardProps & { fresh: Set<string> };
 
 /**
  * Terrain vu depuis ta place : l'adversaire en haut (miroir), toi en bas, les Zones Monstre
  * Extra au milieu. Colonnes : [Terrain/Extra] [5 zones] [Cimetière/Deck], bannies au milieu.
  */
-export function DuelBoard(props: BoardProps) {
-  const { state, cards } = props;
+export function DuelBoard(boardProps: BoardProps) {
+  const { state, cards } = boardProps;
   const t = useTranslations('duel.board');
+  const fresh = useArrivals(state);
+  const props: ZoneProps = { ...boardProps, fresh };
   const [me, opp] = state.players;
   const mirror = [4, 3, 2, 1, 0];
   const chainKeys = new Set(state.chain.map((c) => refKey(c.card)));
@@ -178,7 +187,8 @@ function Zone({
   onCard,
   onZone,
   onHover,
-}: BoardProps & {
+  fresh,
+}: ZoneProps & {
   card: DuelCardDto | null;
   zones: ZoneRef[];
   kind: keyof typeof zoneTone;
@@ -196,14 +206,20 @@ function Zone({
     zoneTone[kind],
     target && 'cursor-pointer border-accent bg-accent/15 ring-1 ring-accent/60 hover:bg-accent/25',
     selected && 'border-accent bg-accent/35 ring-2 ring-accent',
-    actionable && 'cursor-pointer ring-2 ring-accent shadow-[0_0_14px_-2px_var(--accent)]',
+    actionable && 'fx-glow cursor-pointer ring-2 ring-accent',
     inChain && 'ring-2 ring-trap',
+  );
+  const face = card && (
+    // Carte qui vient d'arriver : elle « pop » (la clé relance l'animation si elle change)
+    <div key={`${key}:${card.code}`} className={cn('size-full', key && fresh.has(key) && 'fx-pop')}>
+      <FieldCard card={card} cards={cards} showStats={card.location === 'MZONE'} />
+    </div>
   );
 
   if (target)
     return (
       <button type="button" className={className} onClick={() => onZone(target)}>
-        {card && <FieldCard card={card} cards={cards} showStats={card.location === 'MZONE'} />}
+        {face}
       </button>
     );
   if (!card) return <div className={className} />;
@@ -216,7 +232,7 @@ function Zone({
       onMouseEnter={() => onHover(card.code || null)}
       onMouseLeave={() => onHover(null)}
     >
-      <FieldCard card={card} cards={cards} showStats={card.location === 'MZONE'} />
+      {face}
     </button>
   );
 }
@@ -248,7 +264,7 @@ function PileZone({
       className={cn(
         'relative aspect-(--aspect-card) rounded-md border border-border bg-bg-sunken/40 transition',
         openable && 'hover:border-border-strong',
-        actionable && 'ring-2 ring-accent shadow-[0_0_14px_-2px_var(--accent)]',
+        actionable && 'fx-glow ring-2 ring-accent',
         pile === 'BANISHED' && 'opacity-90',
       )}
     >
@@ -319,6 +335,7 @@ function Hand({
   actions,
   onCard,
   onHover,
+  lp,
 }: BoardProps & { player: DuelPlayerDto; controller: 0 | 1 }) {
   const t = useTranslations('duel.board');
   const mine = controller === 0;
@@ -334,7 +351,7 @@ function Hand({
         <span className="text-[10px] tracking-wide text-fg-subtle uppercase">
           {mine ? t('you') : t('opponent')}
         </span>
-        <span className="font-mono text-lg font-semibold tabular-nums">{player.lp}</span>
+        <LpCounter value={lp?.[controller] ?? player.lp} className="text-lg font-semibold" />
         <span className="text-[10px] text-fg-subtle">{t('lp')}</span>
       </div>
       <div
@@ -354,17 +371,41 @@ function Hand({
               onMouseEnter={() => onHover(card.code || null)}
               onMouseLeave={() => onHover(null)}
               className={cn(
-                'relative shrink-0 rounded-[4%/3%] transition hover:z-10 hover:-translate-y-1.5',
+                'relative shrink-0 rounded-[4%/3%] transition hover:z-10 hover:-translate-y-2',
                 mine ? 'w-12 sm:w-16' : 'w-9 sm:w-11',
-                actionable &&
-                  'z-[1] -translate-y-1 ring-2 ring-accent shadow-[0_0_14px_-2px_var(--accent)]',
+                actionable && 'fx-glow z-[1] -translate-y-1 ring-2 ring-accent',
               )}
             >
-              <DuelCardFace card={card} cards={cards} sizes="64px" />
+              {mine ? (
+                <Tilt>
+                  <DuelCardFace card={card} cards={cards} sizes="64px" />
+                </Tilt>
+              ) : (
+                <DuelCardFace card={card} cards={cards} sizes="64px" />
+              )}
             </button>
           );
         })}
       </div>
     </div>
   );
+}
+
+/**
+ * Cartes du Terrain qui viennent d'arriver (Invoquées, posées, activées) depuis l'affichage
+ * précédent : elles jouent l'animation d'entrée. Rien au premier affichage.
+ */
+function useArrivals(state: DuelStateDto): Set<string> {
+  const previous = useRef<Map<string, number> | null>(null);
+  const current = new Map<string, number>();
+  for (const player of state.players)
+    for (const card of [...player.monsters, ...player.spells])
+      if (card) current.set(refKey(card), card.code);
+  const fresh = new Set<string>();
+  if (previous.current)
+    for (const [key, code] of current) if (previous.current.get(key) !== code) fresh.add(key);
+  useEffect(() => {
+    previous.current = current;
+  });
+  return fresh;
 }

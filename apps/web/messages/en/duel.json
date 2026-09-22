@@ -130,6 +130,13 @@
       "SMART": "Auto",
       "ALWAYS": "Always",
       "hint": "Auto: you're only asked to chain after an opponent's action (or when it's mandatory). Always: at every chain window, as in EDOPro."
+    },
+    "sound": "Sound",
+    "speed": {
+      "label": "Animations",
+      "normal": "Normal",
+      "fast": "Fast",
+      "off": "Off"
     }
   },
   "prompt": {
@@ -299,5 +306,21 @@
   "inspector": {
     "empty": "Hover over or tap a card to read it.",
     "hidden": "Face-down card."
+  },
+  "fx": {
+    "duel": "Duel!",
+    "summon": {
+      "NORMAL": "Normal Summon",
+      "SPECIAL": "Special Summon",
+      "FLIP": "Flip Summon"
+    },
+    "activate": "Chain Link {link}",
+    "negated": "Negated!",
+    "attack": "Attack!",
+    "direct": "Direct attack!",
+    "set": "Card set",
+    "skip": "Skip",
+    "you": "You",
+    "opponent": "Opp."
   }
 }

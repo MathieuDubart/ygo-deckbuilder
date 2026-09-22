@@ -11,11 +11,16 @@ import { DUEL_CHAIN_PROMPTS, DUEL_PHASES } from '@ygo/shared';
 import { BookOpen, LogOut, RotateCcw, Swords, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { EmptyState, PageHeader, Skeleton } from '@/components/ui/feedback';
 import { useDuelEngine } from '@/lib/api/duel';
+import { Confetti } from './fx/confetti';
+import { FxControls } from './fx/fx-controls';
+import { FxStage } from './fx/fx-stage';
+import { fxSettings } from './fx/settings';
+import { play } from './fx/sound';
 import { SOURCE_URL } from '@/lib/source';
 import { cn } from '@/lib/utils';
 import { ActionMenu } from './action-menu';
@@ -96,10 +101,14 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
   const [sheet, setSheet] = useState<number | null>(null);
   const [picks, setPicks] = useState<ZoneRef[]>([]);
   const [resultOpen, setResultOpen] = useState(true);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const { playing, fx } = session;
 
   const promptId = state.prompt?.id;
-  const actions = useMemo(() => actionsByCard(state.prompt), [state.prompt]);
-  const placeable = useMemo(() => placeableZones(state.prompt), [state.prompt]);
+  // Pendant le replay, le terrain est figé : pas d'actions ni de zones à choisir
+  const livePrompt = playing ? null : state.prompt;
+  const actions = useMemo(() => actionsByCard(livePrompt), [livePrompt]);
+  const placeable = useMemo(() => placeableZones(livePrompt), [livePrompt]);
   const picked = useMemo(() => new Set(picks.map(refKey)), [picks]);
 
   // Nouvelle invite : on referme les menus, on oublie les zones choisies
@@ -109,6 +118,30 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
     setPicks([]);
   }, [promptId]);
   useEffect(() => setResultOpen(true), [state.finished]);
+
+  // Secousse du terrain sur un gros coup
+  useEffect(() => {
+    if (!fx?.shake || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    boardRef.current?.animate(
+      [
+        { transform: 'translate(0, 0)' },
+        { transform: 'translate(-8px, 4px) rotate(-0.6deg)' },
+        { transform: 'translate(7px, -5px) rotate(0.5deg)' },
+        { transform: 'translate(-5px, 3px)' },
+        { transform: 'translate(4px, 2px) rotate(0.3deg)' },
+        { transform: 'translate(-2px, -1px)' },
+        { transform: 'translate(0, 0)' },
+      ],
+      { duration: 450, easing: 'ease-out' },
+    );
+  }, [fx]);
+
+  // Fanfare ou glas à la fin du duel
+  const winner = state.finished?.winner;
+  useEffect(() => {
+    if (winner === undefined || !fxSettings().sound) return;
+    play(winner === 0 ? 'win' : 'lose');
+  }, [winner]);
 
   const inspect = useCallback((code: number) => {
     if (window.matchMedia('(min-width: 1024px)').matches) setPinned(code);
@@ -148,6 +181,7 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TurnStrip state={state} busy={busy} />
         <div className="flex flex-wrap items-center gap-2">
+          <FxControls />
           <ChainToggle
             value={state.chainPrompts}
             disabled={busy}
@@ -184,18 +218,23 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
         </aside>
 
         <div className="relative min-w-0">
-          <DuelBoard
-            state={state}
-            cards={cards}
-            actions={actions}
-            placeable={placeable}
-            picked={picked}
-            onCard={onCard}
-            onZone={onZone}
-            onPile={(controller, p) => setPile({ controller, pile: p })}
-            onHover={setHover}
-          />
-          {state.finished && resultOpen && (
+          <div ref={boardRef}>
+            <DuelBoard
+              state={state}
+              lp={session.lp}
+              cards={cards}
+              actions={actions}
+              placeable={placeable}
+              picked={picked}
+              onCard={onCard}
+              onZone={onZone}
+              onPile={(controller, p) => setPile({ controller, pile: p })}
+              onHover={setHover}
+            />
+          </div>
+          <FxStage frame={fx} cards={cards} onSkip={session.skip} />
+          {state.finished && resultOpen && !playing && winner === 0 && <Confetti />}
+          {state.finished && resultOpen && !playing && (
             <ResultOverlay
               state={state}
               onRematch={session.lastSetup ? () => session.start(session.lastSetup!) : null}
@@ -208,7 +247,7 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
         <div className="flex min-w-0 flex-col gap-4 lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)]">
           <div className="fixed inset-x-2 bottom-[4.75rem] z-30 max-h-[55dvh] overflow-y-auto rounded-2xl md:bottom-4 md:left-auto md:w-96 lg:static lg:max-h-none lg:w-auto lg:overflow-visible">
             <PromptPanel
-              state={state}
+              state={playing ? { ...state, prompt: null } : state}
               cards={cards}
               busy={busy}
               pickedCount={picks.length}
