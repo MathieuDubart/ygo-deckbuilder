@@ -1,12 +1,23 @@
 'use client';
 import type { DeckDto, DeckIssue } from '@ygo/shared';
-import { AlertTriangle, ArrowLeft, Check, CloudOff, Download, Heart, Loader2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  BookOpen,
+  Check,
+  CloudOff,
+  Download,
+  Heart,
+  Loader2,
+} from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog';
+import { DeckGuide } from '@/features/guide/deck-guide';
 import { useUpdateDeck } from '@/lib/api/decks';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { formatPrice } from '@/lib/utils';
@@ -20,6 +31,16 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
   const addWish = useAddToWishlist();
   const rename = useUpdateDeck(deck.id);
   const [name, setName] = useState(deck.name);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideCards = useMemo(
+    () =>
+      [...b.byZone.MAIN, ...b.byZone.EXTRA, ...b.byZone.SIDE].map((e) => ({
+        cardId: e.card.id,
+        zone: e.zone,
+        quantity: e.quantity,
+      })),
+    [b.byZone],
+  );
 
   const missingCost = b.missing.reduce((s, m) => s + (m.card.priceCardmarket ?? 0) * m.missing, 0);
   const nameOf = (id: number) =>
@@ -58,6 +79,15 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
           aria-label="Nom du deck"
         />
         <SaveIndicator status={b.status} onRetry={b.retry} />
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setGuideOpen(true)}
+          disabled={b.counts.MAIN === 0}
+          title="Comment jouer ce deck : plan, combos, erreurs à éviter"
+        >
+          <BookOpen className="size-4" /> Guide
+        </Button>
         <a href={`/api/decks/${deck.id}/export.ydk`} download={`${deck.name}.ydk`}>
           <Button variant="secondary" size="sm">
             <Download className="size-4" /> .ydk
@@ -145,6 +175,15 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
         </div>
       </div>
 
+      <Dialog
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        title={`Guide : ${name}`}
+        variant="sheet"
+        className="w-[min(100vw,44rem)]"
+      >
+        {guideOpen && <DeckGuide cards={guideCards} name={name} onInspect={setInspect} />}
+      </Dialog>
       <CardDetailDialog cardId={inspect} onClose={() => setInspect(null)} />
     </div>
   );

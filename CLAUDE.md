@@ -9,3 +9,5 @@
 - Logique métier pure (règles de deck, couverture) = fonctions sans I/O + tests vitest à côté.
 - Scripts CLI : dans `apps/api/src/cli/` (compilés par `nest build`). Pas de `tsx` : esbuild n'émet pas les métadonnées de décorateurs, l'injection de dépendances Nest casse.
 - Moteur meta = `apps/api/src/modules/meta-decks/engine/` (pur, sans Prisma). Fixture de vraies listes dans `fixtures.ts`.
+- Moteur de synergie = `apps/api/src/modules/synergy/engine/` (pur) : `parse.ts` lit les textes PSCT (anglais), `graph.ts` liens/rôles/Extra, `combos.ts` simulation, `guide.ts` guide FR. Fixtures = vrais textes Blue-Eyes. Toute nouvelle tournure de texte → un test dans `parse.test.ts`.
+- L'IA des guides est optionnelle (`AI_PROVIDER`) : le guide calculé doit toujours rester complet seul.

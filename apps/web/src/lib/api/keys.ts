@@ -18,4 +18,5 @@ export const qk = {
     ['suggestions', 'generate', target, mode] as const,
   metaStatus: ['meta-status'] as const,
   playable: ['suggestions', 'playable'] as const,
+  guide: (fingerprint: string, ai: boolean) => ['guide', fingerprint, ai] as const,
 };

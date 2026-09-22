@@ -12,6 +12,7 @@ vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui ma
 - **Wishlist** : édition visée, budget max, priorité, lien vers le deck qui la réclame, « Je l'ai » → bascule en collection
 - **Meta automatique** : les tops de tournois récents (YGOPRODeck) sont regroupés en archétypes par similarité de contenu, avec une liste type par archétype, un tier et la part du meta
 - **Suggestions & génération de decks** : pour chaque deck du meta, ta couverture et le coût pour compléter ; génération en un clic de la liste meta complète ou d'une version « avec mes cartes » (cœur de la liste, cartes flex, staples que tu possèdes) ; deck auto pour tout archétype de ta collection ; les manquantes partent en wishlist
+- **Synergie & guides** : les effets des cartes sont lus (qui cherche / invoque / envoie quoi, starters, extenders, hand traps, Extra Deck réellement invocable) ; les decks générés privilégient les cartes qui s'emboîtent, et chaque deck a son **guide de jeu** : plan, cartes clés, combos pas à pas, en premier / en second, erreurs à éviter (rédaction par IA en option)
 
 ## Stack
 
@@ -101,18 +102,45 @@ Mise à jour au premier démarrage, puis selon `META_SYNC_CRON` (lundi 5h), ou �
 Le moteur (`apps/api/src/modules/meta-decks/engine/`) est fait de fonctions pures, testées sur de vraies listes.
 Les decks meta peuvent aussi être importés à la main depuis un `.ydk` (`POST /api/meta-decks/import-ydk`, admin).
 
+## Synergie et guides de deck
+
+`apps/api/src/modules/synergy/engine/` lit le texte officiel des cartes (format PSCT de Konami) :
+
+- **effets** : recherches, invocations depuis le Deck / la main / le cimetière, envois au cimetière,
+  déclencheurs (Invocation Normale, envoi au cimetière, End Phase…), coûts « défausse cette carte » ;
+- **graphe** : A → B si un effet de A peut chercher / invoquer / envoyer B dans ce deck ;
+- **rôles** : starter, extender, chercheur, hand trap, interruption, destruction, pioche, boss ;
+- **Extra Deck** : matériaux Fusion / Synchro / Xyz / Lien vérifiés contre le Main Deck ;
+- **combos** : simulation simplifiée à partir de mains de 1–2 cartes jusqu'au boss de fin de tour.
+
+La génération s'en sert (cartes classées par affinité avec le cœur du deck, monstres d'Extra
+impossibles à invoquer retirés, note de solidité avec une composante *Synergie* et un minimum de starters),
+et `POST /api/suggestions/guide` produit le guide affiché sous la composition et dans le deck builder.
+
+**IA optionnelle** pour rédiger le guide (le guide calculé reste la base et le repli) :
+
+```bash
+AI_PROVIDER=openai            # toute API compatible OpenAI : OpenAI, Mistral, Groq, LM Studio, Ollama…
+AI_BASE_URL=http://localhost:1234/v1   # ex. LM Studio (en Docker : http://host.docker.internal:1234/v1)
+AI_MODEL=qwen2.5-14b-instruct
+# ou : AI_PROVIDER=anthropic, AI_API_KEY=…, AI_MODEL=…
+```
+
+Les réponses sont validées (zod) et mises en cache en base (`DeckGuideCache`) par liste + modèle.
+
 ## Qualité
 
 ```bash
 pnpm typecheck
-pnpm test        # règles de deck, .ydk, recherche, YGOPRODeck/Yugipedia, moteur meta (clustering, consensus, génération)
+pnpm test        # règles de deck, .ydk, recherche, YGOPRODeck/Yugipedia, moteur meta (clustering, consensus, génération), synergie (lecture des effets, graphe, combos, guide)
 pnpm build
 ```
 
 ## Roadmap
 
 - [ ] Page admin : import de decks meta, statut des syncs
-- [ ] Moteur de synergie plus fin (rôles des cartes : starters, extenders, hand traps, ratios)
+- [x] Moteur de synergie (rôles, liens entre cartes, Extra Deck invocable, combos) + guides de jeu
+- [ ] Simulateur de mains de départ (probabilités d'ouvrir chaque combo)
 - [ ] Quantités réelles des Structure Decks
 - [ ] Recherche plein texte (`pg_trgm`) sur les effets
 - [ ] Deck public partageable (lecture seule)
