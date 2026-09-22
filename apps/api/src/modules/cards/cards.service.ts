@@ -14,9 +14,17 @@ import { normalizeProductQuery, parsePrintCode } from '../../common/search/norma
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
+import { currentLocale, t } from '../../common/i18n/locale-context';
 
-/** Nom affiché = nom FR s'il existe. On trie sur sa forme normalisée (É = E). */
-const DISPLAY_NAME = Prisma.sql`ygo_normalize(coalesce(c."nameFr", c."name"))`;
+/** Nom affiché dans la langue de la requête ; on trie sur sa forme normalisée (É = E). */
+function displayName(): Prisma.Sql {
+  const locale = currentLocale();
+  if (locale === 'en') return Prisma.sql`ygo_normalize(c."name")`;
+  if (locale === 'fr') return Prisma.sql`ygo_normalize(coalesce(c."nameFr", c."name"))`;
+  return Prisma.sql`ygo_normalize(coalesce(
+    (SELECT tr.name FROM "CardTranslation" tr WHERE tr."cardId" = c.id AND tr.locale = ${locale}),
+    c."name"))`;
+}
 
 @Injectable()
 export class CardsService {
@@ -77,9 +85,12 @@ export class CardsService {
   async findOne(id: number, userId?: string): Promise<CardDetailDto> {
     const card = await this.prisma.card.findUnique({
       where: { id },
-      include: { prints: { include: { set: true }, orderBy: { printCode: 'asc' } } },
+      include: {
+        prints: { include: { set: true }, orderBy: { printCode: 'asc' } },
+        translations: true,
+      },
     });
-    if (!card) throw new NotFoundException('Carte introuvable');
+    if (!card) throw new NotFoundException(t('errors.cardNotFound'));
     const owned = userId
       ? ((await this.ownership.quantities(userId, [id])).get(id) ?? 0)
       : undefined;
@@ -173,29 +184,29 @@ export class CardsService {
   ): Prisma.Sql {
     switch (sort) {
       case 'relevance': {
-        if (!text) return Prisma.sql`${DISPLAY_NAME}`;
+        if (!text) return Prisma.sql`${displayName()}`;
         const n = text.normalized;
         // exact > commence par > contient, puis similarité, puis noms courts d'abord
         return Prisma.sql`
           CASE
-            WHEN ${DISPLAY_NAME} = ${n} OR ygo_normalize(c.name) = ${n} THEN 0
-            WHEN ${DISPLAY_NAME} LIKE ${n + '%'} OR ygo_normalize(c.name) LIKE ${n + '%'} THEN 1
+            WHEN ${displayName()} = ${n} OR ygo_normalize(c.name) = ${n} THEN 0
+            WHEN ${displayName()} LIKE ${n + '%'} OR ygo_normalize(c.name) LIKE ${n + '%'} THEN 1
             ELSE 2
           END,
           ${text.similarity} DESC,
-          length(coalesce(c."nameFr", c.name)),
-          ${DISPLAY_NAME}`;
+          length(${displayName()}),
+          ${displayName()}`;
       }
       case 'atk':
-        return Prisma.sql`c.atk DESC NULLS LAST, ${DISPLAY_NAME}`;
+        return Prisma.sql`c.atk DESC NULLS LAST, ${displayName()}`;
       case 'def':
-        return Prisma.sql`c.def DESC NULLS LAST, ${DISPLAY_NAME}`;
+        return Prisma.sql`c.def DESC NULLS LAST, ${displayName()}`;
       case 'level':
-        return Prisma.sql`c.level DESC NULLS LAST, ${DISPLAY_NAME}`;
+        return Prisma.sql`c.level DESC NULLS LAST, ${displayName()}`;
       case 'newest':
-        return Prisma.sql`c."tcgDate" DESC NULLS LAST, ${DISPLAY_NAME}`;
+        return Prisma.sql`c."tcgDate" DESC NULLS LAST, ${displayName()}`;
       default:
-        return Prisma.sql`${DISPLAY_NAME}`;
+        return Prisma.sql`${displayName()}`;
     }
   }
 }

@@ -7,6 +7,7 @@ import { mapCard, mapPrint, parseDate, setPrefixOf } from './ygoprodeck.mapper';
 import { InteractionIndexService } from '../synergy/interaction-index.service';
 import { ProductCoversService } from './product-covers.service';
 import { YgoprodeckClient } from './ygoprodeck.client';
+import { t } from '../../common/i18n/locale-context';
 
 const SYNC_ID = 'ygoprodeck';
 const BATCH = 250;
@@ -50,7 +51,16 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
   async onApplicationBootstrap(): Promise<void> {
     if (!this.config.get('CARD_SYNC_ON_BOOT')) return;
     const count = await this.prisma.card.count();
-    if (count > 0) return;
+    if (count > 0) {
+      // Mise à jour d'une installation existante : traductions DE / IT / PT pas encore là
+      if (!(await this.prisma.cardTranslation.count())) {
+        this.logger.log(
+          'Traductions des cartes (DE, IT, PT) absentes : récupération en arrière-plan…',
+        );
+        void this.syncTranslations().catch((e) => this.logger.error(`Traductions : ${e}`));
+      }
+      return;
+    }
     this.logger.log('Catalogue vide : synchronisation initiale lancée en arrière-plan…');
     void this.sync().catch((e) => this.logger.error(`Sync initiale échouée : ${e}`));
   }
@@ -61,7 +71,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
 
   /** Synchronise tout le catalogue. Idempotent : ne fait rien si la version YGOPRODeck n'a pas bougé. */
   async sync({ force = false } = {}): Promise<SyncResult> {
-    if (this.running) throw new Error('Une synchronisation est déjà en cours');
+    if (this.running) throw new Error(t('errors.syncRunning'));
     this.running = true;
     const started = Date.now();
     try {
@@ -87,6 +97,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       const cardCount = await this.upsertCards(cards.map((c) => mapCard(c, fr.get(c.id))));
       const printCount = await this.upsertPrints(cards, setIds);
       await this.upsertArts(cards);
+      await this.upsertTranslations();
       await this.refreshSearchIndex();
       // Nouveaux textes → nouvelles interactions (un échec ici ne fait pas échouer la sync)
       await this.interactions
@@ -219,9 +230,51 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
   }
 
   /** Recalcule le texte de recherche normalisé (fonction SQL ygo_normalize, cf. migration "search"). */
+  /** Traductions seules (installation existante, ou appel manuel), puis index de recherche. */
+  async syncTranslations(): Promise<number> {
+    const n = await this.upsertTranslations();
+    await this.refreshSearchIndex();
+    return n;
+  }
+
+  /**
+   * Noms / textes allemands, italiens et portugais (le français est dans Card.nameFr/descFr).
+   * Une langue indisponible n'empêche pas les autres.
+   */
+  private async upsertTranslations(): Promise<number> {
+    const known = new Set(
+      (await this.prisma.card.findMany({ select: { id: true } })).map((c) => c.id),
+    );
+    let total = 0;
+    for (const locale of ['de', 'it', 'pt'] as const) {
+      try {
+        const cards = await this.ygo.allCards(locale);
+        const rows = cards
+          .filter((c) => known.has(c.id) && c.name)
+          .map((c) => ({ cardId: c.id, locale, name: c.name, desc: c.desc ?? '' }));
+        await this.prisma.$transaction(
+          async (tx) => {
+            await tx.cardTranslation.deleteMany({ where: { locale } });
+            for (let i = 0; i < rows.length; i += 5000) {
+              await tx.cardTranslation.createMany({ data: rows.slice(i, i + 5000) });
+            }
+          },
+          { timeout: 300_000, maxWait: 30_000 },
+        );
+        total += rows.length;
+        this.logger.log(`  traductions ${locale.toUpperCase()} : ${rows.length} cartes`);
+      } catch (e) {
+        this.logger.warn(`Traductions ${locale.toUpperCase()} indisponibles : ${e}`);
+      }
+    }
+    return total;
+  }
+
   private async refreshSearchIndex(): Promise<void> {
+    // Tous les noms connus (EN, FR, DE, IT, PT) + archétype : on retrouve une carte dans sa langue
     await this.prisma.$executeRaw`
-      UPDATE "Card" SET "searchText" = ygo_normalize(concat_ws(' ', "nameFr", "name", "archetype"))`;
+      UPDATE "Card" c SET "searchText" = ygo_normalize(concat_ws(' ', c."nameFr", c."name", c."archetype",
+        (SELECT string_agg(tr.name, ' ') FROM "CardTranslation" tr WHERE tr."cardId" = c.id)))`;
     await this.prisma.$executeRaw`
       UPDATE "CardSet" SET "searchText" = ygo_normalize(concat_ws(' ', "name", "code"))`;
   }

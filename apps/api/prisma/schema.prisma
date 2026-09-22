@@ -78,6 +78,7 @@ model Card {
   wishlistItems   WishlistItem[]
   metaDeckCards   MetaDeckCard[]
   effectTargets   CardEffectTarget[]
+  translations    CardTranslation[]
 
   @@index([name])
   @@index([archetype])
@@ -448,4 +449,18 @@ model OwnedProduct {
 
   @@unique([userId, setId, language])
   @@index([userId])
+}
+
+/// Nom et texte d'une carte dans une autre langue que l'anglais / le français (de, it, pt),
+/// fournis par YGOPRODeck. Le français reste dans Card.nameFr / descFr.
+model CardTranslation {
+  cardId Int
+  locale String
+  name   String
+  desc   String
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, locale])
+  @@index([locale])
 }

@@ -1,4 +1,5 @@
 export * from './domain/enums';
+export * from './domain/locales';
 export * from './domain/deck-rules';
 export * from './domain/ydk';
 export * from './domain/print-code';

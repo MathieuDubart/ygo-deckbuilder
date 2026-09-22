@@ -3,6 +3,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CatalogSyncService } from './catalog-sync.service';
 import { ProductCoversService } from './product-covers.service';
+import { t } from '../../common/i18n/locale-context';
 
 @Controller('catalog')
 export class CatalogSyncController {
@@ -24,7 +25,7 @@ export class CatalogSyncController {
     try {
       return await this.sync.sync({ force: force === 'true' });
     } catch (e) {
-      throw new BadGatewayException(`Synchronisation échouée : ${(e as Error).message}`);
+      throw new BadGatewayException(t('errors.syncFailed', { message: (e as Error).message }));
     }
   }
 
