@@ -3,6 +3,8 @@ import {
   generateFromArchetypeSchema,
   generateFromMetaSchema,
   metaSuggestionQuerySchema,
+  officialDeckQuerySchema,
+  type OfficialDeckQuery,
   type GenerateFromArchetypeInput,
   type GenerateFromMetaInput,
   type MetaSuggestionQuery,
@@ -35,6 +37,25 @@ export class SuggestionsController {
   @Get('decks/:deckId/cards')
   forDeck(@CurrentUser() user: AuthUser, @Param('deckId') deckId: string) {
     return this.suggestions.forDeck(user.id, deckId);
+  }
+
+  /** Decks officiels (structure decks, starters, coffrets) et leur couverture par la collection. */
+  @Get('official-decks')
+  officialDecks(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(officialDeckQuerySchema)) q: OfficialDeckQuery,
+  ) {
+    return this.suggestions.officialDecks(user.id, q);
+  }
+
+  /** Aperçu d'un deck généré depuis un deck officiel (liste complète ou avec mes cartes). */
+  @Get('generate/official/:productDeckId')
+  generateFromOfficial(
+    @CurrentUser() user: AuthUser,
+    @Param('productDeckId') productDeckId: string,
+    @Query(new ZodValidationPipe(generateFromMetaSchema)) q: GenerateFromMetaInput,
+  ) {
+    return this.generator.fromOfficial(user.id, productDeckId, q.mode);
   }
 
   /** Decks complets et jouables montables avec la collection, du plus solide au moins solide. */
