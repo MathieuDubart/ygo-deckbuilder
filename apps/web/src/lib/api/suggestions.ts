@@ -5,10 +5,14 @@ import type {
   GeneratedDeckDto,
   GenerationMode,
   MetaDeckSuggestionDto,
+  OfficialDeckKind,
+  OfficialDeckSuggestionDto,
   PlayableDeckDto,
 } from '@ygo/shared';
 import { api } from './client';
 import { qk } from './keys';
+
+export type { OfficialDeckKind };
 
 export const useMetaSuggestions = () =>
   useQuery({
@@ -33,19 +37,42 @@ export const usePlayableDecks = () =>
 
 /** Ce qu'on veut générer : un archétype du meta (avec un mode) ou un archétype de la collection. */
 export type GenerationTarget =
-  { kind: 'meta'; metaDeckId: string; name: string } | { kind: 'archetype'; archetype: string };
+  | { kind: 'meta'; metaDeckId: string; name: string }
+  | { kind: 'official'; productDeckId: string; name: string }
+  | { kind: 'archetype'; archetype: string };
+
+/** Decks officiels (structure decks, starters, coffrets) et leur couverture par la collection. */
+export const useOfficialDecks = (kind?: OfficialDeckKind) =>
+  useQuery({
+    queryKey: qk.officialDecks(kind ?? 'ALL'),
+    queryFn: () =>
+      api<OfficialDeckSuggestionDto[]>('/suggestions/official-decks', {
+        query: { kind, limit: 60 },
+      }),
+    placeholderData: keepPreviousData,
+  });
+
+function generatedDeckRequest(target: GenerationTarget, mode: GenerationMode) {
+  switch (target.kind) {
+    case 'meta':
+      return api<GeneratedDeckDto>(`/suggestions/generate/meta/${target.metaDeckId}`, {
+        query: { mode },
+      });
+    case 'official':
+      return api<GeneratedDeckDto>(`/suggestions/generate/official/${target.productDeckId}`, {
+        query: { mode },
+      });
+    case 'archetype':
+      return api<GeneratedDeckDto>('/suggestions/generate/archetype', {
+        query: { archetype: target.archetype },
+      });
+  }
+}
 
 export const useGeneratedDeck = (target: GenerationTarget | null, mode: GenerationMode) =>
   useQuery({
     queryKey: qk.generated(target, mode),
-    queryFn: () =>
-      target!.kind === 'meta'
-        ? api<GeneratedDeckDto>(`/suggestions/generate/meta/${target!.metaDeckId}`, {
-            query: { mode },
-          })
-        : api<GeneratedDeckDto>('/suggestions/generate/archetype', {
-            query: { archetype: target!.archetype },
-          }),
+    queryFn: () => generatedDeckRequest(target!, mode),
     enabled: target !== null,
     placeholderData: keepPreviousData,
   });

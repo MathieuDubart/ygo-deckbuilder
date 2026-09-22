@@ -5,7 +5,8 @@
     "sections": {
       "playable": "Pronti da giocare · 100% carte tue",
       "meta": "Deck meta · i più accessibili per te",
-      "archetypes": "Dalla tua collezione · un deck automatico per archetipo"
+      "archetypes": "Dalla tua collezione · un deck automatico per archetipo",
+      "official": "Deck ufficiali · structure, starter e deck dei box da ricostruire"
     },
     "archetypeStats": "{cards, plural, one {# carta} other {# carte}} · {copies, plural, one {# copia} other {# copie}}",
     "archetypesEmpty": "Aggiungi carte alla tua collezione per vedere gli archetipi che puoi costruire."
@@ -43,7 +44,8 @@
     "metaTier": "Meta · Tier {tier}",
     "homebrew": "Homebrew",
     "composition": "100% carte tue · {main} main · {extra} extra",
-    "open": "Vedi e crea"
+    "open": "Vedi e crea",
+    "official": "Deck ufficiale"
   },
   "score": {
     "hint": "Valutazione della solidità: sinergia tra le carte, engine, staple, consistenza, quota di riempitivi generici",
@@ -120,6 +122,32 @@
       "ARCHETYPE": "Archetipo",
       "SUPPORT": "Supporto",
       "FILLER": "Riempitivo"
+    },
+    "titleOfficial": "Deck ufficiale: {name}",
+    "modesOfficial": {
+      "OWNED": {
+        "label": "Con le mie carte",
+        "hint": "Solo ciò che possiedi, completato con le tue staple"
+      },
+      "META": {
+        "label": "Lista ufficiale completa",
+        "hint": "Il deck così come viene venduto, con ciò che ti manca"
+      }
     }
+  },
+  "official": {
+    "filterLabel": "Tipo di prodotto",
+    "filters": {
+      "ALL": "Tutti",
+      "STRUCTURE": "Structure Deck",
+      "STARTER": "Starter Deck",
+      "BOX": "Deck dei box"
+    },
+    "empty": {
+      "title": "Ancora nessun deck ufficiale",
+      "description": "Le liste ufficiali (Structure Deck, Starter Deck, deck dei box come Legendary Decks) vengono scaricate da Yugipedia in background all’avvio dell’API. Torna tra qualche minuto."
+    },
+    "owned": "Nella tua collezione",
+    "showMore": "Mostra altri ({count})"
   }
 }

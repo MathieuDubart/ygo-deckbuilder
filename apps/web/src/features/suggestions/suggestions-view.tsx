@@ -1,6 +1,6 @@
 'use client';
 import type { MetaDeckSuggestionDto } from '@ygo/shared';
-import { RefreshCw, ShieldCheck, Sparkles, Trophy, Wand2 } from 'lucide-react';
+import { Boxes, RefreshCw, ShieldCheck, Sparkles, Trophy, Wand2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
@@ -19,10 +19,9 @@ import {
 import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { GenerateDeckDialog } from './generate-deck-dialog';
+import { CoverageRing, compact } from './coverage-ring';
+import { OfficialDecks } from './official-decks';
 import { PlayableDecks } from './playable-decks';
-
-/** Pourcentage compact (sans espace) pour les badges et l'anneau. */
-const compact = (s: string) => s.replace(/\s/g, '');
 
 export function SuggestionsView() {
   const t = useTranslations('suggestions');
@@ -68,6 +67,11 @@ export function SuggestionsView() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mb-12">
+        <SectionTitle icon={Boxes}>{t('page.sections.official')}</SectionTitle>
+        <OfficialDecks onOpen={setTarget} />
       </section>
 
       <section>
@@ -209,34 +213,5 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
         </Button>
       </div>
     </li>
-  );
-}
-
-function CoverageRing({ value }: { value: number }) {
-  const t = useTranslations('suggestions.meta.card');
-  const { percent } = useFormat();
-  const r = 18;
-  const c = 2 * Math.PI * r;
-  const tone = value >= 0.8 ? 'text-success' : value >= 0.5 ? 'text-accent' : 'text-fg-subtle';
-  return (
-    <div className="relative size-12 shrink-0" title={t('coverage')}>
-      <svg viewBox="0 0 44 44" className="size-full -rotate-90">
-        <circle cx="22" cy="22" r={r} fill="none" strokeWidth="4" className="stroke-border" />
-        <circle
-          cx="22"
-          cy="22"
-          r={r}
-          fill="none"
-          strokeWidth="4"
-          strokeLinecap="round"
-          strokeDasharray={c}
-          strokeDashoffset={c * (1 - value)}
-          className={cn('stroke-current transition-all', tone)}
-        />
-      </svg>
-      <span className="absolute inset-0 grid place-items-center font-mono text-[11px] font-semibold tabular-nums">
-        {compact(percent(value))}
-      </span>
-    </div>
   );
 }
