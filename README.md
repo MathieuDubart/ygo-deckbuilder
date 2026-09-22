@@ -7,7 +7,8 @@ vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui ma
 
 - **Comptes** multi-utilisateurs (Argon2id, JWT court + refresh token roté en cookie httpOnly)
 - **Catalogue** complet synchronisé depuis [YGOPRODeck](https://ygoprodeck.com/api-guide/) (EN + noms FR), éditions, raretés, prix Cardmarket
-- **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck, tin…) depuis une galerie de visuels HD (Yugipedia), valeur estimée
+- **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck, tin…) depuis une galerie de visuels HD (Yugipedia), avec les **quantités officielles** du produit (listes Yugipedia), valeur estimée
+- **Produits** : onglet dédié dans la collection — contenu de chaque produit pour le reconstituer (ce qui manque, liste à copier), création d'un deck en un clic, et guide de jeu pour les Structure / Starter Decks
 - **Deck builder** : recherche limitée à tes cartes (ou tout le catalogue), validation live (40–60, 3 max, banlist, zone Extra), exemplaires manquants signalés, auto-save, import/export `.ydk`
 - **Wishlist** : édition visée, budget max, priorité, lien vers le deck qui la réclame, « Je l'ai » → bascule en collection
 - **Meta automatique** : les tops de tournois récents (YGOPRODeck) sont regroupés en archétypes par similarité de contenu, avec une liste type par archétype, un tier et la part du meta
@@ -151,7 +152,7 @@ pnpm build
 - [ ] Page admin : import de decks meta, statut des syncs
 - [x] Moteur de synergie (rôles, liens entre cartes, Extra Deck invocable, combos) + guides de jeu
 - [ ] Simulateur de mains de départ (probabilités d'ouvrir chaque combo)
-- [ ] Quantités réelles des Structure Decks
+- [x] Quantités réelles des Structure Decks (listes Yugipedia)
 - [ ] Recherche plein texte (`pg_trgm`) sur les effets
 - [ ] Deck public partageable (lecture seule)
 - [ ] Tests e2e (Playwright)

@@ -9,6 +9,8 @@ export const qk = {
   collection: (params: object) => ['collection', params] as const,
   collectionAll: ['collection'] as const,
   collectionStats: ['collection-stats'] as const,
+  products: ['products'] as const,
+  product: (id: string) => ['products', id] as const,
   decks: ['decks'] as const,
   deck: (id: string) => ['deck', id] as const,
   wishlist: ['wishlist'] as const,

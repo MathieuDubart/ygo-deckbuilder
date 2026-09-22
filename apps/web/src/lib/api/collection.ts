@@ -5,6 +5,9 @@ import type {
   CardSummaryDto,
   CollectionQueryInput,
   ImportSetInput,
+  ImportSetResultDto,
+  OwnedProductDetailDto,
+  OwnedProductDto,
   Paginated,
   UpdateCollectionItemInput,
 } from '@ygo/shared';
@@ -52,9 +55,15 @@ function useInvalidateOwnership() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      [qk.collectionAll, qk.collectionStats, ['cards'], ['card'], ['deck'], ['suggestions']].map(
-        (queryKey) => qc.invalidateQueries({ queryKey }),
-      ),
+      [
+        qk.collectionAll,
+        qk.collectionStats,
+        qk.products,
+        ['cards'],
+        ['card'],
+        ['deck'],
+        ['suggestions'],
+      ].map((queryKey) => qc.invalidateQueries({ queryKey })),
     );
 }
 
@@ -88,7 +97,38 @@ export function useImportSet() {
   const invalidate = useInvalidateOwnership();
   return useMutation({
     mutationFn: (body: Partial<ImportSetInput> & { setName: string }) =>
-      api<{ set: string; cardsAdded: number }>('/collection/import-set', { method: 'POST', body }),
+      api<ImportSetResultDto>('/collection/import-set', { method: 'POST', body }),
     onSuccess: invalidate,
   });
 }
+
+export function useRemoveProduct() {
+  const qc = useQueryClient();
+  const invalidate = useInvalidateOwnership();
+  return useMutation({
+    mutationFn: ({ id, removeCards }: { id: string; removeCards: boolean }) =>
+      api<void>(`/collection/products/${id}`, {
+        method: 'DELETE',
+        query: { removeCards: String(removeCards) },
+      }),
+    // La fiche du produit supprimé ne doit pas être rechargée (404)
+    onSuccess: (_, { id }) => {
+      qc.removeQueries({ queryKey: qk.product(id) });
+      return invalidate();
+    },
+  });
+}
+
+/** Produits ajoutés à la collection (structure decks, tins…). */
+export const useOwnedProducts = () =>
+  useQuery({
+    queryKey: qk.products,
+    queryFn: () => api<OwnedProductDto[]>('/collection/products'),
+  });
+
+export const useOwnedProduct = (id: string | null) =>
+  useQuery({
+    queryKey: qk.product(id ?? ''),
+    queryFn: () => api<OwnedProductDetailDto>(`/collection/products/${id}`),
+    enabled: id !== null,
+  });

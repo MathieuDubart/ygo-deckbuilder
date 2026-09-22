@@ -1,5 +1,5 @@
 'use client';
-import { Library, Minus, PackageOpen, Plus, Search, Trash2 } from 'lucide-react';
+import { Boxes, Library, Minus, PackageOpen, Plus, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
@@ -11,13 +11,18 @@ import { Input } from '@/components/ui/input';
 import {
   useCollection,
   useCollectionStats,
+  useOwnedProducts,
   useRemoveCollectionItem,
   useUpdateCollectionItem,
   type CollectionItemDto,
 } from '@/lib/api/collection';
 import { useDebounced } from '@/lib/hooks/use-debounced';
-import { formatPrice } from '@/lib/utils';
+import { cn, formatPrice } from '@/lib/utils';
 import { ImportSetDialog } from './import-set-dialog';
+import { ProductDialog } from './product-dialog';
+import { ProductsTab } from './products-tab';
+
+type Tab = 'cards' | 'products';
 
 export function CollectionView() {
   const [q, setQ] = useState('');
@@ -30,6 +35,9 @@ export function CollectionView() {
   const { data: stats } = useCollectionStats();
   const [importOpen, setImportOpen] = useState(false);
   const [selected, setSelected] = useState<number | null>(null);
+  const [tab, setTab] = useState<Tab>('cards');
+  const [justImported, setJustImported] = useState<string | null>(null);
+  const products = useOwnedProducts();
 
   return (
     <>
@@ -56,55 +64,103 @@ export function CollectionView() {
         <Stat label="Valeur estimée" value={stats ? formatPrice(stats.estimatedValue) : '—'} />
       </div>
 
-      <div className="relative mb-4">
-        <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
-        <Input
-          type="search"
-          placeholder="Filtrer ma collection…"
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            setPage(1);
-          }}
-          className="pl-9"
-        />
+      <div
+        role="tablist"
+        aria-label="Vue de la collection"
+        className="mb-4 inline-grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm"
+      >
+        {(
+          [
+            ['cards', 'Cartes', Library, stats?.distinctCards],
+            ['products', 'Produits', Boxes, products.data?.length],
+          ] as const
+        ).map(([value, label, Icon, count]) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={tab === value}
+            onClick={() => setTab(value)}
+            className={cn(
+              'flex items-center justify-center gap-1.5 rounded-md px-4 py-1.5 font-medium transition',
+              tab === value ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted hover:text-fg',
+            )}
+          >
+            <Icon className="size-4" /> {label}
+            {count !== undefined && (
+              <span className="font-mono text-xs text-fg-subtle tabular-nums">{count}</span>
+            )}
+          </button>
+        ))}
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2">
-          {Array.from({ length: 8 }, (_, i) => (
-            <Skeleton key={i} className="h-20" />
-          ))}
-        </div>
-      ) : !data?.items.length ? (
-        <EmptyState
-          icon={Library}
-          title={q ? 'Rien ne correspond' : 'Ta collection est vide'}
-          description={
-            q
-              ? undefined
-              : 'Ajoute tes cartes depuis le catalogue, ou importe directement un Structure Deck.'
-          }
-          action={
-            !q && (
-              <Button variant="secondary" onClick={() => setImportOpen(true)}>
-                <PackageOpen className="size-4" /> Ajouter un produit
-              </Button>
-            )
-          }
-        />
+      {tab === 'products' ? (
+        <ProductsTab onImport={() => setImportOpen(true)} />
       ) : (
         <>
-          <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-bg-elevated">
-            {data.items.map((item) => (
-              <CollectionRow key={item.id} item={item} onOpen={() => setSelected(item.card.id)} />
-            ))}
-          </ul>
-          <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
+          <div className="relative mb-4">
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
+            <Input
+              type="search"
+              placeholder="Filtrer ma collection…"
+              value={q}
+              onChange={(e) => {
+                setQ(e.target.value);
+                setPage(1);
+              }}
+              className="pl-9"
+            />
+          </div>
+
+          {isLoading ? (
+            <div className="space-y-2">
+              {Array.from({ length: 8 }, (_, i) => (
+                <Skeleton key={i} className="h-20" />
+              ))}
+            </div>
+          ) : !data?.items.length ? (
+            <EmptyState
+              icon={Library}
+              title={q ? 'Rien ne correspond' : 'Ta collection est vide'}
+              description={
+                q
+                  ? undefined
+                  : 'Ajoute tes cartes depuis le catalogue, ou importe directement un Structure Deck.'
+              }
+              action={
+                !q && (
+                  <Button variant="secondary" onClick={() => setImportOpen(true)}>
+                    <PackageOpen className="size-4" /> Ajouter un produit
+                  </Button>
+                )
+              }
+            />
+          ) : (
+            <>
+              <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-bg-elevated">
+                {data.items.map((item) => (
+                  <CollectionRow
+                    key={item.id}
+                    item={item}
+                    onOpen={() => setSelected(item.card.id)}
+                  />
+                ))}
+              </ul>
+              <Pagination page={data.page} totalPages={data.totalPages} onChange={setPage} />
+            </>
+          )}
         </>
       )}
 
-      <ImportSetDialog open={importOpen} onClose={() => setImportOpen(false)} />
+      <ImportSetDialog
+        open={importOpen}
+        onClose={() => setImportOpen(false)}
+        onImported={(id) => {
+          setTab('products');
+          setJustImported(id);
+        }}
+      />
+      <ProductDialog productId={justImported} onClose={() => setJustImported(null)} />
       <CardDetailDialog cardId={selected} onClose={() => setSelected(null)} />
     </>
   );

@@ -1,9 +1,9 @@
 'use client';
 import { CARD_LANGUAGES, type CardLanguage, type CardSetDto, type ProductKind } from '@ygo/shared';
-import { ArrowLeft, Package, PackageOpen, Search } from 'lucide-react';
-import Image from 'next/image';
+import { ArrowLeft, PackageOpen, Search } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { ProductCover } from '@/components/products/product-cover';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
@@ -26,7 +26,16 @@ const KINDS: { value: ProductKind | undefined; label: string }[] = [
  * Ajout d'un produit entier à la collection. Galerie visuelle : on reconnaît sa boîte
  * sans connaître son nom anglais.
  */
-export function ImportSetDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function ImportSetDialog({
+  open,
+  onClose,
+  onImported,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** Produit ajouté : id du produit dans la collection */
+  onImported?: (productId: string) => void;
+}) {
   const [q, setQ] = useState('');
   const [kind, setKind] = useState<ProductKind | undefined>();
   const [selected, setSelected] = useState<CardSetDto | null>(null);
@@ -48,7 +57,14 @@ export function ImportSetDialog({ open, onClose }: { open: boolean; onClose: () 
       className="w-[min(94vw,56rem)]"
     >
       {selected ? (
-        <ConfirmImport set={selected} onBack={() => setSelected(null)} onDone={close} />
+        <ConfirmImport
+          set={selected}
+          onBack={() => setSelected(null)}
+          onDone={(productId) => {
+            close();
+            onImported?.(productId);
+          }}
+        />
       ) : (
         <div className="space-y-4">
           <div className="relative">
@@ -110,41 +126,6 @@ export function ImportSetDialog({ open, onClose }: { open: boolean; onClose: () 
   );
 }
 
-function ProductCover({
-  set,
-  className,
-  sizes,
-}: {
-  set: CardSetDto;
-  className?: string;
-  sizes: string;
-}) {
-  // Visuel HD indisponible → visuel de secours → pictogramme (jamais d'image cassée)
-  const sources = [set.imageUrl, set.fallbackImageUrl].filter((u): u is string => !!u);
-  const [attempt, setAttempt] = useState(0);
-  const src = sources[attempt];
-  return (
-    <div className={cn('relative overflow-hidden rounded-lg bg-bg-sunken', className)}>
-      {src ? (
-        <Image
-          key={src}
-          src={src}
-          alt=""
-          fill
-          sizes={sizes}
-          quality={90}
-          className="object-contain p-1.5"
-          onError={() => setAttempt((a) => a + 1)}
-        />
-      ) : (
-        <div className="grid h-full place-items-center">
-          <Package className="size-8 text-fg-subtle" strokeWidth={1.25} />
-        </div>
-      )}
-    </div>
-  );
-}
-
 function ProductTile({ set, onClick }: { set: CardSetDto; onClick: () => void }) {
   return (
     <button
@@ -173,7 +154,7 @@ function ConfirmImport({
 }: {
   set: CardSetDto;
   onBack: () => void;
-  onDone: () => void;
+  onDone: (productId: string) => void;
 }) {
   const importSet = useImportSet();
   const [copies, setCopies] = useState(1);
@@ -193,9 +174,10 @@ function ConfirmImport({
             {set.tcgDate && ` · sorti le ${new Date(set.tcgDate).toLocaleDateString('fr-FR')}`}
           </p>
           <p className="text-fg-muted">
-            <strong className="text-fg">{set.cardCount} cartes</strong> seront ajoutées à ta
-            collection. Les quantités exactes du produit ne sont pas connues : ajuste ensuite les
-            cartes en 2 ou 3 exemplaires.
+            Ses <strong className="text-fg">{set.cardCount} cartes</strong> seront ajoutées à ta
+            collection, avec les quantités officielles du produit quand on les trouve (liste
+            Yugipedia), sinon 1 exemplaire de chaque. Le produit apparaîtra dans l’onglet « Produits
+            » de ta collection.
           </p>
         </div>
 
@@ -236,14 +218,18 @@ function ConfirmImport({
                 { setName: set.name, copies, language },
                 {
                   onSuccess: (r) => {
-                    toast.success(`${r.cardsAdded} cartes ajoutées depuis « ${r.set} »`);
-                    onDone();
+                    toast.success(
+                      `${r.copiesAdded} cartes ajoutées depuis « ${r.set} »${
+                        r.quantitiesVerified ? ' (quantités officielles)' : ''
+                      }`,
+                    );
+                    onDone(r.productId);
                   },
                 },
               )
             }
           >
-            <PackageOpen className="size-4" /> Ajouter {set.cardCount} cartes
+            <PackageOpen className="size-4" /> Ajouter ce produit
           </Button>
         </div>
       </div>
