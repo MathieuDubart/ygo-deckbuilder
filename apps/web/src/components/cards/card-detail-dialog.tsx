@@ -124,7 +124,7 @@ export function CardDetailDialog({
           </div>
 
           <AddToCollectionForm
-            key={card.id}
+            key={`c-${card.id}`}
             cardId={card.id}
             prints={card.prints}
             defaultPrintId={hintedPrintId}
@@ -132,7 +132,7 @@ export function CardDetailDialog({
           />
           <AddToWishlistForm key={`w-${card.id}`} cardId={card.id} prints={card.prints} />
 
-          <CardInteractions key={card.id} cardId={card.id} onOpen={go} signedIn={!!me} />
+          <CardInteractions key={`i-${card.id}`} cardId={card.id} onOpen={go} signedIn={!!me} />
 
           {card.prints.length > 0 && (
             <section>
