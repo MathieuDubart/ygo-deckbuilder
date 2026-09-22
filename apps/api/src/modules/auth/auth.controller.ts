@@ -10,11 +10,15 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import {
+  AUTH_MODE_HEADER,
   loginSchema,
+  refreshTokenBodySchema,
   registerSchema,
   type LoginInput,
   type PublicUser,
+  type RefreshTokenBody,
   type RegisterInput,
+  type TokenSessionDto,
 } from '@ygo/shared';
 import type { CookieOptions, Request, Response } from 'express';
 import { AppConfig } from '../../config/app-config.service';
@@ -39,10 +43,8 @@ export class AuthController {
     @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<PublicUser> {
-    const { user, tokens } = await this.auth.register(body, req.headers['user-agent']);
-    this.setCookies(res, tokens);
-    return user;
+  ): Promise<PublicUser | TokenSessionDto> {
+    return this.respond(req, res, await this.auth.register(body, req.headers['user-agent']));
   }
 
   @Public()
@@ -52,10 +54,8 @@ export class AuthController {
     @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<PublicUser> {
-    const { user, tokens } = await this.auth.login(body, req.headers['user-agent']);
-    this.setCookies(res, tokens);
-    return user;
+  ): Promise<PublicUser | TokenSessionDto> {
+    return this.respond(req, res, await this.auth.login(body, req.headers['user-agent']));
   }
 
   @Public()
@@ -63,21 +63,24 @@ export class AuthController {
   @HttpCode(200)
   @Throttle({ default: { limit: 30, ttl: 60_000 } })
   async refresh(
+    @Body(new ZodValidationPipe(refreshTokenBodySchema)) body: RefreshTokenBody,
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<PublicUser> {
-    const token = this.readRefreshCookie(req);
+  ): Promise<PublicUser | TokenSessionDto> {
+    const token = this.readRefreshToken(req, body);
     if (!token) throw new UnauthorizedException();
-    const { user, tokens } = await this.auth.refresh(token, req.headers['user-agent']);
-    this.setCookies(res, tokens);
-    return user;
+    return this.respond(req, res, await this.auth.refresh(token, req.headers['user-agent']));
   }
 
   @Public()
   @Post('logout')
   @HttpCode(204)
-  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<void> {
-    await this.auth.logout(this.readRefreshCookie(req));
+  async logout(
+    @Body(new ZodValidationPipe(refreshTokenBodySchema)) body: RefreshTokenBody,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    await this.auth.logout(this.readRefreshToken(req, body));
     const base = this.cookieBase();
     res.clearCookie(ACCESS_COOKIE, base);
     res.clearCookie(REFRESH_COOKIE, base);
@@ -88,8 +91,30 @@ export class AuthController {
     return this.auth.me(user.id);
   }
 
-  private readRefreshCookie(req: Request): string | undefined {
-    return (req.cookies as Record<string, string> | undefined)?.[REFRESH_COOKIE];
+  /** Cookie (navigateur) ou corps de la requête (client natif). */
+  private readRefreshToken(req: Request, body: RefreshTokenBody): string | undefined {
+    return (
+      (req.cookies as Record<string, string> | undefined)?.[REFRESH_COOKIE] ?? body.refreshToken
+    );
+  }
+
+  /** Navigateur : cookies httpOnly · client natif (`X-Auth-Mode: token`) : tokens dans le corps. */
+  private respond(
+    req: Request,
+    res: Response,
+    { user, tokens }: { user: PublicUser; tokens: IssuedTokens },
+  ): PublicUser | TokenSessionDto {
+    if (req.headers[AUTH_MODE_HEADER] === 'token') {
+      return {
+        user,
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        accessExpiresIn: Math.floor(tokens.accessMaxAgeMs / 1000),
+        refreshExpiresIn: Math.floor(tokens.refreshMaxAgeMs / 1000),
+      };
+    }
+    this.setCookies(res, tokens);
+    return user;
   }
 
   private cookieBase(): CookieOptions {
