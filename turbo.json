@@ -44,6 +44,12 @@
       "dependsOn": [
         "^build"
       ]
+    },
+    "@ygo/web#typecheck": {
+      "dependsOn": [
+        "^build",
+        "@ygo/web#build"
+      ]
     }
   }
 }
