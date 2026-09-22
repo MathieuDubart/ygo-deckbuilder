@@ -34,6 +34,7 @@ services:
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       WEB_ORIGIN: ${PUBLIC_URL:-http://localhost:3000}
       CARD_SYNC_CRON: ${CARD_SYNC_CRON:-0 4 * * 1}
+      META_SYNC_CRON: ${META_SYNC_CRON:-0 5 * * 1}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
     # Pas de port exposé : seul le front parle à l'API (réseau interne Docker)
 

@@ -69,6 +69,8 @@ model Card {
   updatedAt DateTime @updatedAt
 
   prints          CardPrint[]
+  arts            CardArt[]
+  metaStat        CardMetaStat?
   collectionItems CollectionItem[]
   deckCards       DeckCard[]
   wishlistItems   WishlistItem[]
@@ -78,6 +80,17 @@ model Card {
   @@index([archetype])
   @@index([category])
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
+}
+
+/// Artworks alternatifs : certains outils (decklists de tournoi, .ydk) utilisent leur ID
+/// (ex: Ash Blossom 14558128 au lieu de 14558127). On les résout vers la carte principale.
+model CardArt {
+  id     Int @id
+  cardId Int
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
 }
 
 /// Un produit/édition (booster, structure deck, tin...).
@@ -289,19 +302,27 @@ model WishlistItem {
 
 // ═══════════════════════════════ Meta ════════════════════════════════════════
 
-/// Decklist de référence (tier list / tournoi) utilisée par le moteur de suggestion.
+/// Archétype du meta : soit calculé automatiquement à partir des listes de tournoi
+/// (source = "tournaments"), soit importé à la main depuis un .ydk (source = "manual").
 model MetaDeck {
   id        String     @id @default(cuid())
   name      String
   archetype String?
   tier      Int?
   format    DeckFormat @default(TCG)
-  source    String? // ex: "ygoprodeck", "manual"
+  source    String? // "tournaments" | "manual"
   sourceUrl String?
+  /// Nombre de listes de tournoi regroupées dans cet archétype
+  listCount Int        @default(0)
+  /// Part des listes récentes (0..1)
+  share     Float?
+  /// Autres noms rencontrés pour ce deck ("Azamina Mitsurugi…")
+  variants  String[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
   cards MetaDeckCard[]
+  lists TournamentDeck[]
 
   @@unique([name, format])
 }
@@ -311,9 +332,46 @@ model MetaDeckCard {
   cardId     Int
   zone       DeckZone
   quantity   Int
+  /// Part des listes de l'archétype qui jouent cette carte (1 = toutes)
+  inclusion  Float    @default(1)
+  /// Carte "flex" : jouée par une partie des listes mais hors liste type (sert aux substitutions)
+  flex       Boolean  @default(false)
 
   metaDeck MetaDeck @relation(fields: [metaDeckId], references: [id], onDelete: Cascade)
   card     Card     @relation(fields: [cardId], references: [id])
 
   @@id([metaDeckId, cardId, zone])
+}
+
+/// Decklist de tournoi brute (YGOPRODeck "Tournament Meta Decks"), IDs déjà résolus.
+model TournamentDeck {
+  id          Int      @id // deckNum YGOPRODeck
+  name        String
+  tournament  String?
+  placement   String?
+  playerCount Int?
+  main        Int[]
+  extra       Int[]
+  side        Int[]
+  url         String?
+  fetchedAt   DateTime @default(now())
+  metaDeckId  String?
+
+  metaDeck MetaDeck? @relation(fields: [metaDeckId], references: [id], onDelete: SetNull)
+
+  @@index([metaDeckId])
+}
+
+/// Popularité d'une carte dans le meta : sert à repérer les "staples" (Ash Blossom, Nibiru…).
+model CardMetaStat {
+  cardId    Int      @id
+  /// Part des listes de tournoi récentes qui la jouent (main ou extra)
+  deckShare Float
+  /// Nombre moyen d'exemplaires quand elle est jouée
+  avgCopies Float
+  /// Jouée par plusieurs archétypes différents (hand traps, board breakers…)
+  isStaple  Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }

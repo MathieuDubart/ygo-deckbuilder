@@ -1,16 +1,20 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { parseYdk, type ImportMetaDeckInput } from '@ygo/shared';
+import { CardResolver } from '../../common/catalog/card-resolver.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 
 @Injectable()
 export class MetaDecksService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly resolver: CardResolver,
+  ) {}
 
   async list() {
     const decks = await this.prisma.metaDeck.findMany({
       orderBy: [{ tier: { sort: 'asc', nulls: 'last' } }, { name: 'asc' }],
-      include: { _count: { select: { cards: true } } },
+      include: { _count: { select: { cards: { where: { flex: false } } } } },
     });
     return decks.map(({ _count, ...d }) => ({ ...d, distinctCards: _count.cards }));
   }
@@ -18,7 +22,12 @@ export class MetaDecksService {
   async get(id: string) {
     const deck = await this.prisma.metaDeck.findUnique({
       where: { id },
-      include: { cards: { include: { card: { select: cardSummarySelect } } } },
+      include: {
+        cards: {
+          where: { flex: false }, // les cartes "flex" ne font pas partie de la liste type
+          include: { card: { select: cardSummarySelect } },
+        },
+      },
     });
     if (!deck) throw new NotFoundException();
     return {
@@ -34,15 +43,19 @@ export class MetaDecksService {
   /** Crée ou remplace (même nom + format) une decklist de référence depuis un .ydk. */
   async importYdk(input: ImportMetaDeckInput) {
     const entries = parseYdk(input.ydk);
-    const known = new Set(
-      (
-        await this.prisma.card.findMany({
-          where: { id: { in: entries.map((e) => e.cardId) } },
-          select: { id: true },
-        })
-      ).map((c) => c.id),
-    );
-    const cards = entries.filter((e) => known.has(e.cardId));
+    const ids = await this.resolver.resolve(entries.map((e) => e.cardId));
+    const merged = new Map<
+      string,
+      { cardId: number; zone: (typeof entries)[number]['zone']; quantity: number }
+    >();
+    for (const e of entries) {
+      const cardId = ids.get(e.cardId);
+      if (cardId === undefined) continue;
+      const key = `${e.zone}:${cardId}`;
+      const prev = merged.get(key);
+      merged.set(key, { cardId, zone: e.zone, quantity: (prev?.quantity ?? 0) + e.quantity });
+    }
+    const cards = [...merged.values()];
     if (!cards.length) throw new BadRequestException('Aucune carte reconnue dans ce .ydk');
 
     const meta = {
@@ -61,7 +74,7 @@ export class MetaDecksService {
       await tx.metaDeckCard.createMany({
         data: cards.map((c) => ({ ...c, quantity: Math.min(c.quantity, 3), metaDeckId: deck.id })),
       });
-      return { id: deck.id, cards: cards.length, ignored: entries.length - cards.length };
+      return { id: deck.id, cards: cards.length };
     });
   }
 

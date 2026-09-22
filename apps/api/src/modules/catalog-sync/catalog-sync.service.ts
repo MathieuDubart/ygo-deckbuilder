@@ -84,6 +84,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       const setIds = await this.upsertSets(sets, cards);
       const cardCount = await this.upsertCards(cards.map((c) => mapCard(c, fr.get(c.id))));
       const printCount = await this.upsertPrints(cards, setIds);
+      await this.upsertArts(cards);
       await this.refreshSearchIndex();
 
       const result: SyncResult = {
@@ -196,6 +197,19 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       );
     }
     return prints.length;
+  }
+
+  /** Artworks alternatifs → carte principale (utilisé par les imports .ydk et listes de tournoi). */
+  private async upsertArts(
+    cards: Awaited<ReturnType<YgoprodeckClient['allCards']>>,
+  ): Promise<void> {
+    const arts = cards.flatMap((c) =>
+      (c.card_images ?? []).filter((i) => i.id !== c.id).map((i) => ({ id: i.id, cardId: c.id })),
+    );
+    await this.prisma.cardArt.deleteMany();
+    for (let i = 0; i < arts.length; i += 1000) {
+      await this.prisma.cardArt.createMany({ data: arts.slice(i, i + 1000), skipDuplicates: true });
+    }
   }
 
   /** Recalcule le texte de recherche normalisé (fonction SQL ygo_normalize, cf. migration "search"). */

@@ -7,3 +7,5 @@
 - Next 16 : `middleware` s'appelle `proxy` (`apps/web/src/proxy.ts`). Lire `node_modules/next/dist/docs` avant d'utiliser une API Next.
 - Pas de `incremental` dans le tsconfig de l'API (casse `nest build` avec `deleteOutDir`).
 - Logique métier pure (règles de deck, couverture) = fonctions sans I/O + tests vitest à côté.
+- Scripts CLI : dans `apps/api/src/cli/` (compilés par `nest build`). Pas de `tsx` : esbuild n'émet pas les métadonnées de décorateurs, l'injection de dépendances Nest casse.
+- Moteur meta = `apps/api/src/modules/meta-decks/engine/` (pur, sans Prisma). Fixture de vraies listes dans `fixtures.ts`.

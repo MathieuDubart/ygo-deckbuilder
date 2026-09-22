@@ -8,6 +8,6 @@ import { YugipediaClient } from './yugipedia.client';
 @Module({
   controllers: [CatalogSyncController],
   providers: [CatalogSyncService, YgoprodeckClient, YugipediaClient, ProductCoversService],
-  exports: [CatalogSyncService, ProductCoversService],
+  exports: [CatalogSyncService, ProductCoversService, YgoprodeckClient],
 })
 export class CatalogSyncModule {}

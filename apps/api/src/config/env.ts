@@ -17,6 +17,11 @@ export const envSchema = z.object({
 
   YGOPRODECK_BASE_URL: z.url().default('https://db.ygoprodeck.com/api/v7'),
   CARD_SYNC_CRON: z.string().optional().default(''),
+  YGOPRODECK_DECKS_URL: z.url().default('https://ygoprodeck.com/api/decks/getDecks.php'),
+  /** Mise à jour du meta (listes de tournoi). Vide = désactivée. Défaut : lundi 5h. */
+  META_SYNC_CRON: z.string().optional().default('0 5 * * 1'),
+  /** Pages de ~20 listes récupérées à chaque mise à jour (15 ≈ 300 listes ≈ 1 mois de tournois). */
+  META_SYNC_PAGES: z.coerce.number().int().min(1).max(50).default(15),
   CARD_SYNC_ON_BOOT: z
     .enum(['true', 'false'])
     .default('true')
