@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseSetList, setListTitles } from './set-list.parser';
+import { officialDecks, parseSetList, parseSetListBlocks, setListTitles } from './set-list.parser';
 
 // Extrait réel de « Set Card Lists:Saga of Blue-Eyes White Dragon Structure Deck (TCG-EN) »
 const SDBE = `{{Set page header}}
@@ -46,5 +46,55 @@ describe('listes de cartes Yugipedia', () => {
     expect(setListTitles('Saga of Blue-Eyes White Dragon Structure Deck')[0]).toBe(
       'Set Card Lists:Saga of Blue-Eyes White Dragon Structure Deck (TCG-EN)',
     );
+  });
+});
+
+// Extraits réels : « Legendary 5D's Decks » et « 2-Player Starter Set »
+const L5DD = `{{Set page header}}
+== Yusei Deck ==
+{{Set list|region=EN|rarities=Common|print=Reprint|qty=1|
+L5DD-ENS01; Stardust Dragon; Secret Rare
+L5DD-ENS04; Token (card); Secret Rare //description::(Yusei)
+L5DD-EN001; Junk Synchron
+}}
+== Akiza Deck ==
+{{Set list|region=EN|rarities=Common|print=Reprint|qty=1|
+L5DD-ENS02; Black Rose Dragon; Secret Rare
+L5DD-EN041; Twilight Rose Knight;; ; 2
+}}
+== Crow Deck ==
+{{Set list|region=EN|rarities=Common|print=Reprint|qty=1|
+L5DD-ENS03; Black-Winged Dragon; Secret Rare
+}}`;
+
+const LDK2 = `==Yugi Deck==
+{{Set list|region=EN|rarities=C|print=Reprint|
+LDK2-ENY01; Dark Magician
+}}
+==Promotional cards==
+{{Set list|region=EN|rarities=ScR|print=New|
+LDK2-ENS01; Obelisk the Tormentor
+}}`;
+
+describe('decks officiels', () => {
+  it('un deck par section « … Deck », sans les jetons', () => {
+    const decks = officialDecks(parseSetListBlocks(L5DD), false);
+    expect(decks.map((d) => d.name)).toEqual(['Yusei Deck', 'Akiza Deck', 'Crow Deck']);
+    expect(decks[0]?.rows.map((r) => r.name)).toEqual(['Stardust Dragon', 'Junk Synchron']);
+    expect(decks[1]?.rows.find((r) => r.name === 'Twilight Rose Knight')?.quantity).toBe(2);
+  });
+
+  it('ignore les promos ; un seul deck + produit-deck = tout le produit', () => {
+    expect(officialDecks(parseSetListBlocks(LDK2), false).map((d) => d.name)).toEqual([
+      'Yugi Deck',
+    ]);
+    const sdbe = officialDecks(parseSetListBlocks(SDBE), true);
+    expect(sdbe).toHaveLength(1);
+    expect(sdbe[0]?.name).toBeNull();
+    expect(sdbe[0]?.rows).toHaveLength(6);
+  });
+
+  it('booster (pas un deck, pas de section deck) : rien', () => {
+    expect(officialDecks(parseSetListBlocks(SDBE), false)).toEqual([]);
   });
 });

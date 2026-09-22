@@ -4,8 +4,8 @@ import { Prisma } from '../../generated/prisma/client';
 export const PRODUCT_KIND = Prisma.sql`CASE
   WHEN s."searchText" ~ '(^| )(structure deck|structure decks)( |$)' THEN 'STRUCTURE'
   WHEN s."searchText" ~ '(^| )(mega )?tins?( |$)' THEN 'TIN'
-  WHEN s."searchText" ~ '(^| )starter decks?( |$)' THEN 'STARTER'
-  WHEN s."searchText" ~ '(^| )(box|collection|legendary decks|chronicles deck|anniversary pack)( |$)' THEN 'BOX'
+  WHEN s."searchText" ~ '(^| )(starter decks?|starter set|starter kit|super starter)( |$)' THEN 'STARTER'
+  WHEN s."searchText" ~ '(^| )(box|collection|legendary( [a-z0-9]+){0,2} decks|chronicles deck|anniversary pack)( |$)' THEN 'BOX'
   ELSE 'OTHER' END`;
 
 /** Illustration de la première carte du produit (dernier recours pour le visuel). */
