@@ -1,0 +1,97 @@
+# Déploiement Coolify (ressource « Docker Compose »), avec les images publiques du dépôt.
+#
+#   Coolify → + New → Docker Compose → colle ce fichier → Deploy.
+#   Coolify génère le domaine (service `web`), le mot de passe Postgres et le secret JWT.
+#   Variables à renseigner côté Coolify : ADMIN_EMAIL (ton compte devient admin à l'inscription).
+#
+# Pas de port publié : le proxy de Coolify sert le service `web` sur le domaine généré,
+# l'API et la base restent sur le réseau interne.
+
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${SERVICE_USER_POSTGRES}
+      POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES}
+      POSTGRES_DB: ygo
+    volumes:
+      - ygo-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    image: ghcr.io/mathieudubart/ygo-deckbuilder-api:${YGO_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@db:5432/ygo?schema=public
+      JWT_ACCESS_SECRET: ${SERVICE_PASSWORD_JWT}
+      # Domaine généré par Coolify pour le service web
+      WEB_ORIGIN: ${SERVICE_FQDN_WEB}
+      COOKIE_SECURE: 'true'
+      # Ce compte devient ADMIN à l'inscription
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      # Catalogue YGOPRODeck et meta : synchronisés par cron (vide = jamais)
+      CARD_SYNC_CRON: ${CARD_SYNC_CRON:-0 4 * * 1}
+      META_SYNC_CRON: ${META_SYNC_CRON:-0 5 * * 1}
+      # Simulateur de duel : scripts et bases ProjectIgnis dans le volume ygo-duel
+      DUEL_ENABLED: ${DUEL_ENABLED:-true}
+      DUEL_DATA_CRON: ${DUEL_DATA_CRON:-0 3 * * 2}
+      DUEL_MAX_SESSIONS: ${DUEL_MAX_SESSIONS:-20}
+      DUEL_IDLE_MINUTES: ${DUEL_IDLE_MINUTES:-30}
+      # Guides de deck rédigés par une IA (optionnel) : none | openai | anthropic
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      AI_BASE_URL: ${AI_BASE_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
+    volumes:
+      - ygo-duel:/app/data/duel
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  web:
+    image: ghcr.io/mathieudubart/ygo-deckbuilder-web:${YGO_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      # Coolify génère le domaine et route le port 3000 dessus
+      - SERVICE_FQDN_WEB_3000
+    volumes:
+      # Cache des images optimisées (visuels de cartes)
+      - ygo-images:/app/apps/web/.next/cache
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://localhost:3000/login').then(r=>process.exit(r.status<500?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  ygo-db:
+  ygo-duel:
+  ygo-images:

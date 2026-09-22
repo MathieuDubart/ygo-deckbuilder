@@ -2,7 +2,8 @@
 # Contexte de build : racine du monorepo  →  docker build -f apps/api/Dockerfile .
 
 FROM node:22-slim AS base
-RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates \
+# tar : extraction des scripts et bases de cartes du simulateur de duel
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates tar \
   && rm -rf /var/lib/apt/lists/* && corepack enable
 WORKDIR /repo
 
