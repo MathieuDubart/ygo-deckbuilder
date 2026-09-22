@@ -377,3 +377,14 @@ model CardMetaStat {
 
   card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
+
+/// Guides de deck rédigés par l'IA (clé = empreinte de la liste + modèle) : évite de repayer
+/// la même génération. Les guides calculés ne sont pas mis en cache (instantanés).
+model DeckGuideCache {
+  key       String   @id
+  model     String
+  content   Json
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}

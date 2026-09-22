@@ -15,6 +15,7 @@ import { DecksModule } from './modules/decks/decks.module';
 import { HealthController } from './modules/health/health.controller';
 import { MetaDecksModule } from './modules/meta-decks/meta-decks.module';
 import { SuggestionsModule } from './modules/suggestions/suggestions.module';
+import { SynergyModule } from './modules/synergy/synergy.module';
 import { WishlistModule } from './modules/wishlist/wishlist.module';
 
 @Module({
@@ -32,6 +33,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
     WishlistModule,
     MetaDecksModule,
     SuggestionsModule,
+    SynergyModule,
   ],
   controllers: [HealthController],
   providers: [
