@@ -27,3 +27,24 @@ export interface PublicUser {
   role: 'USER' | 'ADMIN';
   createdAt: string;
 }
+
+/**
+ * Clients natifs (app iOS) : en-tête `X-Auth-Mode: token` → les tokens sont renvoyés dans le
+ * corps au lieu de cookies, et le refresh token est renvoyé dans le corps de /auth/refresh et
+ * /auth/logout. Le navigateur, lui, garde les cookies httpOnly.
+ */
+export const AUTH_MODE_HEADER = 'x-auth-mode';
+
+export const refreshTokenBodySchema = z
+  .object({ refreshToken: z.string().min(1).max(512).optional() })
+  .default({});
+export type RefreshTokenBody = z.infer<typeof refreshTokenBodySchema>;
+
+export interface TokenSessionDto {
+  user: PublicUser;
+  accessToken: string;
+  refreshToken: string;
+  /** Durées de vie en secondes */
+  accessExpiresIn: number;
+  refreshExpiresIn: number;
+}
