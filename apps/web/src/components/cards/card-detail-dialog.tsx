@@ -2,6 +2,7 @@
 import {
   CARD_CONDITIONS,
   CARD_LANGUAGES,
+  type CardDetailDto,
   matchesPrintCode,
   parsePrintCode,
   type CardCondition,
@@ -37,9 +38,15 @@ export function CardDetailDialog({
   cardId,
   onClose,
   printCodeHint,
+  actions,
 }: {
   cardId: number | null;
   onClose: () => void;
+  /**
+   * Actions propres au contexte (ex. deck builder : ajouter / retirer du deck), affichées
+   * sous la carte. Reçoit la carte affichée, y compris après navigation via les interactions.
+   */
+  actions?: (card: CardDetailDto) => React.ReactNode;
   /** Code tapé par l'utilisateur ("SDBE-FR001") : pré-sélectionne l'édition et la langue. */
   printCodeHint?: string;
 }) {
@@ -122,6 +129,8 @@ export function CardDetailDialog({
               </p>
             </div>
           </div>
+
+          {actions?.(card)}
 
           <AddToCollectionForm
             key={`c-${card.id}`}

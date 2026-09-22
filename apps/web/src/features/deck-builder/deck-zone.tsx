@@ -44,8 +44,8 @@ export function DeckZone({
       {copies.length === 0 ? (
         <p className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-fg-subtle">
           {zone === 'SIDE'
-            ? 'Maj + clic sur une carte pour l’ajouter au side'
-            : 'Clique sur une carte à gauche pour l’ajouter'}
+            ? 'Ouvre une carte et ajoute-la au side, ou Maj + clic pour l’ajouter direct'
+            : 'Clique sur une carte à gauche pour voir sa fiche et l’ajouter'}
         </p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(3.75rem,1fr))] gap-1.5 md:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))]">
@@ -53,12 +53,10 @@ export function DeckZone({
             <button
               key={`${entry.card.id}-${index}`}
               type="button"
-              title={`${entry.card.name}${missing ? ' — non possédée' : ''}\nClic : retirer · Clic droit : détails`}
-              onClick={() => onRemove(zone, entry.card.id)}
-              onContextMenu={(e) => {
-                e.preventDefault();
-                onInspect(entry.card.id);
-              }}
+              title={`${entry.card.name}${missing ? ' — non possédée' : ''}\nClic : détails · Ctrl/⌘+clic : retirer`}
+              onClick={(e) =>
+                e.metaKey || e.ctrlKey ? onRemove(zone, entry.card.id) : onInspect(entry.card.id)
+              }
               className="group relative transition hover:-translate-y-0.5"
             >
               <CardImage
@@ -71,9 +69,6 @@ export function DeckZone({
                   MANQUE
                 </span>
               )}
-              <span className="absolute inset-0 hidden place-items-center rounded-[4%/3%] bg-black/50 text-lg font-bold text-white group-hover:grid">
-                −
-              </span>
             </button>
           ))}
         </div>
