@@ -18,6 +18,7 @@ export const cardSummarySelect = {
   level: true,
   atk: true,
   def: true,
+  imageUrl: true,
   imageUrlSmall: true,
   isExtraDeck: true,
   banTcg: true,
@@ -39,6 +40,7 @@ export function toCardSummary(card: CardSummaryRow, ownedQuantity?: number): Car
     level: card.level,
     atk: card.atk,
     def: card.def,
+    imageUrl: card.imageUrl,
     imageUrlSmall: card.imageUrlSmall,
     isExtraDeck: card.isExtraDeck,
     banTcg: card.banTcg,
@@ -53,7 +55,6 @@ export function toCardDetail(card: CardDetailRow, ownedQuantity?: number): CardD
   return {
     ...toCardSummary(card, ownedQuantity),
     desc: card.descFr ?? card.desc,
-    imageUrl: card.imageUrl,
     linkVal: card.linkVal,
     linkMarkers: card.linkMarkers,
     scale: card.scale,

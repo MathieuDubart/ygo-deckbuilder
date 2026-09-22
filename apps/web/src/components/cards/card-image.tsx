@@ -20,12 +20,14 @@ export function CardImage({
   className,
   priority,
 }: {
-  card: Pick<CardSummaryDto, 'name' | 'imageUrlSmall' | 'frameType'>;
+  card: Pick<CardSummaryDto, 'name' | 'imageUrl' | 'imageUrlSmall' | 'frameType'>;
   sizes?: string;
   className?: string;
   priority?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  // Pleine résolution, redimensionnée par Next selon `sizes` → nette sur écran Retina
+  const src = card.imageUrl ?? card.imageUrlSmall;
   return (
     <div
       className={cn(
@@ -33,9 +35,9 @@ export function CardImage({
         className,
       )}
     >
-      {card.imageUrlSmall && !failed ? (
+      {src && !failed ? (
         <Image
-          src={card.imageUrlSmall}
+          src={src}
           alt={card.name}
           fill
           sizes={sizes}

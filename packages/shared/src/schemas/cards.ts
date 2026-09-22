@@ -45,6 +45,8 @@ export interface CardSummaryDto {
   level: number | null;
   atk: number | null;
   def: number | null;
+  /** Pleine résolution (≈ 421×614) : l'optimiseur d'images du front la redimensionne. */
+  imageUrl: string | null;
   imageUrlSmall: string | null;
   isExtraDeck: boolean;
   banTcg: string | null;
@@ -54,7 +56,6 @@ export interface CardSummaryDto {
 
 export interface CardDetailDto extends CardSummaryDto {
   desc: string;
-  imageUrl: string | null;
   linkVal: number | null;
   linkMarkers: string[];
   scale: number | null;
@@ -74,8 +75,10 @@ export interface CardSetDto {
   code: string | null;
   tcgDate: string | null;
   kind: ProductKind;
-  /** Visuel du produit ; à défaut, l'illustration de sa première carte. */
+  /** Meilleur visuel : HD (Yugipedia), sinon YGOPRODeck, sinon l'illustration de sa première carte. */
   imageUrl: string | null;
+  /** Visuel de secours si le premier ne charge pas. */
+  fallbackImageUrl: string | null;
   /** Nombre de cartes distinctes réellement connues dans ce produit. */
   cardCount: number;
 }
