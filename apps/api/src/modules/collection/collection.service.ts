@@ -123,46 +123,6 @@ export class CollectionService {
    * NB : YGOPRODeck ne donne pas les quantités exactes par produit (3x certaines cartes
    * dans les structures) — on ajoute `copies` exemplaires de chaque, à ajuster ensuite.
    */
-  async importSet(userId: string, input: ImportSetInput) {
-    const set = await this.prisma.cardSet.findUnique({
-      where: { name: input.setName },
-      include: { prints: { select: { id: true, cardId: true }, orderBy: { printCode: 'asc' } } },
-    });
-    if (!set) throw new NotFoundException('Produit introuvable');
-
-    // Une seule entrée par carte (certains sets listent une carte en plusieurs raretés).
-    const byCard = new Map<number, string>();
-    for (const p of set.prints) if (!byCard.has(p.cardId)) byCard.set(p.cardId, p.id);
-    if (!byCard.size) throw new NotFoundException('Ce produit ne contient aucune carte connue');
-
-    const identity = {
-      userId,
-      condition: 'NEAR_MINT' as const,
-      language: input.language,
-      firstEdition: false,
-    };
-    const existing = await this.prisma.collectionItem.findMany({
-      where: { ...identity, printId: { in: [...byCard.values()] } },
-      select: { id: true, printId: true },
-    });
-    const existingByPrint = new Map(existing.map((e) => [e.printId, e.id]));
-
-    await this.prisma.$transaction([
-      ...existing.map((e) =>
-        this.prisma.collectionItem.update({
-          where: { id: e.id },
-          data: { quantity: { increment: input.copies } },
-        }),
-      ),
-      this.prisma.collectionItem.createMany({
-        data: [...byCard]
-          .filter(([, printId]) => !existingByPrint.has(printId))
-          .map(([cardId, printId]) => ({ ...identity, cardId, printId, quantity: input.copies })),
-      }),
-    ]);
-    return { set: set.name, cardsAdded: byCard.size };
-  }
-
   private async findOwned(userId: string, id: string) {
     const item = await this.prisma.collectionItem.findFirst({ where: { id, userId } });
     if (!item) throw new NotFoundException();
