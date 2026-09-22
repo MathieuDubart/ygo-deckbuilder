@@ -14,4 +14,7 @@ export const qk = {
   metaSuggestions: ['suggestions', 'meta'] as const,
   archetypeSuggestions: ['suggestions', 'archetypes'] as const,
   deckSuggestions: (deckId: string) => ['suggestions', 'deck', deckId] as const,
+  generated: (target: object | null, mode: string) =>
+    ['suggestions', 'generate', target, mode] as const,
+  metaStatus: ['meta-status'] as const,
 };

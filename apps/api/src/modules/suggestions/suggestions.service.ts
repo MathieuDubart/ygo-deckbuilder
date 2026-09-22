@@ -21,7 +21,12 @@ export class SuggestionsService {
   async metaDecks(userId: string, q: MetaSuggestionQuery): Promise<MetaDeckSuggestionDto[]> {
     const [decks, owned] = await Promise.all([
       this.prisma.metaDeck.findMany({
-        include: { cards: { include: { card: { select: cardSummarySelect } } } },
+        include: {
+          cards: {
+            where: { flex: false },
+            include: { card: { select: cardSummarySelect } },
+          },
+        },
       }),
       this.ownership.quantities(userId),
     ]);
@@ -38,11 +43,20 @@ export class SuggestionsService {
           })),
           owned,
         );
+        // Visuel : la carte la plus jouée du main (hors staples les plus courants, souvent la 1re)
+        const cover = deck.cards
+          .filter((c) => c.zone === 'MAIN')
+          .sort((a, b) => b.inclusion - a.inclusion || b.quantity - a.quantity)[0]?.card;
         return {
           metaDeckId: deck.id,
           name: deck.name,
           archetype: deck.archetype,
           tier: deck.tier,
+          source: deck.source,
+          listCount: deck.listCount,
+          share: deck.share,
+          variants: deck.variants,
+          coverImageUrl: cover?.imageUrl ?? cover?.imageUrlSmall ?? null,
           coverage: result.coverage,
           ownedCopies: result.ownedCopies,
           requiredCopies: result.requiredCopies,
