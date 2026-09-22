@@ -12,6 +12,7 @@ import { CardsModule } from './modules/cards/cards.module';
 import { CatalogSyncModule } from './modules/catalog-sync/catalog-sync.module';
 import { CollectionModule } from './modules/collection/collection.module';
 import { DecksModule } from './modules/decks/decks.module';
+import { DuelModule } from './modules/duel/duel.module';
 import { HealthController } from './modules/health/health.controller';
 import { MetaDecksModule } from './modules/meta-decks/meta-decks.module';
 import { ProductsModule } from './modules/products/products.module';
@@ -36,6 +37,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
     ProductsModule,
     SuggestionsModule,
     SynergyModule,
+    DuelModule,
   ],
   controllers: [HealthController],
   providers: [

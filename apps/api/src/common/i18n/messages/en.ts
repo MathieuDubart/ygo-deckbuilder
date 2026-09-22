@@ -6,6 +6,17 @@
 export const en = {
   format: { quote: '“{text}”' },
 
+  duel: {
+    errors: {
+      disabled: 'The duel simulator is disabled on this server.',
+      notReady: 'The duel simulator is downloading card scripts, try again in a minute.',
+      engine: 'The duel engine stopped unexpectedly.',
+      invalidResponse: 'This choice is not possible right now.',
+      notFound: 'Duel not found or expired.',
+      emptyDeck: 'This deck has no Main Deck card the simulator knows.',
+    },
+  },
+
   errors: {
     emailTaken: 'Email already in use',
     usernameTaken: 'Username already taken',
