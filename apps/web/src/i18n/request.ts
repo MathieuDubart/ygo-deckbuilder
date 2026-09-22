@@ -29,12 +29,15 @@ async function loadMessages(locale: AppLocale) {
   return Object.fromEntries(entries);
 }
 
-type Tree = { [k: string]: string | Tree };
+type Tree = { [k: string]: string | unknown[] | Tree };
+const isTree = (v: unknown): v is Tree => typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/** Fusion récursive des objets ; les tableaux (contenus lus avec `t.raw`) sont remplacés en bloc. */
 function deepMerge(base: Tree, over: Tree): Tree {
   const out: Tree = { ...base };
   for (const [k, v] of Object.entries(over)) {
     const b = out[k];
-    out[k] = typeof v === 'object' && typeof b === 'object' ? deepMerge(b, v) : v;
+    out[k] = isTree(v) && isTree(b) ? deepMerge(b, v) : v;
   }
   return out;
 }

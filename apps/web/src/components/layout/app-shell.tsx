@@ -1,5 +1,14 @@
 'use client';
-import { BookOpen, Layers, Library, LogOut, Heart, Sparkles } from 'lucide-react';
+import {
+  BookOpen,
+  Heart,
+  Layers,
+  Library,
+  LogOut,
+  ScrollText,
+  Sparkles,
+  Swords,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
@@ -13,7 +22,11 @@ const NAV = [
   { href: '/suggestions', key: 'suggestions', icon: Sparkles },
   { href: '/cards', key: 'catalog', icon: BookOpen },
   { href: '/wishlist', key: 'wishlist', icon: Heart },
+  { href: '/duel', key: 'duel', icon: Swords },
 ] as const;
+
+/** Liens secondaires (barre latérale seulement) */
+const SECONDARY = [{ href: '/rules', key: 'rules', icon: ScrollText }] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -31,6 +44,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </Link>
         <nav className="flex flex-1 flex-col gap-0.5">
           {NAV.map(({ href, key, icon: Icon }) => {
+            const active = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
+                  active ? 'bg-bg-elevated font-medium text-fg' : 'text-fg-muted hover:text-fg',
+                )}
+              >
+                <Icon className={cn('size-4', active && 'text-accent')} />
+                {t(`nav.${key}`)}
+              </Link>
+            );
+          })}
+          <div className="my-3 border-t border-border" />
+          {SECONDARY.map(({ href, key, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link
@@ -69,7 +99,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Tab bar mobile */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         {NAV.map(({ href, key, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (

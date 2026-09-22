@@ -7,7 +7,9 @@
     "decks": "Decks",
     "suggestions": "Suggestions",
     "catalog": "Catalog",
-    "wishlist": "Wishlist"
+    "wishlist": "Wishlist",
+    "duel": "Duel",
+    "rules": "Rules"
   },
   "logout": "Log out",
   "pages": {
@@ -18,6 +20,8 @@
     "catalog": "Catalog",
     "suggestions": "Suggestions",
     "wishlist": "Wishlist",
-    "deckNotFound": "Deck not found."
+    "deckNotFound": "Deck not found.",
+    "duel": "Duel simulator",
+    "rules": "Rules"
   }
 }
