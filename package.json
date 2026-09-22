@@ -1,5 +1,6 @@
 {
   "name": "ygo-deckbuilder",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "packageManager": "pnpm@10.34.5",
   "engines": {
