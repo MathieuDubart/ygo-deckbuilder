@@ -29,8 +29,7 @@
       "ME": "Controlado por mim",
       "ME_hint": "Você faz todas as escolhas dos dois jogadores: interações, hand traps, linhas de jogo.",
       "BOT": "Bot",
-      "BOT_hint": "Uma IA que joga o próprio deck.",
-      "soon": "Em breve"
+      "BOT_hint": "Joga sozinho o Deck do oponente: monta o campo, ataca quando vale a pena e responde às suas jogadas com hand traps e Armadilhas."
     },
     "opponentDeck": {
       "label": "Deck do oponente",
@@ -125,7 +124,13 @@
     "end": "Encerrar turno",
     "leave": "Sair",
     "restart": "Recomeçar",
-    "thinking": "O motor está resolvendo…"
+    "thinking": "O motor está resolvendo…",
+    "chains": {
+      "label": "Correntes",
+      "SMART": "Auto",
+      "ALWAYS": "Sempre",
+      "hint": "Auto: você só é consultado para encadear após uma ação do oponente (ou quando é obrigatório). Sempre: a cada janela de Corrente, como no EDOPro."
+    }
   },
   "prompt": {
     "opponent": "Escolha do oponente",

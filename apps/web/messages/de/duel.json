@@ -29,8 +29,7 @@
       "ME": "Von mir gesteuert",
       "ME_hint": "Du triffst alle Entscheidungen für beide Spieler: Interaktionen, Handtraps, Spielzüge.",
       "BOT": "Bot",
-      "BOT_hint": "Eine KI, die ihr eigenes Deck spielt.",
-      "soon": "Bald"
+      "BOT_hint": "Spielt das gegnerische Deck selbst: baut sein Spielfeld auf, greift an, wenn es sich lohnt, und kontert deine Züge mit Handtraps und Fallen."
     },
     "opponentDeck": {
       "label": "Deck des Gegners",
@@ -125,7 +124,13 @@
     "end": "Spielzug beenden",
     "leave": "Verlassen",
     "restart": "Neu starten",
-    "thinking": "Die Engine rechnet…"
+    "thinking": "Die Engine rechnet…",
+    "chains": {
+      "label": "Ketten",
+      "SMART": "Auto",
+      "ALWAYS": "Immer",
+      "hint": "Auto: Du wirst nur nach einer Aktion des Gegners (oder wenn es Pflicht ist) gefragt, ob du kettest. Immer: bei jedem Kettenfenster, wie in EDOPro."
+    }
   },
   "prompt": {
     "opponent": "Wahl des Gegners",

@@ -1,5 +1,6 @@
 'use client';
 import {
+  DUEL_OPPONENT_CONTROLS,
   DUEL_SETUP_LOCATIONS,
   DUEL_SETUP_POSITIONS,
   type CreateDuelInput,
@@ -31,6 +32,7 @@ export const defaultSetup = (deckId = ''): CreateDuelInput => ({
   goingFirst: true,
   openingHand: [],
   startingLP: 8000,
+  chainPrompts: 'SMART',
   opponent: { control: 'PASSIVE', board: [] },
 });
 
@@ -199,38 +201,25 @@ function OpponentControl({
   onChange: (v: DuelOpponentControl) => void;
 }) {
   const t = useTranslations('duel.setup.opponent');
-  const options = [
-    { id: 'PASSIVE', enabled: true },
-    { id: 'ME', enabled: true },
-    { id: 'BOT', enabled: false },
-  ] as const;
   return (
     <fieldset className="space-y-1.5">
       <legend className="mb-1.5 text-xs font-medium tracking-wide text-fg-muted uppercase">
         {t('label')}
       </legend>
       <div className="grid gap-2 sm:grid-cols-3">
-        {options.map(({ id, enabled }) => (
+        {DUEL_OPPONENT_CONTROLS.map((id) => (
           <button
             key={id}
             type="button"
-            disabled={!enabled}
-            onClick={() => id !== 'BOT' && onChange(id)}
+            onClick={() => onChange(id)}
             className={cn(
-              'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50',
+              'flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition',
               value === id
                 ? 'border-accent bg-accent/10'
                 : 'border-border hover:border-border-strong',
             )}
           >
-            <span className="flex w-full items-center justify-between gap-2 text-sm font-medium">
-              {t(id)}
-              {!enabled && (
-                <span className="rounded bg-bg-sunken px-1.5 py-0.5 text-[10px] text-fg-subtle">
-                  {t('soon')}
-                </span>
-              )}
-            </span>
+            <span className="text-sm font-medium">{t(id)}</span>
             <span className="text-xs text-fg-muted">{t(`${id}_hint`)}</span>
           </button>
         ))}

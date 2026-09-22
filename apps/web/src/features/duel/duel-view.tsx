@@ -3,10 +3,11 @@ import type {
   CreateDuelInput,
   DuelActionDto,
   DuelCardRef,
+  DuelChainPrompts,
   DuelPhase,
   DuelStateDto,
 } from '@ygo/shared';
-import { DUEL_PHASES } from '@ygo/shared';
+import { DUEL_CHAIN_PROMPTS, DUEL_PHASES } from '@ygo/shared';
 import { BookOpen, LogOut, RotateCcw, Swords, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -146,7 +147,12 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
     <div className="space-y-4 pb-64 md:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <TurnStrip state={state} busy={busy} />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <ChainToggle
+            value={state.chainPrompts}
+            disabled={busy}
+            onChange={session.setChainPrompts}
+          />
           <Link
             href="/rules"
             target="_blank"
@@ -255,6 +261,40 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
       >
         <CardInspector card={sheet ? (cards[sheet] ?? null) : null} />
       </Dialog>
+    </div>
+  );
+}
+
+function ChainToggle({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: DuelChainPrompts;
+  disabled: boolean;
+  onChange: (v: DuelChainPrompts) => void;
+}) {
+  const t = useTranslations('duel.controls.chains');
+  return (
+    <div className="flex items-center gap-2 text-xs text-fg-muted" title={t('hint')}>
+      <span>{t('label')}</span>
+      <div className="flex rounded-lg border border-border bg-bg-sunken p-0.5">
+        {DUEL_CHAIN_PROMPTS.map((mode) => (
+          <button
+            key={mode}
+            type="button"
+            disabled={disabled}
+            aria-pressed={value === mode}
+            onClick={() => value !== mode && onChange(mode)}
+            className={cn(
+              'rounded-md px-2 py-1 font-medium transition',
+              value === mode ? 'bg-bg-elevated text-fg shadow-sm' : 'hover:text-fg',
+            )}
+          >
+            {t(mode)}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

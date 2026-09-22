@@ -29,8 +29,7 @@
       "ME": "Contrôlé par moi",
       "ME_hint": "Tu fais tous les choix des deux joueurs : interactions, hand traps, lignes de jeu.",
       "BOT": "Bot",
-      "BOT_hint": "Une IA qui joue son propre deck.",
-      "soon": "Bientôt"
+      "BOT_hint": "Joue le deck adverse tout seul : développe son Terrain, attaque quand ça vaut le coup et répond à tes actions avec ses hand traps et ses pièges."
     },
     "opponentDeck": {
       "label": "Deck adverse",
@@ -125,7 +124,13 @@
     "end": "Finir le tour",
     "leave": "Quitter",
     "restart": "Recommencer",
-    "thinking": "Le moteur résout…"
+    "thinking": "Le moteur résout…",
+    "chains": {
+      "label": "Chaînes",
+      "SMART": "Auto",
+      "ALWAYS": "Toujours",
+      "hint": "Auto : on ne te propose de chaîner qu’après une action adverse (ou si c’est obligatoire). Toujours : à chaque fenêtre de chaîne, comme sur EDOPro."
+    }
   },
   "prompt": {
     "opponent": "Choix de l’adversaire",
