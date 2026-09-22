@@ -10,3 +10,7 @@ coverage
 apps/api/src/generated
 .DS_Store
 next-env.d.ts
+
+# Fichiers générés par `next dev` (règles pour agents IA)
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
