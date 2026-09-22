@@ -1,139 +1,198 @@
 'use client';
 import type { MetaDeckSuggestionDto } from '@ygo/shared';
-import { ChevronDown, Heart, Sparkles, Trophy } from 'lucide-react';
-import Link from 'next/link';
+import { RefreshCw, Sparkles, Trophy, Wand2 } from 'lucide-react';
+import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { CardImage } from '@/components/cards/card-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState, PageHeader, Skeleton } from '@/components/ui/feedback';
-import { useArchetypeSuggestions, useMetaSuggestions } from '@/lib/api/suggestions';
-import { useAddToWishlist } from '@/lib/api/wishlist';
+import { useMe } from '@/lib/api/auth';
+import {
+  useArchetypeSuggestions,
+  useMetaStatus,
+  useMetaSuggestions,
+  useMetaSync,
+  type GenerationTarget,
+} from '@/lib/api/suggestions';
 import { cn, formatPercent, formatPrice } from '@/lib/utils';
+import { GenerateDeckDialog } from './generate-deck-dialog';
 
 export function SuggestionsView() {
   const meta = useMetaSuggestions();
   const archetypes = useArchetypeSuggestions();
+  const [target, setTarget] = useState<GenerationTarget | null>(null);
 
   return (
     <>
       <PageHeader
         title="Suggestions"
-        description="Ce que ta collection te permet de jouer — et ce qu’il te manque pour y arriver."
+        description="Les decks du moment, ce que ta collection permet déjà, et des decks construits pour toi."
+        actions={<MetaStatusBar />}
       />
 
-      <section className="mb-10">
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-wide text-fg-muted uppercase">
-          <Trophy className="size-4 text-accent" /> Decks meta les plus accessibles
-        </h2>
+      <section className="mb-12">
+        <SectionTitle icon={Trophy}>Decks du meta · les plus accessibles pour toi</SectionTitle>
         {meta.isLoading ? (
-          <Skeleton className="h-48" />
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {Array.from({ length: 6 }, (_, i) => (
+              <Skeleton key={i} className="h-44" />
+            ))}
+          </div>
         ) : !meta.data?.length ? (
           <EmptyState
             icon={Trophy}
-            title="Aucun deck meta de référence"
-            description="Un admin doit importer des decklists (.ydk) via POST /meta-decks/import-ydk. Une page d’admin arrive bientôt."
+            title="Pas encore de données de tournoi"
+            description="Le meta se calcule automatiquement à partir des tops de tournois récents (YGOPRODeck). La première mise à jour se fait au démarrage de l’API, puis chaque lundi."
           />
         ) : (
-          <ul className="space-y-3">
+          <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {meta.data.map((s) => (
-              <MetaDeckRow key={s.metaDeckId} s={s} />
+              <MetaDeckCard
+                key={s.metaDeckId}
+                s={s}
+                onBuild={() => setTarget({ kind: 'meta', metaDeckId: s.metaDeckId, name: s.name })}
+              />
             ))}
           </ul>
         )}
       </section>
 
       <section>
-        <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-wide text-fg-muted uppercase">
-          <Sparkles className="size-4 text-accent" /> Tes archétypes les plus fournis
-        </h2>
+        <SectionTitle icon={Sparkles}>
+          Depuis ta collection · un deck auto par archétype
+        </SectionTitle>
         {archetypes.data?.length ? (
           <div className="flex flex-wrap gap-2">
             {archetypes.data.map((a) => (
-              <Link
+              <button
                 key={a.archetype}
-                href={`/cards?archetype=${encodeURIComponent(a.archetype)}`}
-                className="rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm transition hover:border-accent/50"
+                onClick={() => setTarget({ kind: 'archetype', archetype: a.archetype })}
+                className="group flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm transition hover:border-accent/50"
               >
+                <Wand2 className="size-3.5 text-fg-subtle transition group-hover:text-accent" />
                 <span className="font-medium">{a.archetype}</span>
-                <span className="ml-2 font-mono text-xs text-fg-subtle">
+                <span className="font-mono text-xs text-fg-subtle">
                   {a.distinctCards} cartes · {a.totalCopies} ex.
                 </span>
-              </Link>
+              </button>
             ))}
           </div>
         ) : (
           <p className="text-sm text-fg-subtle">
-            Ajoute des cartes à ta collection pour voir émerger des pistes.
+            Ajoute des cartes à ta collection pour voir émerger des archétypes à construire.
           </p>
         )}
       </section>
+
+      <GenerateDeckDialog target={target} onClose={() => setTarget(null)} />
     </>
   );
 }
 
-function MetaDeckRow({ s }: { s: MetaDeckSuggestionDto }) {
-  const [open, setOpen] = useState(false);
-  const addWish = useAddToWishlist();
-  const pct = s.coverage;
-
+function SectionTitle({
+  icon: Icon,
+  children,
+}: {
+  icon: typeof Trophy;
+  children: React.ReactNode;
+}) {
   return (
-    <li className="overflow-hidden rounded-2xl border border-border bg-bg-elevated">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center gap-4 p-4 text-left"
-      >
-        <CoverageRing value={pct} />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="truncate font-semibold">{s.name}</p>
-            {s.tier !== null && <Badge tone="accent">Tier {s.tier}</Badge>}
-          </div>
-          <p className="mt-0.5 text-sm text-fg-muted">
-            {s.ownedCopies}/{s.requiredCopies} exemplaires ·{' '}
-            {s.missing.length === 0 ? (
-              <span className="text-success">jouable tel quel</span>
-            ) : (
-              <>
-                il manque{' '}
-                <strong className="text-fg">{formatPrice(s.estimatedCostToComplete)}</strong>
-              </>
-            )}
-          </p>
-        </div>
-        <ChevronDown className={cn('size-4 text-fg-subtle transition', open && 'rotate-180')} />
-      </button>
-      {open && s.missing.length > 0 && (
-        <div className="border-t border-border p-4">
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))] gap-2">
-            {s.missing.map((m) => (
-              <div key={`${m.zone}-${m.card.id}`} className="space-y-1">
-                <CardImage card={m.card} sizes="72px" />
-                <p className="text-center font-mono text-[10px] text-fg-muted">
-                  {m.missing}× · {formatPrice(m.unitPrice)}
-                </p>
-              </div>
-            ))}
-          </div>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="mt-4"
-            loading={addWish.isPending}
-            onClick={async () => {
-              await Promise.all(
-                s.missing.map((m) =>
-                  addWish.mutateAsync({ cardId: m.card.id, quantity: Math.min(m.missing, 3) }),
-                ),
-              );
-              toast.success('Cartes manquantes ajoutées à la wishlist');
-            }}
-          >
-            <Heart className="size-4" /> Tout mettre en wishlist
-          </Button>
-        </div>
+    <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold tracking-wide text-fg-muted uppercase">
+      <Icon className="size-4 text-accent" /> {children}
+    </h2>
+  );
+}
+
+function MetaStatusBar() {
+  const { data: me } = useMe();
+  const { data: status } = useMetaStatus();
+  const sync = useMetaSync();
+  return (
+    <div className="flex items-center gap-3 text-xs text-fg-subtle">
+      {status?.lastSyncAt && (
+        <span>
+          Meta mis à jour le {new Date(status.lastSyncAt).toLocaleDateString('fr-FR')}
+          {status.lastStatus === 'OK' ? ` · ${status.cardCount} listes` : ' · échec'}
+        </span>
       )}
+      {me?.role === 'ADMIN' && (
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={sync.isPending}
+          onClick={() =>
+            sync.mutate(undefined, {
+              onSuccess: (r) =>
+                toast.success(`${r.archetypes} archétypes calculés à partir de ${r.lists} listes`),
+              onError: (e) => toast.error(e.message),
+            })
+          }
+        >
+          <RefreshCw className="size-3.5" /> Mettre à jour
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () => void }) {
+  const playable = s.missing.length === 0;
+  return (
+    <li className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-bg-elevated transition hover:border-border-strong">
+      {/* Illustration de la carte phare, recadrée en bandeau */}
+      <div className="relative h-24 overflow-hidden bg-bg-sunken">
+        {s.coverImageUrl && (
+          <Image
+            src={s.coverImageUrl}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, 400px"
+            className="scale-150 object-cover object-[50%_28%] opacity-60 transition duration-500 group-hover:opacity-80"
+          />
+        )}
+        <div className="absolute inset-0 bg-linear-to-t from-bg-elevated via-bg-elevated/40 to-transparent" />
+        <div className="absolute top-3 left-3 flex gap-1.5">
+          {s.tier !== null && <Badge tone="accent">Tier {s.tier}</Badge>}
+          {s.source === 'tournaments' && s.share !== null && (
+            <Badge>{formatPercent(s.share).replace(' ', '')} du meta</Badge>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-3 p-4 pt-0">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-base font-semibold" title={s.name}>
+              {s.name}
+            </p>
+            <p className="truncate text-xs text-fg-subtle">
+              {s.listCount > 0 ? `${s.listCount} liste(s) de tournoi` : 'Liste importée'}
+              {s.variants.length > 0 && ` · aussi « ${s.variants[0]} »`}
+            </p>
+          </div>
+          <CoverageRing value={s.coverage} />
+        </div>
+
+        <p className="text-sm text-fg-muted">
+          {playable ? (
+            <span className="text-success">Tu peux le jouer tel quel.</span>
+          ) : (
+            <>
+              {s.ownedCopies}/{s.requiredCopies} exemplaires · il manque{' '}
+              <strong className="text-fg">{formatPrice(s.estimatedCostToComplete)}</strong>
+            </>
+          )}
+        </p>
+
+        <Button
+          className="mt-auto"
+          variant={s.coverage >= 0.5 ? 'primary' : 'secondary'}
+          onClick={onBuild}
+        >
+          <Wand2 className="size-4" /> Construire ce deck
+        </Button>
+      </div>
     </li>
   );
 }
@@ -143,7 +202,7 @@ function CoverageRing({ value }: { value: number }) {
   const c = 2 * Math.PI * r;
   const tone = value >= 0.8 ? 'text-success' : value >= 0.5 ? 'text-accent' : 'text-fg-subtle';
   return (
-    <div className="relative size-12 shrink-0">
+    <div className="relative size-12 shrink-0" title="Part de la liste type que tu possèdes déjà">
       <svg viewBox="0 0 44 44" className="size-full -rotate-90">
         <circle cx="22" cy="22" r={r} fill="none" strokeWidth="4" className="stroke-border" />
         <circle
