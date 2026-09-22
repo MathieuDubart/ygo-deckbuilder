@@ -32,6 +32,7 @@
     "cron": "4.4.0",
     "dotenv": "^17.2.0",
     "helmet": "^8.1.0",
+    "ocgcore-wasm": "0.1.2",
     "prisma": "7.10.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
