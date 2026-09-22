@@ -73,7 +73,10 @@ export function DeckGuide({
 
   const aiGuide = !ai.isPlaceholderData && ai.data?.source === 'AI' ? ai.data : null;
   const aiError = !ai.isPlaceholderData ? (ai.error?.message ?? ai.data?.aiError ?? null) : null;
-  const writing = aiAvailable && ai.isFetching;
+  // En cours : 1re requête, ou rédaction en arrière-plan côté API (on repasse toutes les 3 s)
+  const writing =
+    aiAvailable &&
+    (ai.isPlaceholderData || ai.data?.aiStatus === 'PENDING' || (ai.isFetching && !ai.data));
   const guide = aiGuide && !preferRules ? aiGuide : rules.data;
 
   return (
@@ -91,7 +94,8 @@ export function DeckGuide({
         )}
         {writing && (
           <span className="flex items-center gap-1.5 text-xs text-fg-muted" aria-live="polite">
-            <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide…
+            <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide… (un modèle local
+            peut prendre une minute ou deux)
           </span>
         )}
         {aiGuide && (

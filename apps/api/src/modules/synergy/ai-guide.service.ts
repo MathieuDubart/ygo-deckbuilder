@@ -24,6 +24,16 @@ export const aiGuideSchema = z.object({
 });
 export type AiGuide = z.infer<typeof aiGuideSchema>;
 
+export type AiResult =
+  | { status: 'OFF' | 'PENDING' }
+  | { status: 'READY'; guide: AiGuide }
+  | { status: 'ERROR'; error: string };
+
+/** Rédaction en cours (ou échouée, en attente d'être signalée) pour une liste donnée. */
+interface Job {
+  error?: string;
+}
+
 export interface AiDeckCard {
   name: string;
   nameFr: string;
@@ -57,6 +67,9 @@ Règles strictes :
 @Injectable()
 export class AiGuideService {
   private readonly logger = new Logger(AiGuideService.name);
+  private readonly jobs = new Map<string, Job>();
+  /** File d'attente : une rédaction à la fois */
+  private queue: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly config: AppConfig,
@@ -71,21 +84,54 @@ export class AiGuideService {
     return this.enabled ? this.config.get('AI_MODEL')! : null;
   }
 
-  async write(
+  /**
+   * Guide IA d'une liste, sans jamais bloquer la requête HTTP : un modèle local peut mettre
+   * plusieurs minutes, bien au-delà des délais d'un proxy (Next, nginx…). La rédaction tourne
+   * en arrière-plan (une à la fois : un serveur local ne sert qu'un modèle), le front
+   * redemande jusqu'à READY / ERROR ; le résultat est mis en cache en base.
+   */
+  async request(
     deckName: string | undefined,
     cards: AiDeckCard[],
     rules: RuleGuide,
-  ): Promise<{ guide: AiGuide | null; error: string | null }> {
-    if (!this.enabled) return { guide: null, error: null };
+  ): Promise<AiResult> {
+    if (!this.enabled) return { status: 'OFF' };
     const model = this.model!;
     const key = cacheKey(model, cards);
 
     const cached = await this.prisma.deckGuideCache.findUnique({ where: { key } });
     if (cached && Date.now() - cached.createdAt.getTime() < CACHE_TTL_DAYS * 86_400_000) {
       const parsed = aiGuideSchema.safeParse(cached.content);
-      if (parsed.success) return { guide: parsed.data, error: null };
+      if (parsed.success) return { status: 'READY', guide: parsed.data };
     }
 
+    const job = this.jobs.get(key);
+    if (job?.error) {
+      // Échec signalé une fois ; la demande suivante ("Réessayer") relance une rédaction
+      this.jobs.delete(key);
+      return { status: 'ERROR', error: job.error };
+    }
+    if (job) return { status: 'PENDING' };
+
+    const entry: Job = {};
+    this.jobs.set(key, entry);
+    this.queue = this.queue.then(async () => {
+      const error = await this.write(key, model, deckName, cards, rules);
+      if (error) entry.error = error;
+      else this.jobs.delete(key);
+    });
+    return { status: 'PENDING' };
+  }
+
+  /** Rédige et met en cache ; renvoie un message d'erreur lisible en cas d'échec. */
+  private async write(
+    key: string,
+    model: string,
+    deckName: string | undefined,
+    cards: AiDeckCard[],
+    rules: RuleGuide,
+  ): Promise<string | null> {
+    const started = Date.now();
     try {
       const raw = await this.complete(SYSTEM, userPrompt(deckName, cards, rules));
       const parsed = aiGuideSchema.safeParse(extractJson(raw));
@@ -94,14 +140,15 @@ export class AiGuideService {
           ? `réponse inexploitable (${parsed.error.issues[0]?.path.join('.') || 'JSON'} : ${parsed.error.issues[0]?.message ?? 'illisible'})`
           : 'réponse vide';
         this.logger.warn(`Guide IA : ${why}`);
-        return { guide: null, error: `Le modèle a donné une ${why}.` };
+        return `Le modèle a donné une ${why}.`;
       }
       await this.prisma.deckGuideCache.upsert({
         where: { key },
         create: { key, model, content: parsed.data },
         update: { model, content: parsed.data, createdAt: new Date() },
       });
-      return { guide: parsed.data, error: null };
+      this.logger.log(`Guide IA rédigé en ${Math.round((Date.now() - started) / 1000)} s`);
+      return null;
     } catch (e) {
       const err = e as Error;
       const message =
@@ -113,7 +160,7 @@ export class AiGuideService {
             ? `serveur injoignable (${this.config.get('AI_BASE_URL') ?? 'URL par défaut'}) — le serveur du modèle est-il lancé ?`
             : err.message;
       this.logger.warn(`Guide IA indisponible : ${message}`);
-      return { guide: null, error: `IA indisponible : ${message}` };
+      return `IA indisponible : ${message}`;
     }
   }
 

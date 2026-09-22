@@ -128,6 +128,8 @@ AI_MODEL=qwen2.5-14b-instruct
 ```
 
 Les réponses sont validées (zod) et mises en cache en base (`DeckGuideCache`) par liste + modèle.
+La rédaction tourne en arrière-plan (une à la fois) et le front repasse toutes les 3 s : aucun
+timeout de proxy même avec un modèle local lent. Délai max côté API : `AI_TIMEOUT_MS` (3 min par défaut).
 
 **Interactions entre cartes** : après chaque sync du catalogue, les cibles *précises* de chaque carte
 (un nom / archétype cité, ou un filtre serré type « Syntoniseur LUMIÈRE de niveau 1 ») sont indexées dans
