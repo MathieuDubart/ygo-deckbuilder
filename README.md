@@ -1,158 +1,204 @@
 # YGO Deck Builder
 
-Webapp self-hostable pour gérer sa collection Yu-Gi-Oh!, construire ses decks avec ce qu'on possède
-vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui manque).
+A self-hostable web app to manage your Yu-Gi-Oh! collection, build decks with the cards you actually
+own, see which meta decks you can put together (and what the missing cards cost), and learn how to
+play them.
 
-## Fonctionnalités (V1)
+Available in **English, French, German, Italian and Portuguese** — interface, card names and effects,
+and generated play guides.
 
-- **Comptes** multi-utilisateurs (Argon2id, JWT court + refresh token roté en cookie httpOnly)
-- **Catalogue** complet synchronisé depuis [YGOPRODeck](https://ygoprodeck.com/api-guide/) (EN + noms FR), éditions, raretés, prix Cardmarket
-- **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck, tin…) depuis une galerie de visuels HD (Yugipedia), avec les **quantités officielles** du produit (listes Yugipedia), valeur estimée
-- **Produits** : onglet dédié dans la collection — contenu de chaque produit pour le reconstituer (ce qui manque, liste à copier), création d'un deck en un clic, et guide de jeu pour les Structure / Starter Decks
-- **Deck builder** : recherche limitée à tes cartes (ou tout le catalogue), validation live (40–60, 3 max, banlist, zone Extra), exemplaires manquants signalés, auto-save, import/export `.ydk`
-- **Wishlist** : édition visée, budget max, priorité, lien vers le deck qui la réclame, « Je l'ai » → bascule en collection
-- **Meta automatique** : les tops de tournois récents (YGOPRODeck) sont regroupés en archétypes par similarité de contenu, avec une liste type par archétype, un tier et la part du meta
-- **Suggestions & génération de decks** : pour chaque deck du meta, ta couverture et le coût pour compléter ; génération en un clic de la liste meta complète ou d'une version « avec mes cartes » (cœur de la liste, cartes flex, staples que tu possèdes) ; deck auto pour tout archétype de ta collection ; les manquantes partent en wishlist
-- **Synergie & guides** : les effets des cartes sont lus (qui cherche / invoque / envoie quoi, starters, extenders, hand traps, Extra Deck réellement invocable) ; les decks générés privilégient les cartes qui s'emboîtent, et chaque deck a son **guide de jeu** : plan, cartes clés, combos pas à pas, en premier / en second, erreurs à éviter (rédaction par IA en option)
-- **Exploration des cartes** : sur chaque fiche, ce que la carte va chercher / invoquer / utiliser, et quelles cartes la cherchent, l'invoquent ou l'utilisent comme matériau — tes cartes en premier, un clic pour naviguer de carte en carte
+## Features
+
+- **Accounts** — multi-user, Argon2id passwords, short-lived JWT + rotated refresh token in an httpOnly cookie.
+- **Card catalog** — fully synced from [YGOPRODeck](https://ygoprodeck.com/api-guide/): names and effects in 5 languages, prints, rarities, Cardmarket prices. Typo-tolerant search in any language, or by the code printed on the card (`SDBE-EN001`).
+- **Collection** — by print, condition, language and 1st edition, with an estimated value. Add a whole product (structure deck, tin, box…) from a gallery of HD box art, with the **official quantities** of each card (Yugipedia set lists).
+- **Products** — every product you added, with its full content to rebuild it (what is missing, a copyable list), one-click deck creation, and a play guide for structure and starter decks.
+- **Deck builder** — search limited to your cards (or the whole catalog), live validation (40–60 cards, 3 copies, banlist, Extra Deck), missing copies flagged, auto-save, `.ydk` import/export. Clicking a card opens its details with +/− per zone.
+- **Card interactions** — on every card: what it searches, summons or uses as material, and which cards search, summon or use it. Your cards first, click to jump from card to card.
+- **Automatic meta** — recent tournament top decks are clustered into archetypes by content, with a consensus list, flex cards, a tier and the meta share.
+- **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
+- **Synergy & play guides** — card effects are read (who searches, summons or sends what; starters, extenders, hand traps; which Extra Deck monsters are actually reachable). Generated decks favour cards that work together, and every deck gets a **play guide**: game plan, key cards, step-by-step combos, going first/second, mistakes to avoid. Optionally rewritten by an AI model (OpenAI-compatible or Anthropic, local models welcome).
+- **Wishlist** — target print, max budget, priority, link to the deck that needs it, "Got it" moves it to the collection.
+
+<!-- Screenshots to add in docs/screenshots/ (collection, deck-builder, card-interactions, suggestions, guide, products, languages):
+
+## Screenshots
+
+| | |
+| --- | --- |
+| ![Deck builder](docs/screenshots/deck-builder.png) | ![Card interactions](docs/screenshots/card-interactions.png) |
+| **Deck builder** — card details with "In this deck" controls | **Card interactions** — what it does, who uses it |
+| ![Suggestions](docs/screenshots/suggestions.png) | ![Play guide](docs/screenshots/guide.png) |
+| **Suggestions** — playable decks from your collection | **Play guide** — combos and mistakes to avoid |
+| ![Products](docs/screenshots/products.png) | ![Languages](docs/screenshots/languages.png) |
+| **Products** — contents, what is missing, deck guide | **5 languages** — UI, card texts and guides |
+-->
 
 ## Stack
 
-| Couche | Choix |
+| Layer | Choice |
 | --- | --- |
 | Monorepo | pnpm workspaces + Turborepo |
-| Front | Next.js 16 (App Router), React 19, Tailwind 4, TanStack Query |
+| Web | Next.js 16 (App Router), React 19, Tailwind 4, TanStack Query, next-intl |
 | API | NestJS 11 (Express), zod |
-| DB | PostgreSQL 17 + Prisma 7 (driver adapter `pg`) |
-| Contrats partagés | `packages/shared` : schémas zod, types DTO, règles de deck — utilisés par le front ET l'API |
-| Déploiement | Docker Compose (db + api + web), un seul port exposé |
+| Database | PostgreSQL 17 + Prisma 7 (`pg` driver adapter) |
+| Shared contracts | `packages/shared`: zod schemas, DTO types, deck rules, locales — used by both web and API |
+| Deployment | Docker Compose (db + api + web), a single exposed port |
 
 ```
 apps/
   api/                 NestJS
-    prisma/            schéma + migrations
+    prisma/            schema + migrations
     src/
-      common/          prisma, guards (JWT global, rôles), pipe zod, mappers
-      config/          env validée au démarrage
+      common/          prisma, guards (global JWT, roles), zod pipe, mappers, i18n, search
+      config/          env validated at startup
+      cli/             one-off scripts (card sync, meta sync, interaction index)
       modules/
         auth/          register, login, refresh, logout, me
-        cards/         recherche catalogue, fiche, archétypes, sets
-        catalog-sync/  client + mapper YGOPRODeck, sync planifiée
-        collection/    CRUD, import de set, stats, OwnershipService
-        decks/         CRUD, import/export .ydk, validation
+        cards/         catalog search, card details, archetypes, products
+        catalog-sync/  YGOPRODeck + Yugipedia clients, scheduled sync, product covers
+        collection/    CRUD, stats, OwnershipService
+        products/      product import, official quantities, owned products
+        decks/         CRUD, .ydk import/export, validation
         wishlist/
-        meta-decks/    listes de tournoi, moteur meta (engine/), sync
-        suggestions/   couverture, génération de decks
+        meta-decks/    tournament lists, meta engine (engine/), sync
+        suggestions/   coverage, deck generation, playable decks
+        synergy/       effect reader, synergy graph, combos, guides (engine/), card interactions
   web/                 Next.js
+    messages/          UI translations, one folder per language
     src/
-      app/             routes (auth) et (app)
-      components/      ui/ (design system maison), cards/, layout/
-      features/        une vue par domaine (catalog, collection, deck-builder…)
-      lib/api/         client HTTP + hooks TanStack Query par domaine
+      app/             routes: (auth) and (app)
+      components/      ui/ (in-house design system), cards/, products/, layout/
+      features/        one view per domain (catalog, collection, deck-builder, guide…)
+      i18n/            next-intl setup (cookie, then browser language)
+      lib/api/         HTTP client + TanStack Query hooks per domain
 packages/
-  shared/              contrats front/back
-  tsconfig/            configs TS partagées
+  shared/              web/API contracts
+  tsconfig/            shared TS configs
 ```
 
-Le navigateur ne parle qu'au front : `/api/*` est relayé par Next vers l'API. Cookies first-party,
-pas de CORS, un seul domaine à exposer.
+The browser only talks to the web app: `/api/*` is proxied by Next to the API. First-party cookies,
+no CORS, a single domain to expose.
 
-## Démarrer en local
+## Running locally
 
-Prérequis : Node 22+, Docker (pour Postgres), `corepack enable`.
+Requirements: Node 22+, Docker (for Postgres), `corepack enable`.
 
 ```bash
 pnpm install
-pnpm db:up                                   # Postgres sur :5432
-cp apps/api/.env.example apps/api/.env       # mets un vrai JWT_ACCESS_SECRET (openssl rand -base64 48)
+pnpm db:up                                   # Postgres on :5432
+cp apps/api/.env.example apps/api/.env       # set a real JWT_ACCESS_SECRET (openssl rand -base64 48)
 cp apps/web/.env.example apps/web/.env
-pnpm db:migrate                              # applique la migration initiale
-pnpm cards:sync                              # ~13 000 cartes, quelques minutes
+pnpm db:migrate
+pnpm cards:sync                              # ~13,000 cards in 5 languages, a few minutes
 pnpm dev                                     # web :3000, api :4000
 ```
 
-Mets ton email dans `ADMIN_EMAIL` avant de créer ton compte pour avoir le rôle admin.
+Put your email in `ADMIN_EMAIL` before creating your account to get the admin role.
 
-## Déployer (VPS / selfhost)
+## Deploying (VPS / self-hosting)
 
 ```bash
-cp .env.example .env          # remplis POSTGRES_PASSWORD, JWT_ACCESS_SECRET, PUBLIC_URL, ADMIN_EMAIL
+cp .env.example .env          # fill POSTGRES_PASSWORD, JWT_ACCESS_SECRET, PUBLIC_URL, ADMIN_EMAIL
 docker compose up -d --build
 ```
 
-- Les migrations s'appliquent au démarrage de l'API.
-- Au premier démarrage, le catalogue vide déclenche une sync automatique (logs : `docker compose logs -f api`).
-- Les visuels HD des produits sont récupérés sur Yugipedia en arrière-plan (`PRODUCT_COVERS_ENABLED`).
-- Ensuite la sync tourne selon `CARD_SYNC_CRON` (lundi 4h par défaut) et ne fait rien si YGOPRODeck n'a pas bougé.
-- Mets un reverse proxy HTTPS devant le port 3000 (voir `Caddyfile.example`). En HTTP pur, passe `COOKIE_SECURE=false`.
+- Migrations run when the API starts.
+- On first start, the empty catalog triggers an automatic sync (`docker compose logs -f api`).
+- HD product covers and official product quantities come from Yugipedia (`PRODUCT_COVERS_ENABLED`).
+- The sync then runs on `CARD_SYNC_CRON` (Mondays 4am by default) and does nothing if YGOPRODeck has not changed.
+- Put an HTTPS reverse proxy in front of port 3000 (see `Caddyfile.example`). Over plain HTTP, set `COOKIE_SECURE=false`.
 
-## Meta et génération de decks
+## Languages
 
-Le meta se calcule tout seul à partir des decklists de tournoi publiées par YGOPRODeck
-(catégorie *Tournament Meta Decks*) :
+English (default), French, German, Italian and Portuguese. The language comes from the `NEXT_LOCALE`
+cookie set by the language switcher, then from the browser's `Accept-Language`, then English — for
+the web UI and for everything the API generates (card names and effects, guides, notes, errors).
+Card texts come from YGOPRODeck (French in `Card.nameFr/descFr`, German/Italian/Portuguese in
+`CardTranslation`). UI strings live in `apps/web/messages/<locale>/<namespace>.json`; English is the
+reference and missing keys fall back to it.
 
-1. les ~300 listes les plus récentes sont récupérées (`META_SYNC_PAGES`), les artworks alternatifs résolus ;
-2. elles sont regroupées en archétypes par **contenu** (Jaccard sur les cartes jouées), pas par nom ;
-3. pour chaque archétype : liste type (cartes par taux d'inclusion, au nombre d'exemplaires le plus joué),
-   cartes *flex*, tier selon la part du meta ;
-4. les **staples** (cartes jouées par plusieurs archétypes : hand traps, board breakers) servent à compléter
-   les decks générés avec ta collection.
+## Meta and deck generation
 
-Mise à jour au premier démarrage, puis selon `META_SYNC_CRON` (lundi 5h), ou à la main :
-`pnpm meta:sync`, ou le bouton « Mettre à jour » de la page Suggestions (admin).
+The meta is computed from the tournament decklists published by YGOPRODeck (*Tournament Meta Decks*):
 
-Le moteur (`apps/api/src/modules/meta-decks/engine/`) est fait de fonctions pures, testées sur de vraies listes.
-Les decks meta peuvent aussi être importés à la main depuis un `.ydk` (`POST /api/meta-decks/import-ydk`, admin).
+1. the ~300 most recent lists are fetched (`META_SYNC_PAGES`), alternate artworks are resolved;
+2. they are clustered into archetypes by **content** (Jaccard on the cards played), not by name;
+3. for each archetype: a consensus list (cards by inclusion rate, at their most played copy count),
+   *flex* cards, a tier based on meta share;
+4. **staples** (cards played across archetypes: hand traps, board breakers) are used to complete
+   decks generated from your collection.
 
-## Synergie et guides de deck
+It runs on first start, then on `META_SYNC_CRON` (Mondays 5am), or manually with `pnpm meta:sync` or
+the "Update" button on the Suggestions page (admin). The engine
+(`apps/api/src/modules/meta-decks/engine/`) is made of pure functions tested on real lists. Meta decks
+can also be imported from a `.ydk` file (`POST /api/meta-decks/import-ydk`, admin).
 
-`apps/api/src/modules/synergy/engine/` lit le texte officiel des cartes (format PSCT de Konami) :
+## Synergy and play guides
 
-- **effets** : recherches, invocations depuis le Deck / la main / le cimetière, envois au cimetière,
-  déclencheurs (Invocation Normale, envoi au cimetière, End Phase…), coûts « défausse cette carte » ;
-- **graphe** : A → B si un effet de A peut chercher / invoquer / envoyer B dans ce deck ;
-- **rôles** : starter, extender, chercheur, hand trap, interruption, destruction, pioche, boss ;
-- **Extra Deck** : matériaux Fusion / Synchro / Xyz / Lien vérifiés contre le Main Deck ;
-- **combos** : simulation simplifiée à partir de mains de 1–2 cartes jusqu'au boss de fin de tour.
+`apps/api/src/modules/synergy/engine/` reads the official card text (Konami's PSCT format):
 
-La génération s'en sert (cartes classées par affinité avec le cœur du deck, monstres d'Extra
-impossibles à invoquer retirés, note de solidité avec une composante *Synergie* et un minimum de starters),
-et `POST /api/suggestions/guide` produit le guide affiché sous la composition et dans le deck builder.
+- **effects**: searches, special summons from the Deck / hand / GY, sends to the GY, triggers
+  (Normal Summon, sent to the GY, End Phase…), "discard this card" costs;
+- **graph**: A → B when an effect of A can search / summon / send B in this deck;
+- **roles**: starter, extender, searcher, hand trap, interruption, removal, draw, boss;
+- **Extra Deck**: Fusion / Synchro / Xyz / Link materials checked against the Main Deck;
+- **combos**: a simplified simulation from 1–2 card hands to an end-of-turn boss.
 
-**IA optionnelle** pour rédiger le guide (le guide calculé reste la base et le repli) :
+Deck generation uses it (cards ranked by affinity with the deck core, unreachable Extra Deck monsters
+removed, a *synergy* component and a minimum number of starters in the solidity score), and
+`POST /api/suggestions/guide` produces the play guide shown under generated decks, in the deck
+builder and on product pages.
+
+**Optional AI** to write the guide (the computed guide stays the baseline and the fallback):
 
 ```bash
-AI_PROVIDER=openai            # toute API compatible OpenAI : OpenAI, Mistral, Groq, LM Studio, Ollama…
-AI_BASE_URL=http://localhost:1234/v1   # ex. LM Studio (en Docker : http://host.docker.internal:1234/v1)
+AI_PROVIDER=openai            # any OpenAI-compatible API: OpenAI, Mistral, Groq, LM Studio, Ollama…
+AI_BASE_URL=http://localhost:1234/v1   # e.g. LM Studio (from Docker: http://host.docker.internal:1234/v1)
 AI_MODEL=qwen2.5-14b-instruct
-# ou : AI_PROVIDER=anthropic, AI_API_KEY=…, AI_MODEL=…
+# or: AI_PROVIDER=anthropic, AI_API_KEY=…, AI_MODEL=…
 ```
 
-Les réponses sont validées (zod) et mises en cache en base (`DeckGuideCache`) par liste + modèle.
-La rédaction tourne en arrière-plan (une à la fois) et le front repasse toutes les 3 s : aucun
-timeout de proxy même avec un modèle local lent. Délai max côté API : `AI_TIMEOUT_MS` (3 min par défaut).
+Answers are validated with zod and cached in the database (`DeckGuideCache`) per list, model and
+language. Writing happens in the background (one at a time) and the UI polls every 3 s, so there are no
+proxy timeouts even with a slow local model. API-side limit: `AI_TIMEOUT_MS` (3 min by default).
 
-**Interactions entre cartes** : après chaque sync du catalogue, les cibles *précises* de chaque carte
-(un nom / archétype cité, ou un filtre serré type « Syntoniseur LUMIÈRE de niveau 1 ») sont indexées dans
-`CardEffectTarget` (quelques secondes pour tout le catalogue). La fiche d'une carte calcule ses cibles à la
-volée et interroge l'index pour la question inverse (`GET /api/cards/:id/interactions`). Les effets
-génériques (« 1 monstre ») ne sont pas indexés : ils visent tout le monde. Reconstruction manuelle :
-`pnpm interactions:index` (automatique au démarrage si le lecteur de textes a changé).
+**Card interactions**: after each catalog sync, the *precise* targets of every card (a quoted name or
+archetype, or a tight filter such as "Level 1 LIGHT Tuner") are indexed in `CardEffectTarget` (a few
+seconds for the whole catalog). A card page computes its own targets on the fly and queries the index
+for the reverse question (`GET /api/cards/:id/interactions`). Generic effects ("1 monster") are not
+indexed: they target everything. Manual rebuild: `pnpm interactions:index` (automatic on start when the
+text reader changes).
 
-## Qualité
+## Products
+
+Adding a product records it (`OwnedProduct`) in addition to its cards. YGOPRODeck lists each card once
+per product, so the official copy counts are read on demand from the Yugipedia *Set Card Lists* and
+stored in `CardPrint.setQuantity` (1 copy per card when unknown). The product page shows what is still
+in your collection, a copyable list to rebuild it, and — for structure and starter decks — the play
+guide and one-click deck creation.
+
+## Quality
 
 ```bash
 pnpm typecheck
-pnpm test        # règles de deck, .ydk, recherche, YGOPRODeck/Yugipedia, moteur meta (clustering, consensus, génération), synergie (lecture des effets, graphe, combos, guide)
+pnpm test        # deck rules, .ydk, search, locales, YGOPRODeck/Yugipedia parsing, meta engine, synergy engine, product quantities
 pnpm build
 ```
 
 ## Roadmap
 
-- [ ] Page admin : import de decks meta, statut des syncs
-- [x] Moteur de synergie (rôles, liens entre cartes, Extra Deck invocable, combos) + guides de jeu
-- [ ] Simulateur de mains de départ (probabilités d'ouvrir chaque combo)
-- [x] Quantités réelles des Structure Decks (listes Yugipedia)
-- [ ] Recherche plein texte (`pg_trgm`) sur les effets
-- [ ] Deck public partageable (lecture seule)
-- [ ] Tests e2e (Playwright)
+- [ ] Admin page: meta deck import, sync status
+- [x] Synergy engine (roles, card links, reachable Extra Deck, combos) + play guides
+- [x] Real structure deck quantities (Yugipedia set lists)
+- [x] Five languages
+- [ ] Opening-hand simulator (odds of opening each combo)
+- [ ] Deck builder suggestions from the interaction index (owned cards linked to the deck, beyond its archetype)
+- [ ] Shareable read-only public decks
+- [ ] End-to-end tests (Playwright) in CI
+
+## Credits
+
+Card data and images: [YGOPRODeck](https://ygoprodeck.com/). Product box art and set lists:
+[Yugipedia](https://yugipedia.com/). Yu-Gi-Oh! is a trademark of Konami; this project is not affiliated
+with or endorsed by Konami.
