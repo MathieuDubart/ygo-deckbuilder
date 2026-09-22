@@ -14,7 +14,8 @@ type Tab = 'search' | 'suggestions';
 
 /**
  * Panneau de gauche : recherche (par défaut limitée aux cartes possédées) ou suggestions.
- * Clic = ajoute au Main/Extra · Maj+clic = Side · clic droit = fiche.
+ * Clic = fiche de la carte (stats, effets, + / − dans le deck) · Ctrl/⌘+clic = ajout direct
+ * au Main/Extra · Maj+clic = ajout direct au Side.
  */
 export function CardPicker({
   deckId,
@@ -33,14 +34,13 @@ export function CardPicker({
   const tile = (card: CardSummaryDto) => (
     <div
       key={card.id}
+      title={`${card.name}\nClic : détails · Ctrl/⌘+clic : ajouter · Maj+clic : ajouter au side`}
       onClickCapture={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        onPick(card, e.shiftKey ? 'SIDE' : undefined);
-      }}
-      onContextMenu={(e) => {
-        e.preventDefault();
-        onInspect(card.id);
+        if (e.metaKey || e.ctrlKey) onPick(card);
+        else if (e.shiftKey) onPick(card, 'SIDE');
+        else onInspect(card.id);
       }}
     >
       <CardTile card={card} dimmed={!card.ownedQuantity} />

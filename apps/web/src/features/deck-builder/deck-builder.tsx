@@ -22,6 +22,7 @@ import { useUpdateDeck } from '@/lib/api/decks';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { formatPrice } from '@/lib/utils';
 import { CardPicker } from './card-picker';
+import { DeckCardActions } from './deck-card-actions';
 import { DeckZone } from './deck-zone';
 import { useDeckBuilder, type SaveStatus } from './use-deck-builder';
 
@@ -184,7 +185,20 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
       >
         {guideOpen && <DeckGuide cards={guideCards} name={name} onInspect={setInspect} />}
       </Dialog>
-      <CardDetailDialog cardId={inspect} onClose={() => setInspect(null)} />
+      <CardDetailDialog
+        cardId={inspect}
+        onClose={() => setInspect(null)}
+        actions={(card) => (
+          <DeckCardActions
+            card={card}
+            byZone={b.byZone}
+            counts={b.counts}
+            ocg={deck.format === 'OCG'}
+            onAdd={b.add}
+            onRemove={b.removeOne}
+          />
+        )}
+      />
     </div>
   );
 }
