@@ -133,7 +133,7 @@ export function ScoreBadge({ score }: { score: number }) {
   return (
     <div
       className={cn('flex shrink-0 flex-col items-center rounded-xl border px-2.5 py-1', tone)}
-      title="Note de solidité : moteur, staples, régularité, part de compléments génériques"
+      title="Note de solidité : synergie entre les cartes, moteur, staples, régularité, part de compléments génériques"
     >
       <span className="font-mono text-lg leading-none font-bold tabular-nums">{score}</span>
       <span className="text-[9px] tracking-wide uppercase">solidité</span>
@@ -141,11 +141,25 @@ export function ScoreBadge({ score }: { score: number }) {
   );
 }
 
-/** Les 4 critères de la note, en mots. */
+/** Les critères de la note, en mots. */
 export function ScoreBreakdown({ score }: { score: DeckScoreDto }) {
   const pct = (x: number) => `${Math.round(x * 100)} %`;
   const items = [
     { label: 'Moteur', value: pct(score.engineShare), hint: 'Part du main tenue par l’archétype' },
+    ...(score.synergy !== null
+      ? [
+          {
+            label: 'Synergie',
+            value: pct(score.synergy),
+            hint: 'Cartes qui se cherchent / s’invoquent entre elles, starters, Extra Deck vraiment invocable',
+          },
+          {
+            label: 'Starters',
+            value: String(score.starters ?? 0),
+            hint: 'Exemplaires de cartes qui lancent le jeu toutes seules',
+          },
+        ]
+      : []),
     {
       label: 'Staples',
       value: String(score.staples),
@@ -163,7 +177,7 @@ export function ScoreBreakdown({ score }: { score: DeckScoreDto }) {
     },
   ];
   return (
-    <dl className="grid grid-cols-4 gap-1 text-center">
+    <dl className={cn('grid gap-1 text-center', items.length > 4 ? 'grid-cols-3' : 'grid-cols-4')}>
       {items.map((i) => (
         <div key={i.label} className="rounded-lg bg-bg-sunken/60 px-1 py-1.5" title={i.hint}>
           <dt className="text-[10px] text-fg-subtle">{i.label}</dt>

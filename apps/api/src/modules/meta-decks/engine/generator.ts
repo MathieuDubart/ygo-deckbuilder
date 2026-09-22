@@ -295,13 +295,25 @@ export interface DeckScore {
   fillerShare: number;
   /** Proximité d'une liste de tournoi (0..1), si basé sur un archétype du meta */
   metaCoverage: number | null;
-  /** Jouable = 40 cartes, légal, et un vrai moteur (pas un tas de cartes génériques) */
+  /** 0..1 — cartes qui s'appellent entre elles, starters, Extra Deck invocable (si analysé) */
+  synergy: number | null;
+  /** Exemplaires de cartes qui lancent le jeu seules (si analysé) */
+  starters: number | null;
+  /** Jouable = 40 cartes, légal, un vrai moteur (pas un tas de cartes génériques) et de quoi démarrer */
   playable: boolean;
+}
+
+/** Résumé de l'analyse de synergie utile à la note (cf. module synergy). */
+export interface SynergyInput {
+  score: number;
+  starterCopies: number;
 }
 
 /** Seuils de jouabilité : au moins la moitié de moteur, au plus un tiers de remplissage. */
 export const MIN_ENGINE_SHARE = 0.45;
 export const MAX_FILLER_SHARE = 0.35;
+/** Sans assez de starters, on ouvre trop souvent sans rien pouvoir faire. */
+export const MIN_STARTER_COPIES = 4;
 
 /**
  * Note de solidité d'un deck généré. Heuristique volontairement lisible :
@@ -310,7 +322,7 @@ export const MAX_FILLER_SHARE = 0.35;
  */
 export function scoreDeck(
   result: GenerationResult,
-  opts: { metaCoverage?: number | null; stapleIds?: Set<number> } = {},
+  opts: { metaCoverage?: number | null; stapleIds?: Set<number>; synergy?: SynergyInput } = {},
 ): DeckScore {
   const metaCoverage = opts.metaCoverage ?? null;
   // Un staple reste un staple même s'il fait partie de la liste type (Ash Blossom…)
@@ -329,12 +341,20 @@ export function scoreDeck(
     ? engine.filter((e) => e.quantity >= 3).reduce((s, e) => s + e.quantity, 0) / engineCopies
     : 0;
 
-  const raw =
-    0.4 * Math.min(engineShare / 0.7, 1) +
-    0.2 * Math.min(staples / 9, 1) +
-    0.2 * consistency +
-    0.2 * (metaCoverage ?? Math.min(engineShare, 0.6)) -
-    0.5 * Math.max(0, fillerShare - 0.15);
+  const meta = metaCoverage ?? Math.min(engineShare, 0.6);
+  const engineScore = Math.min(engineShare / 0.7, 1);
+  const stapleScore = Math.min(staples / 9, 1);
+  const fillerPenalty = 0.5 * Math.max(0, fillerShare - 0.15);
+  const syn = opts.synergy;
+  // Avec l'analyse de synergie, elle pèse le plus : c'est ce qui fait tourner un deck
+  const raw = syn
+    ? 0.25 * engineScore +
+      0.15 * stapleScore +
+      0.15 * consistency +
+      0.15 * meta +
+      0.3 * syn.score -
+      fillerPenalty
+    : 0.4 * engineScore + 0.2 * stapleScore + 0.2 * consistency + 0.2 * meta - fillerPenalty;
 
   return {
     score: Math.round(Math.max(0, Math.min(1, raw)) * 100),
@@ -343,6 +363,12 @@ export function scoreDeck(
     consistency,
     fillerShare,
     metaCoverage,
-    playable: result.complete && engineShare >= MIN_ENGINE_SHARE && fillerShare <= MAX_FILLER_SHARE,
+    synergy: syn ? syn.score : null,
+    starters: syn ? syn.starterCopies : null,
+    playable:
+      result.complete &&
+      engineShare >= MIN_ENGINE_SHARE &&
+      fillerShare <= MAX_FILLER_SHARE &&
+      (!syn || syn.starterCopies >= MIN_STARTER_COPIES),
   };
 }
