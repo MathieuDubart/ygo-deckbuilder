@@ -5,7 +5,8 @@
     "sections": {
       "playable": "Prêts à jouer · 100 % avec tes cartes",
       "meta": "Decks du meta · les plus accessibles pour toi",
-      "archetypes": "Depuis ta collection · un deck auto par archétype"
+      "archetypes": "Depuis ta collection · un deck auto par archétype",
+      "official": "Decks officiels · structure, starter et coffrets à remonter"
     },
     "archetypeStats": "{cards, plural, one {# carte} other {# cartes}} · {copies} ex.",
     "archetypesEmpty": "Ajoute des cartes à ta collection pour voir émerger des archétypes à construire."
@@ -43,7 +44,8 @@
     "metaTier": "Meta · Tier {tier}",
     "homebrew": "Deck maison",
     "composition": "100 % tes cartes · {main} main · {extra} extra",
-    "open": "Voir et créer"
+    "open": "Voir et créer",
+    "official": "Deck officiel"
   },
   "score": {
     "hint": "Note de solidité : synergie entre les cartes, moteur, staples, régularité, part de compléments génériques",
@@ -120,6 +122,32 @@
       "ARCHETYPE": "Archétype",
       "SUPPORT": "Support",
       "FILLER": "Complément"
+    },
+    "titleOfficial": "Deck officiel : {name}",
+    "modesOfficial": {
+      "OWNED": {
+        "label": "Avec mes cartes",
+        "hint": "Uniquement ce que tu possèdes, complété par tes staples"
+      },
+      "META": {
+        "label": "Liste officielle complète",
+        "hint": "Le deck tel qu’il est vendu, avec ce qu’il te manque"
+      }
     }
+  },
+  "official": {
+    "filterLabel": "Type de produit",
+    "filters": {
+      "ALL": "Tous",
+      "STRUCTURE": "Decks de structure",
+      "STARTER": "Decks de démarrage",
+      "BOX": "Decks de coffrets"
+    },
+    "empty": {
+      "title": "Pas encore de decks officiels",
+      "description": "Les listes officielles (decks de structure, starters, decks de coffrets comme Legendary Decks) sont récupérées sur Yugipedia en arrière-plan au démarrage de l’API. Reviens dans quelques minutes."
+    },
+    "owned": "Dans ta collection",
+    "showMore": "Voir plus ({count})"
   }
 }

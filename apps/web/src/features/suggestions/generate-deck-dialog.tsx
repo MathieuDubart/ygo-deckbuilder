@@ -46,6 +46,8 @@ export function GenerateDeckDialog({
   onClose: () => void;
 }) {
   const t = useTranslations('suggestions.generate');
+  // Deck officiel : « liste officielle » plutôt que « liste meta »
+  const modesKey = target?.kind === 'official' ? 'modesOfficial' : 'modes';
   const tc = useTranslations('common');
   const router = useRouter();
   const [mode, setMode] = useState<GenerationMode>('OWNED');
@@ -115,26 +117,28 @@ export function GenerateDeckDialog({
         title={
           target?.kind === 'meta'
             ? t('titleMeta', { name: target.name })
-            : t('titleArchetype', { archetype: target?.archetype ?? '' })
+            : target?.kind === 'official'
+              ? t('titleOfficial', { name: target.name })
+              : t('titleArchetype', { archetype: target?.archetype ?? '' })
         }
         variant="sheet"
         className="w-[min(100vw,52rem)]"
       >
         <div className="space-y-5">
-          {target?.kind === 'meta' && (
+          {(target?.kind === 'meta' || target?.kind === 'official') && (
             <div className="grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm">
               {MODES.map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setMode(m)}
-                  title={t(`modes.${m}.hint`)}
+                  title={t(`${modesKey}.${m}.hint`)}
                   className={cn(
                     'rounded-md py-2 font-medium transition',
                     mode === m ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted hover:text-fg',
                   )}
                 >
-                  {t(`modes.${m}.label`)}
+                  {t(`${modesKey}.${m}.label`)}
                 </button>
               ))}
             </div>

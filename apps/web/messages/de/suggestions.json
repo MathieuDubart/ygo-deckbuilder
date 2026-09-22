@@ -5,7 +5,8 @@
     "sections": {
       "playable": "Sofort spielbar · 100 % deine Karten",
       "meta": "Meta-Decks · die für dich zugänglichsten",
-      "archetypes": "Aus deiner Sammlung · ein automatisch gebautes Deck pro Archetyp"
+      "archetypes": "Aus deiner Sammlung · ein automatisch gebautes Deck pro Archetyp",
+      "official": "Offizielle Decks · Structure-, Starter- und Box-Decks zum Nachbauen"
     },
     "archetypeStats": "{cards, plural, one {# Karte} other {# Karten}} · {copies, plural, one {# Exemplar} other {# Exemplare}}",
     "archetypesEmpty": "Füge Karten zu deiner Sammlung hinzu, um Archetypen zu sehen, die du bauen kannst."
@@ -43,7 +44,8 @@
     "metaTier": "Meta · Tier {tier}",
     "homebrew": "Homebrew",
     "composition": "100 % deine Karten · {main} Main · {extra} Extra",
-    "open": "Ansehen & erstellen"
+    "open": "Ansehen & erstellen",
+    "official": "Offizielles Deck"
   },
   "score": {
     "hint": "Stärkewertung: Synergie der Karten, Engine, Staples, Konstanz, Anteil generischer Füllkarten",
@@ -120,6 +122,32 @@
       "ARCHETYPE": "Archetyp",
       "SUPPORT": "Support",
       "FILLER": "Füllkarte"
+    },
+    "titleOfficial": "Offizielles Deck: {name}",
+    "modesOfficial": {
+      "OWNED": {
+        "label": "Mit meinen Karten",
+        "hint": "Nur was du besitzt, ergänzt durch deine Staples"
+      },
+      "META": {
+        "label": "Vollständige offizielle Liste",
+        "hint": "Das Deck wie verkauft, mit dem, was dir fehlt"
+      }
     }
+  },
+  "official": {
+    "filterLabel": "Produkttyp",
+    "filters": {
+      "ALL": "Alle",
+      "STRUCTURE": "Structure Decks",
+      "STARTER": "Starter Decks",
+      "BOX": "Decks aus Boxen"
+    },
+    "empty": {
+      "title": "Noch keine offiziellen Decks",
+      "description": "Die offiziellen Decklisten (Structure Decks, Starter Decks, Decks aus Boxen wie Legendary Decks) werden nach dem Start der API im Hintergrund von Yugipedia geladen. Schau in ein paar Minuten wieder vorbei."
+    },
+    "owned": "In deiner Sammlung",
+    "showMore": "Mehr anzeigen ({count})"
   }
 }

@@ -5,7 +5,8 @@
     "sections": {
       "playable": "Ready to play · 100% your cards",
       "meta": "Meta decks · the most accessible for you",
-      "archetypes": "From your collection · one auto-built deck per archetype"
+      "archetypes": "From your collection · one auto-built deck per archetype",
+      "official": "Official decks · structure, starter and box decks you can rebuild"
     },
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# copy} other {# copies}}",
     "archetypesEmpty": "Add cards to your collection to see archetypes you can build."
@@ -43,7 +44,8 @@
     "metaTier": "Meta · Tier {tier}",
     "homebrew": "Homebrew",
     "composition": "100% your cards · {main} main · {extra} extra",
-    "open": "View & create"
+    "open": "View & create",
+    "official": "Official deck"
   },
   "score": {
     "hint": "Strength rating: card synergy, engine, staples, consistency, share of generic filler",
@@ -120,6 +122,32 @@
       "ARCHETYPE": "Archetype",
       "SUPPORT": "Support",
       "FILLER": "Filler"
+    },
+    "titleOfficial": "Official deck: {name}",
+    "modesOfficial": {
+      "OWNED": {
+        "label": "With my cards",
+        "hint": "Only what you own, rounded out with your staples"
+      },
+      "META": {
+        "label": "Full official list",
+        "hint": "The deck as sold, with what you’re missing"
+      }
     }
+  },
+  "official": {
+    "filterLabel": "Product type",
+    "filters": {
+      "ALL": "All",
+      "STRUCTURE": "Structure decks",
+      "STARTER": "Starter decks",
+      "BOX": "Box decks"
+    },
+    "empty": {
+      "title": "No official decks yet",
+      "description": "Official deck lists (structure decks, starter decks, decks from boxes like Legendary Decks) are fetched from Yugipedia in the background after the API starts. Come back in a few minutes."
+    },
+    "owned": "In your collection",
+    "showMore": "Show more ({count})"
   }
 }

@@ -95,7 +95,9 @@ function PlayableDeckCard({
         })}
         <div className="absolute top-3 left-3 flex gap-1.5">
           {best && <Badge tone="accent">{t('best')}</Badge>}
-          {deck.tier !== null ? (
+          {deck.target.kind === 'official' ? (
+            <Badge>{t('official')}</Badge>
+          ) : deck.tier !== null ? (
             <Badge>{t('metaTier', { tier: deck.tier })}</Badge>
           ) : (
             <Badge>{t('homebrew')}</Badge>

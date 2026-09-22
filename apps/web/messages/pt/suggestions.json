@@ -5,7 +5,8 @@
     "sections": {
       "playable": "Prontos para jogar · 100% seus cards",
       "meta": "Decks do meta · os mais acessíveis para você",
-      "archetypes": "Da sua coleção · um deck automático por arquétipo"
+      "archetypes": "Da sua coleção · um deck automático por arquétipo",
+      "official": "Decks oficiais · structure, starter e decks de caixas para remontar"
     },
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# cópia} other {# cópias}}",
     "archetypesEmpty": "Adicione cards à sua coleção para ver arquétipos que você pode montar."
@@ -43,7 +44,8 @@
     "metaTier": "Meta · Tier {tier}",
     "homebrew": "Homebrew",
     "composition": "100% seus cards · {main} main · {extra} extra",
-    "open": "Ver e criar"
+    "open": "Ver e criar",
+    "official": "Deck oficial"
   },
   "score": {
     "hint": "Nota de força: sinergia entre os cards, engine, staples, consistência, parte de cards genéricos de preenchimento",
@@ -120,6 +122,32 @@
       "ARCHETYPE": "Arquétipo",
       "SUPPORT": "Suporte",
       "FILLER": "Preenchimento"
+    },
+    "titleOfficial": "Deck oficial: {name}",
+    "modesOfficial": {
+      "OWNED": {
+        "label": "Com meus cards",
+        "hint": "Só o que você tem, completado com seus staples"
+      },
+      "META": {
+        "label": "Lista oficial completa",
+        "hint": "O deck como é vendido, com o que falta para você"
+      }
     }
+  },
+  "official": {
+    "filterLabel": "Tipo de produto",
+    "filters": {
+      "ALL": "Todos",
+      "STRUCTURE": "Structure Decks",
+      "STARTER": "Starter Decks",
+      "BOX": "Decks de caixas"
+    },
+    "empty": {
+      "title": "Ainda sem decks oficiais",
+      "description": "As listas oficiais (Structure Decks, Starter Decks, decks de caixas como Legendary Decks) são baixadas do Yugipedia em segundo plano quando a API inicia. Volte em alguns minutos."
+    },
+    "owned": "Na sua coleção",
+    "showMore": "Ver mais ({count})"
   }
 }
