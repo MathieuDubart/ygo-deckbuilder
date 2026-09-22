@@ -1,0 +1,125 @@
+{
+  "page": {
+    "title": "Suggestions",
+    "description": "Today’s top decks, what your collection can already build, and decks built for you.",
+    "sections": {
+      "playable": "Ready to play · 100% your cards",
+      "meta": "Meta decks · the most accessible for you",
+      "archetypes": "From your collection · one auto-built deck per archetype"
+    },
+    "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# copy} other {# copies}}",
+    "archetypesEmpty": "Add cards to your collection to see archetypes you can build."
+  },
+  "meta": {
+    "empty": {
+      "title": "No tournament data yet",
+      "description": "The meta is computed automatically from recent tournament top decks (YGOPRODeck). The first update runs when the API starts, then every Monday."
+    },
+    "status": {
+      "ok": "Meta updated {date} · {count, plural, one {# list} other {# lists}}",
+      "failed": "Meta updated {date} · failed",
+      "refresh": "Update",
+      "synced": "{archetypes} archetypes computed from {lists} lists"
+    },
+    "card": {
+      "tier": "Tier {tier}",
+      "share": "{share} of the meta",
+      "listCount": "{count, plural, one {# tournament list} other {# tournament lists}}",
+      "imported": "Imported list",
+      "variant": "also “{name}”",
+      "playable": "You can play it as is.",
+      "missing": "{owned}/{required} copies · <strong>{cost}</strong> to complete",
+      "build": "Build this deck",
+      "coverage": "Share of the reference list you already own"
+    }
+  },
+  "playable": {
+    "empty": {
+      "title": "No complete deck from your collection yet",
+      "description": "You need a well-stocked archetype (about ten different cards) or a good chunk of a meta deck. A Structure Deck is often the best starting point.",
+      "action": "Add a product"
+    },
+    "best": "Best pick",
+    "metaTier": "Meta · Tier {tier}",
+    "homebrew": "Homebrew",
+    "composition": "100% your cards · {main} main · {extra} extra",
+    "open": "View & create"
+  },
+  "score": {
+    "hint": "Strength rating: card synergy, engine, staples, consistency, share of generic filler",
+    "label": "strength",
+    "criteria": {
+      "engine": {
+        "label": "Engine",
+        "hint": "Share of the Main Deck taken up by the archetype"
+      },
+      "synergy": {
+        "label": "Synergy",
+        "hint": "Cards that search / summon each other, starters, Extra Deck you can actually summon"
+      },
+      "starters": {
+        "label": "Starters",
+        "hint": "Copies of cards that start your combos on their own"
+      },
+      "staples": {
+        "label": "Staples",
+        "hint": "Hand traps and generic meta cards"
+      },
+      "consistency": {
+        "label": "Consistency",
+        "hint": "Engine cards run at 3 copies"
+      },
+      "filler": {
+        "label": "Filler",
+        "hint": "Generic cards added to reach 40"
+      }
+    }
+  },
+  "generate": {
+    "titleMeta": "Build: {name}",
+    "titleArchetype": "Auto deck: {archetype}",
+    "modes": {
+      "OWNED": {
+        "label": "With my cards",
+        "hint": "Only what you own, rounded out with your staples"
+      },
+      "META": {
+        "label": "Full meta list",
+        "hint": "The tournament reference list, with what you’re missing"
+      }
+    },
+    "status": {
+      "playable": "Complete and playable with your cards",
+      "fragile": "Complete, but fragile",
+      "incomplete": "Incomplete with your collection"
+    },
+    "zoneCount": "{count, plural, one {# card} other {# cards}}",
+    "nameLabel": "Deck name",
+    "wishlistMissing": "{count, plural, one {Add the missing copy to my wishlist} other {Add the # missing copies to my wishlist}}",
+    "create": "Create this deck",
+    "created": "Deck “{name}” created",
+    "summary": {
+      "counts": "Main / Extra / Side",
+      "playable": "Playable",
+      "yes": "Yes",
+      "missingMain": "{count, plural, one {# card missing} other {# cards missing}}",
+      "toBuy": "To buy",
+      "toBuyValue": "{count, plural, one {# copy} other {# copies}}",
+      "nothing": "Nothing",
+      "cost": "Estimated cost"
+    },
+    "card": {
+      "inclusion": "Played in {percent} of lists",
+      "toBuy": "{count, plural, one {# copy to buy} other {# copies to buy}}",
+      "allOwned": "All owned",
+      "missingBadge": "MISSING"
+    },
+    "sources": {
+      "FLEX": "Flex",
+      "STAPLE": "Staple",
+      "ARCHETYPE": "Archetype",
+      "SUPPORT": "Support",
+      "FILLER": "Filler"
+    }
+  }
+}

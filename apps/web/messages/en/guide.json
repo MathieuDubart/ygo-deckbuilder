@@ -1,0 +1,44 @@
+{
+  "title": "Deck guide",
+  "source": {
+    "ai": "Written by AI",
+    "aiWithModel": "Written by AI · {model}",
+    "rules": "Computed from card effects"
+  },
+  "writing": "The AI is writing the guide… (a local model can take a minute or two) — showing the computed version in the meantime.",
+  "aiError": "{error} — showing the computed guide instead.",
+  "mode": {
+    "label": "Guide version",
+    "RULES": "Computed",
+    "AI": "AI-written"
+  },
+  "sections": {
+    "gamePlan": "Game plan",
+    "combos": "Combos to know ({count})",
+    "combosDisclaimer": "Suggested lines found by reading the card effects: always check the exact card text (conditions, costs, “once per turn”).",
+    "keyCards": "Key cards",
+    "firstSecond": "Going first / going second",
+    "goingFirst": "Going first",
+    "goingSecond": "Going second",
+    "mistakes": "Mistakes to avoid",
+    "tips": "Tips"
+  },
+  "nothing": "Nothing in particular.",
+  "combo": {
+    "hand": "In hand",
+    "endBoard": "End board"
+  },
+  "roles": {
+    "STARTER": "Starter",
+    "SEARCHER": "Searcher",
+    "EXTENDER": "Extender",
+    "HAND_TRAP": "Hand trap",
+    "INTERRUPTION": "Interruption",
+    "REMOVAL": "Removal",
+    "DRAW": "Draw",
+    "RECOVERY": "Recovery",
+    "FUSION_ENABLER": "Fusion",
+    "RITUAL_ENABLER": "Ritual",
+    "BOSS": "Boss"
+  }
+}

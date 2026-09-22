@@ -1,0 +1,77 @@
+{
+  "ban": {
+    "Forbidden": "Proibita",
+    "Banned": "Proibita",
+    "Limited": "Limitata",
+    "Semi-Limited": "Semi-Limitata"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "detail": {
+    "fallbackTitle": "Carta",
+    "banTcg": "TCG: {status}",
+    "level": "Liv. {level}",
+    "scale": "Scala {scale}",
+    "ownedPrice": "Possedute: <strong>{owned}</strong> · Cardmarket da <strong>{price}</strong>",
+    "prints": "Stampe ({count})",
+    "printUnspecified": "Stampa non specificata"
+  },
+  "collectionForm": {
+    "title": "Aggiungi alla collezione",
+    "print": "Stampa",
+    "quantity": "Qtà",
+    "condition": "Condizione",
+    "language": "Lingua",
+    "firstEdition": "1ª ed.",
+    "success": "{count, plural, one {# copia aggiunta alla tua collezione} other {# copie aggiunte alla tua collezione}}"
+  },
+  "wishlistForm": {
+    "open": "Aggiungi alla wishlist",
+    "success": "Aggiunta alla tua wishlist",
+    "title": "La sto cercando",
+    "print": "Stampa desiderata",
+    "quantity": "Qtà",
+    "maxPrice": "Budget max (€)"
+  },
+  "interactions": {
+    "title": "Interazioni",
+    "ownedLinked": "{count} delle tue carte",
+    "onlyMine": "Solo le mie carte",
+    "emptyIndexed": "Nessun collegamento preciso trovato nei testi: questa carta non si riferisce a nessun nome o tipo in particolare, e nessuna carta si riferisce specificamente a lei.",
+    "emptyIndexing": "L’indice delle interazioni è ancora in costruzione, riprova tra un minuto.",
+    "tabs": {
+      "out": "Cosa fa",
+      "in": "Chi la usa"
+    },
+    "noneMine": "Nessuna delle tue carte qui.",
+    "none": "Niente da questo lato.",
+    "generic": "Effetti generici (funzionano con molte carte): {list}",
+    "byTraits": "(per le sue caratteristiche)",
+    "byTraitsTitle": "Queste carte non la nominano: si riferiscono al suo Livello, Attributo o Tipo",
+    "out": {
+      "SEARCH": "Cerca",
+      "RECOVER": "Recupera",
+      "SPECIAL_SUMMON": "Evoca",
+      "SUMMON_EXTRA": "Evoca dall’Extra Deck",
+      "SEND_GY": "Manda al Cimitero",
+      "MATERIAL": "Materiali possibili",
+      "MENTION": "Nomina"
+    },
+    "in": {
+      "SEARCH": "Cercata da",
+      "RECOVER": "Recuperata da",
+      "SPECIAL_SUMMON": "Evocata da",
+      "SUMMON_EXTRA": "Evocata dall’Extra Deck da",
+      "SEND_GY": "Mandata al Cimitero da",
+      "MATERIAL": "Materiale per",
+      "MENTION": "Nominata da"
+    }
+  }
+}

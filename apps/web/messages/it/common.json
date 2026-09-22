@@ -1,0 +1,40 @@
+{
+  "actions": {
+    "close": "Chiudi",
+    "cancel": "Annulla",
+    "back": "Indietro",
+    "retry": "Riprova",
+    "save": "Salva",
+    "add": "Aggiungi",
+    "remove": "Togli",
+    "delete": "Elimina",
+    "create": "Crea",
+    "copy": "Copia",
+    "copied": "Copiato"
+  },
+  "pagination": {
+    "label": "Paginazione",
+    "previous": "← Precedente",
+    "next": "Successiva →"
+  },
+  "status": {
+    "loading": "Caricamento…",
+    "error": "Qualcosa è andato storto",
+    "none": "—"
+  },
+  "zones": {
+    "MAIN": "Main Deck",
+    "EXTRA": "Extra Deck",
+    "SIDE": "Side Deck"
+  },
+  "categories": {
+    "MONSTER": "Mostri",
+    "SPELL": "Magie",
+    "TRAP": "Trappole",
+    "SKILL": "Abilità",
+    "TOKEN": "Segna-Mostro"
+  },
+  "locale": {
+    "label": "Lingua"
+  }
+}

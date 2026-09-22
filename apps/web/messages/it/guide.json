@@ -1,0 +1,44 @@
+{
+  "title": "Guida al deck",
+  "source": {
+    "ai": "Scritta dall’IA",
+    "aiWithModel": "Scritta dall’IA · {model}",
+    "rules": "Calcolata dagli effetti delle carte"
+  },
+  "writing": "L’IA sta scrivendo la guida… (un modello locale può metterci un minuto o due) — nel frattempo ecco la versione calcolata.",
+  "aiError": "{error} — al suo posto viene mostrata la guida calcolata.",
+  "mode": {
+    "label": "Versione della guida",
+    "RULES": "Calcolata",
+    "AI": "Scritta dall’IA"
+  },
+  "sections": {
+    "gamePlan": "Piano di gioco",
+    "combos": "Combo da conoscere ({count})",
+    "combosDisclaimer": "Linee indicative trovate leggendo gli effetti delle carte: controlla sempre il testo esatto (condizioni, costi, «una volta per turno»).",
+    "keyCards": "Carte chiave",
+    "firstSecond": "Per primo / per secondo",
+    "goingFirst": "Se giochi per primo",
+    "goingSecond": "Se giochi per secondo",
+    "mistakes": "Errori da evitare",
+    "tips": "Consigli"
+  },
+  "nothing": "Niente di particolare.",
+  "combo": {
+    "hand": "In mano",
+    "endBoard": "Board finale"
+  },
+  "roles": {
+    "STARTER": "Starter",
+    "SEARCHER": "Searcher",
+    "EXTENDER": "Extender",
+    "HAND_TRAP": "Hand trap",
+    "INTERRUPTION": "Interruzione",
+    "REMOVAL": "Rimozione",
+    "DRAW": "Pesca",
+    "RECOVERY": "Recupero",
+    "FUSION_ENABLER": "Fusione",
+    "RITUAL_ENABLER": "Rituale",
+    "BOSS": "Boss"
+  }
+}

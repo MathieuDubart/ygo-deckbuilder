@@ -1,22 +1,25 @@
 'use client';
 import { BookOpen, Layers, Library, LogOut, Heart, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useLogout, useMe } from '@/lib/api/auth';
 import { cn } from '@/lib/utils';
+import { LocaleSwitcher } from './locale-switcher';
 
 const NAV = [
-  { href: '/collection', label: 'Collection', icon: Library },
-  { href: '/decks', label: 'Decks', icon: Layers },
-  { href: '/suggestions', label: 'Suggestions', icon: Sparkles },
-  { href: '/cards', label: 'Catalogue', icon: BookOpen },
-  { href: '/wishlist', label: 'Wishlist', icon: Heart },
+  { href: '/collection', key: 'collection', icon: Library },
+  { href: '/decks', key: 'decks', icon: Layers },
+  { href: '/suggestions', key: 'suggestions', icon: Sparkles },
+  { href: '/cards', key: 'catalog', icon: BookOpen },
+  { href: '/wishlist', key: 'wishlist', icon: Heart },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: me } = useMe();
   const logout = useLogout();
+  const t = useTranslations('layout');
 
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
@@ -24,10 +27,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-bg-sunken/60 px-3 py-5 md:flex">
         <Link href="/collection" className="mb-8 flex items-center gap-2 px-3">
           <Logo />
-          <span className="font-semibold tracking-tight">Deck Builder</span>
+          <span className="font-semibold tracking-tight">{t('appName')}</span>
         </Link>
         <nav className="flex flex-1 flex-col gap-0.5">
-          {NAV.map(({ href, label, icon: Icon }) => {
+          {NAV.map(({ href, key, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link
@@ -39,18 +42,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               >
                 <Icon className={cn('size-4', active && 'text-accent')} />
-                {label}
+                {t(`nav.${key}`)}
               </Link>
             );
           })}
         </nav>
+        <LocaleSwitcher className="mb-3 px-3" />
         <div className="flex items-center justify-between gap-2 border-t border-border px-3 pt-4">
           <span className="truncate text-sm text-fg-muted">{me?.username ?? '…'}</span>
           <button
             onClick={() => logout.mutate()}
             className="rounded-md p-1.5 text-fg-subtle hover:bg-bg-elevated hover:text-fg"
-            aria-label="Se déconnecter"
-            title="Se déconnecter"
+            aria-label={t('logout')}
+            title={t('logout')}
           >
             <LogOut className="size-4" />
           </button>
@@ -58,12 +62,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="px-4 pt-6 pb-28 md:px-10 md:py-10">
+        <div className="mb-4 flex justify-end md:hidden">
+          <LocaleSwitcher />
+        </div>
         <div className="mx-auto max-w-7xl">{children}</div>
       </main>
 
       {/* Tab bar mobile */}
       <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        {NAV.map(({ href, label, icon: Icon }) => {
+        {NAV.map(({ href, key, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
             <Link
@@ -75,7 +82,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               )}
             >
               <Icon className="size-5" />
-              {label}
+              {t(`nav.${key}`)}
             </Link>
           );
         })}

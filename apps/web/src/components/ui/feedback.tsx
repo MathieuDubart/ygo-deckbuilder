@@ -1,4 +1,6 @@
+'use client';
 import type { LucideIcon } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 export const Skeleton = ({ className }: { className?: string }) => (
@@ -66,15 +68,16 @@ export function Pagination({
   totalPages: number;
   onChange: (p: number) => void;
 }) {
+  const t = useTranslations('common.pagination');
   if (totalPages <= 1) return null;
   return (
-    <nav className="mt-8 flex items-center justify-center gap-3 text-sm" aria-label="Pagination">
+    <nav className="mt-8 flex items-center justify-center gap-3 text-sm" aria-label={t('label')}>
       <button
         className="rounded-md px-3 py-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-30"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
       >
-        ← Précédent
+        {t('previous')}
       </button>
       <span className="font-mono text-fg-subtle tabular-nums">
         {page} / {totalPages}
@@ -84,7 +87,7 @@ export function Pagination({
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
       >
-        Suivant →
+        {t('next')}
       </button>
     </nav>
   );

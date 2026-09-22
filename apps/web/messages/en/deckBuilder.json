@@ -1,0 +1,58 @@
+{
+  "header": {
+    "nameLabel": "Deck name",
+    "guide": "Guide",
+    "guideHint": "How to play this deck: game plan, combos, mistakes to avoid",
+    "guideDialogTitle": "Guide: {name}"
+  },
+  "save": {
+    "saved": "Saved",
+    "dirty": "Unsaved changes",
+    "saving": "Saving…",
+    "error": "Save failed — retry"
+  },
+  "issues": {
+    "title": "Deck not legal",
+    "zoneTooSmall": "{zone}: {count, plural, one {# card} other {# cards}} (minimum {limit})",
+    "zoneTooLarge": "{zone}: {count, plural, one {# card} other {# cards}} (maximum {limit})",
+    "tooManyCopies": "{name}: {count, plural, one {# copy} other {# copies}} (max {limit})",
+    "wrongZone": "{name} doesn’t belong in the {zone}"
+  },
+  "missing": {
+    "summary": "<strong>{count, plural, one {# copy} other {# copies}}</strong> not owned · about <strong>{cost}</strong>",
+    "addAll": "Add all to wishlist",
+    "added": "{count, plural, one {# card added to your wishlist} other {# cards added to your wishlist}}"
+  },
+  "add": {
+    "extraDeckMonster": "This monster goes in the Extra Deck",
+    "notExtraDeck": "Only Fusion, Synchro, Xyz and Link monsters go in the Extra Deck",
+    "maxCopies": "{limit, plural, one {Maximum # copy} other {Maximum # copies}}",
+    "zoneFull": "{zone} is full"
+  },
+  "picker": {
+    "search": "Search",
+    "suggestions": "Suggestions",
+    "suggestionsCount": "Suggestions ({count})",
+    "tileTitle": "{name}\nClick: details · Ctrl/⌘+click: add · Shift+click: add to Side Deck",
+    "noOwnedResults": "None of your cards match. Uncheck “Owned” to search all cards.",
+    "noResults": "No results.",
+    "suggestionsHint": "Cards from your collection that share an archetype with your deck or are mentioned by it.",
+    "suggestionsEmpty": "Add a few cards to the deck: suggestions are based on its archetypes."
+  },
+  "zone": {
+    "emptySide": "Open a card and add it to the Side Deck, or Shift+click to add it directly",
+    "empty": "Click a card on the left to see its details and add it",
+    "copyTitle": "{name}\nClick: details · Ctrl/⌘+click: remove",
+    "copyTitleMissing": "{name} — not owned\nClick: details · Ctrl/⌘+click: remove",
+    "missingBadge": "MISSING"
+  },
+  "actions": {
+    "inDeck": "In this deck",
+    "copies": "{total}/{limit, plural, one {# copy} other {# copies}}",
+    "owned": "{owned} owned{toBuy, plural, =0 {} other { · # to buy}}",
+    "zoneCount": "{count}/{max} cards",
+    "removeOne": "Remove one copy from the {zone}",
+    "addOne": "Add one copy to the {zone}",
+    "cannotAdd": "Can’t add this card"
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
 import type { CardSummaryDto, DeckZone } from '@ygo/shared';
 import { Sparkles } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { CardFilters } from '@/components/cards/card-filters';
 import { CardGrid, CardTile } from '@/components/cards/card-tile';
@@ -26,6 +27,7 @@ export function CardPicker({
   onPick: (card: CardSummaryDto, zone?: DeckZone) => void;
   onInspect: (cardId: number) => void;
 }) {
+  const t = useTranslations('deckBuilder.picker');
   const [tab, setTab] = useState<Tab>('search');
   const [params, setParams] = useState<CardSearchParams>({ owned: true, page: 1, pageSize: 36 });
   const search = useCardSearch(useDebounced(params), tab === 'search');
@@ -34,7 +36,7 @@ export function CardPicker({
   const tile = (card: CardSummaryDto) => (
     <div
       key={card.id}
-      title={`${card.name}\nClic : détails · Ctrl/⌘+clic : ajouter · Maj+clic : ajouter au side`}
+      title={t('tileTitle', { name: card.name })}
       onClickCapture={(e) => {
         e.stopPropagation();
         e.preventDefault();
@@ -50,19 +52,21 @@ export function CardPicker({
   return (
     <div className="flex h-full flex-col gap-3">
       <div className="grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm">
-        {(['search', 'suggestions'] as const).map((t) => (
+        {(['search', 'suggestions'] as const).map((id) => (
           <button
-            key={t}
-            onClick={() => setTab(t)}
+            key={id}
+            onClick={() => setTab(id)}
             className={cn(
               'flex items-center justify-center gap-1.5 rounded-md py-1.5 font-medium',
-              tab === t ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted',
+              tab === id ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted',
             )}
           >
-            {t === 'suggestions' && <Sparkles className="size-3.5 text-accent" />}
-            {t === 'search'
-              ? 'Rechercher'
-              : `Suggestions${suggestions.data ? ` (${suggestions.data.length})` : ''}`}
+            {id === 'suggestions' && <Sparkles className="size-3.5 text-accent" />}
+            {id === 'search'
+              ? t('search')
+              : suggestions.data
+                ? t('suggestionsCount', { count: suggestions.data.length })
+                : t('suggestions')}
           </button>
         ))}
       </div>
@@ -88,9 +92,7 @@ export function CardPicker({
               </>
             ) : (
               <p className="py-10 text-center text-sm text-fg-subtle">
-                {params.owned
-                  ? 'Aucune carte possédée ne correspond. Décoche « Possédées » pour chercher partout.'
-                  : 'Aucun résultat.'}
+                {params.owned ? t('noOwnedResults') : t('noResults')}
               </p>
             )}
           </div>
@@ -99,15 +101,11 @@ export function CardPicker({
         <Skeleton className="h-40" />
       ) : suggestions.data?.length ? (
         <div className="space-y-2">
-          <p className="text-xs text-fg-subtle">
-            Cartes de ta collection qui partagent un archétype avec ton deck ou y sont citées.
-          </p>
+          <p className="text-xs text-fg-subtle">{t('suggestionsHint')}</p>
           <CardGrid>{suggestions.data.map((s) => tile(s.card))}</CardGrid>
         </div>
       ) : (
-        <p className="py-10 text-center text-sm text-fg-subtle">
-          Ajoute quelques cartes au deck : les suggestions se basent sur ses archétypes.
-        </p>
+        <p className="py-10 text-center text-sm text-fg-subtle">{t('suggestionsEmpty')}</p>
       )}
     </div>
   );

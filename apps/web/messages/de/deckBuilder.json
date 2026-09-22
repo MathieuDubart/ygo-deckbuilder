@@ -1,0 +1,58 @@
+{
+  "header": {
+    "nameLabel": "Deckname",
+    "guide": "Guide",
+    "guideHint": "So spielst du dieses Deck: Spielplan, Combos, Fehler, die du vermeiden solltest",
+    "guideDialogTitle": "Guide: {name}"
+  },
+  "save": {
+    "saved": "Gespeichert",
+    "dirty": "Ungespeicherte Änderungen",
+    "saving": "Speichert…",
+    "error": "Speichern fehlgeschlagen – nochmal versuchen"
+  },
+  "issues": {
+    "title": "Deck nicht legal",
+    "zoneTooSmall": "{zone}: {count, plural, one {# Karte} other {# Karten}} (mindestens {limit})",
+    "zoneTooLarge": "{zone}: {count, plural, one {# Karte} other {# Karten}} (maximal {limit})",
+    "tooManyCopies": "{name}: {count, plural, one {# Exemplar} other {# Exemplare}} (max. {limit})",
+    "wrongZone": "{name} gehört nicht ins {zone}"
+  },
+  "missing": {
+    "summary": "<strong>{count, plural, one {# Exemplar} other {# Exemplare}}</strong> nicht im Besitz · etwa <strong>{cost}</strong>",
+    "addAll": "Alle auf die Wunschliste",
+    "added": "{count, plural, one {# Karte zu deiner Wunschliste hinzugefügt} other {# Karten zu deiner Wunschliste hinzugefügt}}"
+  },
+  "add": {
+    "extraDeckMonster": "Dieses Monster gehört ins Extra Deck",
+    "notExtraDeck": "Nur Fusions-, Synchro-, Xyz- und Link-Monster gehören ins Extra Deck",
+    "maxCopies": "{limit, plural, one {Maximal # Exemplar} other {Maximal # Exemplare}}",
+    "zoneFull": "{zone} ist voll"
+  },
+  "picker": {
+    "search": "Suche",
+    "suggestions": "Vorschläge",
+    "suggestionsCount": "Vorschläge ({count})",
+    "tileTitle": "{name}\nKlick: Details · Strg/⌘+Klick: hinzufügen · Umschalt+Klick: ins Side Deck",
+    "noOwnedResults": "Keine deiner Karten passt. Entferne den Haken bei „Im Besitz“, um alle Karten zu durchsuchen.",
+    "noResults": "Keine Ergebnisse.",
+    "suggestionsHint": "Karten aus deiner Sammlung, die einen Archetyp mit deinem Deck teilen oder von ihm erwähnt werden.",
+    "suggestionsEmpty": "Füge ein paar Karten ins Deck ein: Die Vorschläge basieren auf seinen Archetypen."
+  },
+  "zone": {
+    "emptySide": "Öffne eine Karte und füge sie dem Side Deck hinzu – oder direkt per Umschalt+Klick",
+    "empty": "Klick links auf eine Karte, um ihre Details zu sehen und sie hinzuzufügen",
+    "copyTitle": "{name}\nKlick: Details · Strg/⌘+Klick: entfernen",
+    "copyTitleMissing": "{name} – nicht im Besitz\nKlick: Details · Strg/⌘+Klick: entfernen",
+    "missingBadge": "FEHLT"
+  },
+  "actions": {
+    "inDeck": "In diesem Deck",
+    "copies": "{total}/{limit, plural, one {# Exemplar} other {# Exemplare}}",
+    "owned": "{owned} im Besitz{toBuy, plural, =0 {} other { · # zu kaufen}}",
+    "zoneCount": "{count}/{max} Karten",
+    "removeOne": "Ein Exemplar aus dem {zone} entfernen",
+    "addOne": "Ein Exemplar zum {zone} hinzufügen",
+    "cannotAdd": "Diese Karte kann nicht hinzugefügt werden"
+  }
+}

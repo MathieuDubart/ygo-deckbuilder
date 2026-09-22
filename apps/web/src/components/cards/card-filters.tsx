@@ -1,26 +1,12 @@
 'use client';
 import { CARD_CATEGORIES } from '@ygo/shared';
 import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useArchetypes, type CardSearchParams } from '@/lib/api/cards';
 import { Input, Select } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  MONSTER: 'Monstres',
-  SPELL: 'Magies',
-  TRAP: 'Pièges',
-  SKILL: 'Compétences',
-  TOKEN: 'Jetons',
-};
-
-const SORTS = [
-  ['relevance', 'Pertinence'],
-  ['name', 'Nom'],
-  ['newest', 'Plus récentes'],
-  ['atk', 'ATK'],
-  ['def', 'DEF'],
-  ['level', 'Niveau'],
-] as const;
+const SORTS = ['relevance', 'name', 'newest', 'atk', 'def', 'level'] as const;
 
 export function CardFilters({
   value,
@@ -31,6 +17,8 @@ export function CardFilters({
   onChange: (next: CardSearchParams) => void;
   compact?: boolean;
 }) {
+  const t = useTranslations('catalog.filters');
+  const tc = useTranslations('common.categories');
   const { data: archetypes } = useArchetypes();
   const set = (patch: CardSearchParams) => onChange({ ...value, ...patch, page: 1 });
 
@@ -40,9 +28,7 @@ export function CardFilters({
         <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
         <Input
           type="search"
-          placeholder={
-            compact ? 'Nom, archétype…' : 'Nom FR ou EN, archétype, ou code imprimé (SDBE-FR001)…'
-          }
+          placeholder={compact ? t('searchPlaceholderCompact') : t('searchPlaceholder')}
           value={value.q ?? ''}
           onChange={(e) => set({ q: e.target.value || undefined })}
           className="pl-9"
@@ -64,18 +50,18 @@ export function CardFilters({
                   : 'text-fg-muted hover:text-fg',
               )}
             >
-              {CATEGORY_LABELS[c]}
+              {tc(c)}
             </button>
           ))}
         </div>
 
         <Select
-          aria-label="Archétype"
+          aria-label={t('archetype')}
           value={value.archetype ?? ''}
           onChange={(e) => set({ archetype: e.target.value || undefined })}
           className="w-auto min-w-36"
         >
-          <option value="">Tous archétypes</option>
+          <option value="">{t('allArchetypes')}</option>
           {archetypes?.map((a) => (
             <option key={a} value={a}>
               {a}
@@ -85,14 +71,14 @@ export function CardFilters({
 
         {!compact && (
           <Select
-            aria-label="Tri"
+            aria-label={t('sortLabel')}
             value={value.sort ?? (value.q ? 'relevance' : 'name')}
             onChange={(e) => set({ sort: e.target.value as CardSearchParams['sort'] })}
             className="w-auto"
           >
-            {SORTS.filter(([v]) => v !== 'relevance' || value.q).map(([v, l]) => (
+            {SORTS.filter((v) => v !== 'relevance' || value.q).map((v) => (
               <option key={v} value={v}>
-                Tri : {l}
+                {t('sortOption', { label: t(`sort.${v}`) })}
               </option>
             ))}
           </Select>
@@ -105,7 +91,7 @@ export function CardFilters({
             checked={!!value.owned}
             onChange={(e) => set({ owned: e.target.checked || undefined })}
           />
-          Possédées
+          {t('owned')}
         </label>
       </div>
     </div>

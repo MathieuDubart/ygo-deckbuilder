@@ -1,0 +1,26 @@
+{
+  "view": {
+    "title": "Wishlist",
+    "description": "Le carte da cercare, con la stampa che vuoi e il tuo budget.",
+    "stats": {
+      "cards": "Carte",
+      "estimatedCost": "Costo stimato"
+    },
+    "empty": {
+      "title": "La tua wishlist è vuota",
+      "description": "Aggiungi carte dalla loro scheda, oppure manda qui con un clic tutto quello che manca a un deck."
+    }
+  },
+  "priorities": {
+    "HIGH": "Urgente",
+    "MEDIUM": "Normale",
+    "LOW": "Prima o poi"
+  },
+  "row": {
+    "budget": "budget {price}",
+    "priority": "Priorità",
+    "acquired": "Presa",
+    "acquiredToast": "Aggiunta alla tua collezione 🎉",
+    "remove": "Togli"
+  }
+}

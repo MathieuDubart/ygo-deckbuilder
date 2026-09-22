@@ -1,0 +1,43 @@
+{
+  "formats": {
+    "TCG": "TCG",
+    "OCG": "OCG",
+    "GOAT": "GOAT",
+    "EDISON": "Edison",
+    "CASUAL": "Casual"
+  },
+  "view": {
+    "title": "Meus decks",
+    "description": "Monte com o que você tem, veja o que falta.",
+    "newDeck": "Novo deck",
+    "empty": {
+      "title": "Nenhum deck ainda",
+      "description": "Comece do zero, importe um .ydk ou veja as sugestões para descobrir o que sua coleção já consegue montar."
+    },
+    "counts": {
+      "main": "{count} main",
+      "extra": "{count} extra",
+      "side": "{count} side"
+    },
+    "updatedOn": "Editado em {date}",
+    "duplicate": "Duplicar",
+    "duplicated": "Deck duplicado",
+    "delete": "Excluir",
+    "confirmDelete": "Excluir “{name}”?"
+  },
+  "new": {
+    "title": "Novo deck",
+    "modes": {
+      "empty": "Deck vazio",
+      "ydk": "Importar um .ydk"
+    },
+    "name": "Nome",
+    "format": "Formato",
+    "file": "Arquivo .ydk",
+    "fileHint": "Escolha um arquivo ou cole o conteúdo dele.",
+    "submit": {
+      "empty": "Criar e montar",
+      "ydk": "Importar"
+    }
+  }
+}

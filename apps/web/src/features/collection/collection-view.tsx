@@ -1,6 +1,8 @@
 'use client';
+import type { CardCondition } from '@ygo/shared';
 import { Boxes, Library, Minus, PackageOpen, Plus, Search, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
@@ -16,8 +18,9 @@ import {
   useUpdateCollectionItem,
   type CollectionItemDto,
 } from '@/lib/api/collection';
+import { useFormat } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks/use-debounced';
-import { cn, formatPrice } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { ImportSetDialog } from './import-set-dialog';
 import { ProductDialog } from './product-dialog';
 import { ProductsTab } from './products-tab';
@@ -25,6 +28,8 @@ import { ProductsTab } from './products-tab';
 type Tab = 'cards' | 'products';
 
 export function CollectionView() {
+  const t = useTranslations('collection.view');
+  const { price, number } = useFormat();
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
   const { data, isLoading } = useCollection({
@@ -42,16 +47,16 @@ export function CollectionView() {
   return (
     <>
       <PageHeader
-        title="Ma collection"
-        description="Tout ce que tu possèdes, par édition, état et langue."
+        title={t('title')}
+        description={t('description')}
         actions={
           <>
             <Button variant="secondary" onClick={() => setImportOpen(true)}>
-              <PackageOpen className="size-4" /> Ajouter un produit
+              <PackageOpen className="size-4" /> {t('addProduct')}
             </Button>
             <Link href="/cards">
               <Button>
-                <Plus className="size-4" /> Ajouter des cartes
+                <Plus className="size-4" /> {t('addCards')}
               </Button>
             </Link>
           </>
@@ -59,20 +64,20 @@ export function CollectionView() {
       />
 
       <div className="mb-6 grid grid-cols-3 gap-3">
-        <Stat label="Exemplaires" value={stats?.totalCopies.toLocaleString('fr-FR') ?? '—'} />
-        <Stat label="Cartes uniques" value={stats?.distinctCards.toLocaleString('fr-FR') ?? '—'} />
-        <Stat label="Valeur estimée" value={stats ? formatPrice(stats.estimatedValue) : '—'} />
+        <Stat label={t('stats.copies')} value={stats ? number(stats.totalCopies) : '—'} />
+        <Stat label={t('stats.distinctCards')} value={stats ? number(stats.distinctCards) : '—'} />
+        <Stat label={t('stats.estimatedValue')} value={stats ? price(stats.estimatedValue) : '—'} />
       </div>
 
       <div
         role="tablist"
-        aria-label="Vue de la collection"
+        aria-label={t('tabs.label')}
         className="mb-4 inline-grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm"
       >
         {(
           [
-            ['cards', 'Cartes', Library, stats?.distinctCards],
-            ['products', 'Produits', Boxes, products.data?.length],
+            ['cards', t('tabs.cards'), Library, stats?.distinctCards],
+            ['products', t('tabs.products'), Boxes, products.data?.length],
           ] as const
         ).map(([value, label, Icon, count]) => (
           <button
@@ -102,7 +107,7 @@ export function CollectionView() {
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
             <Input
               type="search"
-              placeholder="Filtrer ma collection…"
+              placeholder={t('filterPlaceholder')}
               value={q}
               onChange={(e) => {
                 setQ(e.target.value);
@@ -121,16 +126,12 @@ export function CollectionView() {
           ) : !data?.items.length ? (
             <EmptyState
               icon={Library}
-              title={q ? 'Rien ne correspond' : 'Ta collection est vide'}
-              description={
-                q
-                  ? undefined
-                  : 'Ajoute tes cartes depuis le catalogue, ou importe directement un Structure Deck.'
-              }
+              title={q ? t('empty.noMatch') : t('empty.title')}
+              description={q ? undefined : t('empty.description')}
               action={
                 !q && (
                   <Button variant="secondary" onClick={() => setImportOpen(true)}>
-                    <PackageOpen className="size-4" /> Ajouter un produit
+                    <PackageOpen className="size-4" /> {t('addProduct')}
                   </Button>
                 )
               }
@@ -167,6 +168,9 @@ export function CollectionView() {
 }
 
 function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () => void }) {
+  const t = useTranslations('collection');
+  const tc = useTranslations('common.actions');
+  const { price } = useFormat();
   const update = useUpdateCollectionItem();
   const remove = useRemoveCollectionItem();
   const busy = update.isPending || remove.isPending;
@@ -187,22 +191,22 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
               {item.print.printCode} · {item.print.rarity}
             </Badge>
           ) : (
-            <Badge>Édition ?</Badge>
+            <Badge>{t('row.unknownPrint')}</Badge>
           )}
           <Badge>{item.language}</Badge>
-          <Badge>{item.condition.replace('_', ' ').toLowerCase()}</Badge>
+          <Badge>{t(`conditions.${item.condition as CardCondition}`)}</Badge>
           {item.firstEdition && <Badge tone="accent">1st</Badge>}
         </div>
       </div>
       <span className="hidden font-mono text-sm text-fg-muted tabular-nums sm:block">
-        {formatPrice(item.print?.price ?? item.card.priceCardmarket)}
+        {price(item.print?.price ?? item.card.priceCardmarket)}
       </span>
       <div className="flex items-center gap-1 rounded-lg border border-border bg-bg-sunken p-0.5">
         <button
           className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-40"
           disabled={busy}
           onClick={() => setQty(item.quantity - 1)}
-          aria-label="Retirer un exemplaire"
+          aria-label={t('row.removeCopy')}
         >
           <Minus className="size-3.5" />
         </button>
@@ -211,7 +215,7 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
           className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-40"
           disabled={busy}
           onClick={() => setQty(item.quantity + 1)}
-          aria-label="Ajouter un exemplaire"
+          aria-label={t('row.addCopy')}
         >
           <Plus className="size-3.5" />
         </button>
@@ -221,7 +225,7 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
         size="icon"
         disabled={busy}
         onClick={() => remove.mutate(item.id)}
-        aria-label="Supprimer"
+        aria-label={tc('delete')}
       >
         <Trash2 className="size-4" />
       </Button>

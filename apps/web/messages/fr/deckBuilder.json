@@ -1,0 +1,58 @@
+{
+  "header": {
+    "nameLabel": "Nom du deck",
+    "guide": "Guide",
+    "guideHint": "Comment jouer ce deck : plan, combos, erreurs à éviter",
+    "guideDialogTitle": "Guide : {name}"
+  },
+  "save": {
+    "saved": "Enregistré",
+    "dirty": "Modifié",
+    "saving": "Enregistrement…",
+    "error": "Échec — réessayer"
+  },
+  "issues": {
+    "title": "Deck non légal",
+    "zoneTooSmall": "{zone} : {count, plural, one {# carte} other {# cartes}} (minimum {limit})",
+    "zoneTooLarge": "{zone} : {count, plural, one {# carte} other {# cartes}} (maximum {limit})",
+    "tooManyCopies": "{name} : {count, plural, one {# exemplaire} other {# exemplaires}} (max {limit})",
+    "wrongZone": "{name} n’a rien à faire dans le {zone}"
+  },
+  "missing": {
+    "summary": "<strong>{count, plural, one {# exemplaire} other {# exemplaires}}</strong> non {count, plural, one {possédé} other {possédés}} · environ <strong>{cost}</strong>",
+    "addAll": "Tout mettre en wishlist",
+    "added": "{count, plural, one {# carte ajoutée à la wishlist} other {# cartes ajoutées à la wishlist}}"
+  },
+  "add": {
+    "extraDeckMonster": "Ce monstre va dans l’Extra Deck",
+    "notExtraDeck": "Seuls les monstres Fusion/Synchro/Xyz/Link vont en Extra",
+    "maxCopies": "Maximum {limit, plural, one {# exemplaire} other {# exemplaires}}",
+    "zoneFull": "{zone} plein"
+  },
+  "picker": {
+    "search": "Rechercher",
+    "suggestions": "Suggestions",
+    "suggestionsCount": "Suggestions ({count})",
+    "tileTitle": "{name}\nClic : détails · Ctrl/⌘+clic : ajouter · Maj+clic : ajouter au side",
+    "noOwnedResults": "Aucune carte possédée ne correspond. Décoche « Possédées » pour chercher partout.",
+    "noResults": "Aucun résultat.",
+    "suggestionsHint": "Cartes de ta collection qui partagent un archétype avec ton deck ou y sont citées.",
+    "suggestionsEmpty": "Ajoute quelques cartes au deck : les suggestions se basent sur ses archétypes."
+  },
+  "zone": {
+    "emptySide": "Ouvre une carte et ajoute-la au side, ou Maj + clic pour l’ajouter direct",
+    "empty": "Clique sur une carte à gauche pour voir sa fiche et l’ajouter",
+    "copyTitle": "{name}\nClic : détails · Ctrl/⌘+clic : retirer",
+    "copyTitleMissing": "{name} — non possédée\nClic : détails · Ctrl/⌘+clic : retirer",
+    "missingBadge": "MANQUE"
+  },
+  "actions": {
+    "inDeck": "Dans ce deck",
+    "copies": "{total}/{limit, plural, one {# exemplaire} other {# exemplaires}}",
+    "owned": "{owned, plural, one {# possédée} other {# possédées}}{toBuy, plural, =0 {} other { · # à acheter}}",
+    "zoneCount": "{count}/{max} cartes",
+    "removeOne": "Retirer un exemplaire du {zone}",
+    "addOne": "Ajouter un exemplaire au {zone}",
+    "cannotAdd": "Impossible d’ajouter"
+  }
+}

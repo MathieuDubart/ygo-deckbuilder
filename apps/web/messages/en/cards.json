@@ -1,0 +1,77 @@
+{
+  "ban": {
+    "Forbidden": "Forbidden",
+    "Banned": "Banned",
+    "Limited": "Limited",
+    "Semi-Limited": "Semi-Limited"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "detail": {
+    "fallbackTitle": "Card",
+    "banTcg": "TCG: {status}",
+    "level": "Lv. {level}",
+    "scale": "Scale {scale}",
+    "ownedPrice": "Owned: <strong>{owned}</strong> · Cardmarket from <strong>{price}</strong>",
+    "prints": "Printings ({count})",
+    "printUnspecified": "Unspecified printing"
+  },
+  "collectionForm": {
+    "title": "Add to my collection",
+    "print": "Printing",
+    "quantity": "Qty",
+    "condition": "Condition",
+    "language": "Language",
+    "firstEdition": "1st ed.",
+    "success": "{count, plural, one {# copy added to your collection} other {# copies added to your collection}}"
+  },
+  "wishlistForm": {
+    "open": "Add to wishlist",
+    "success": "Added to your wishlist",
+    "title": "I'm looking for it",
+    "print": "Target printing",
+    "quantity": "Qty",
+    "maxPrice": "Max budget (€)"
+  },
+  "interactions": {
+    "title": "Interactions",
+    "ownedLinked": "{count} of your cards",
+    "onlyMine": "Only my cards",
+    "emptyIndexed": "No specific link found in the card texts: this card doesn't target any particular name or type, and no card specifically targets it.",
+    "emptyIndexing": "The interaction index is still being built, check back in a minute.",
+    "tabs": {
+      "out": "What it does",
+      "in": "Used by"
+    },
+    "noneMine": "None of your cards here.",
+    "none": "Nothing on this side.",
+    "generic": "Broad effects (work with many cards): {list}",
+    "byTraits": "(by its traits)",
+    "byTraitsTitle": "These cards don't name it: they target its level, attribute or type",
+    "out": {
+      "SEARCH": "Searches",
+      "RECOVER": "Recovers",
+      "SPECIAL_SUMMON": "Summons",
+      "SUMMON_EXTRA": "Summons from the Extra Deck",
+      "SEND_GY": "Sends to the GY",
+      "MATERIAL": "Possible materials",
+      "MENTION": "Mentions"
+    },
+    "in": {
+      "SEARCH": "Searched by",
+      "RECOVER": "Recovered by",
+      "SPECIAL_SUMMON": "Summoned by",
+      "SUMMON_EXTRA": "Summoned from the Extra Deck by",
+      "SEND_GY": "Sent to the GY by",
+      "MATERIAL": "Material for",
+      "MENTION": "Mentioned by"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 'use client';
-import type { OwnedProductDto, ProductKind } from '@ygo/shared';
+import type { OwnedProductDto } from '@ygo/shared';
 import { Layers, PackageOpen } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ProductCover } from '@/components/products/product-cover';
 import { Badge } from '@/components/ui/badge';
@@ -10,16 +11,9 @@ import { useOwnedProducts } from '@/lib/api/collection';
 import { cn } from '@/lib/utils';
 import { ProductDialog } from './product-dialog';
 
-export const KIND_LABEL: Record<ProductKind, string> = {
-  STRUCTURE: 'Deck de structure',
-  STARTER: 'Deck de démarrage',
-  TIN: 'Tin',
-  BOX: 'Coffret',
-  OTHER: 'Produit',
-};
-
 /** Les produits ajoutés à la collection, pour retrouver et reconstituer leur contenu. */
 export function ProductsTab({ onImport }: { onImport: () => void }) {
+  const t = useTranslations('products.tab');
   const { data, isLoading } = useOwnedProducts();
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -37,11 +31,11 @@ export function ProductsTab({ onImport }: { onImport: () => void }) {
     return (
       <EmptyState
         icon={PackageOpen}
-        title="Aucun produit pour l’instant"
-        description="Ajoute un Structure Deck, un tin ou un coffret : il apparaîtra ici avec tout son contenu, et un guide de jeu pour les decks."
+        title={t('empty.title')}
+        description={t('empty.description')}
         action={
           <Button variant="secondary" onClick={onImport}>
-            <PackageOpen className="size-4" /> Ajouter un produit
+            <PackageOpen className="size-4" /> {t('addProduct')}
           </Button>
         }
       />
@@ -63,6 +57,7 @@ export function ProductsTab({ onImport }: { onImport: () => void }) {
 }
 
 function ProductTile({ product: p, onOpen }: { product: OwnedProductDto; onOpen: () => void }) {
+  const t = useTranslations('products');
   const complete = p.completeness >= 1;
   return (
     <button
@@ -81,7 +76,7 @@ function ProductTile({ product: p, onOpen }: { product: OwnedProductDto; onOpen:
           <Badge>{p.language}</Badge>
           {p.isDeck && (
             <Badge tone="success">
-              <Layers className="size-3" /> Deck
+              <Layers className="size-3" /> {t('tab.deck')}
             </Badge>
           )}
         </div>
@@ -89,15 +84,11 @@ function ProductTile({ product: p, onOpen }: { product: OwnedProductDto; onOpen:
       <div className="min-w-0 space-y-1 px-0.5">
         <p className="line-clamp-2 text-sm leading-snug font-medium">{p.set.name}</p>
         <p className="font-mono text-[11px] text-fg-subtle">
-          {KIND_LABEL[p.set.kind]} · {p.totalCards} cartes
+          {t(`kinds.${p.set.kind}`)} · {t('tab.cardCount', { count: p.totalCards })}
         </p>
         <div
           className="h-1.5 overflow-hidden rounded-full bg-bg-sunken"
-          title={
-            complete
-              ? 'Toutes ses cartes sont dans ta collection'
-              : `${p.missingCopies} exemplaire(s) ne sont plus dans ta collection`
-          }
+          title={complete ? t('tab.complete') : t('tab.missing', { count: p.missingCopies })}
         >
           <div
             className={cn('h-full rounded-full', complete ? 'bg-success' : 'bg-warning')}

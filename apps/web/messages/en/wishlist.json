@@ -1,0 +1,26 @@
+{
+  "view": {
+    "title": "Wishlist",
+    "description": "Cards to hunt down, with the print you want and your budget.",
+    "stats": {
+      "cards": "Cards",
+      "estimatedCost": "Estimated cost"
+    },
+    "empty": {
+      "title": "Your wishlist is empty",
+      "description": "Add cards from their detail page, or send everything a deck is missing in one click."
+    }
+  },
+  "priorities": {
+    "HIGH": "Urgent",
+    "MEDIUM": "Normal",
+    "LOW": "Someday"
+  },
+  "row": {
+    "budget": "budget {price}",
+    "priority": "Priority",
+    "acquired": "Got it",
+    "acquiredToast": "Added to your collection 🎉",
+    "remove": "Remove"
+  }
+}

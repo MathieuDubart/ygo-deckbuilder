@@ -1,0 +1,40 @@
+{
+  "actions": {
+    "close": "Close",
+    "cancel": "Cancel",
+    "back": "Back",
+    "retry": "Retry",
+    "save": "Save",
+    "add": "Add",
+    "remove": "Remove",
+    "delete": "Delete",
+    "create": "Create",
+    "copy": "Copy",
+    "copied": "Copied"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "← Previous",
+    "next": "Next →"
+  },
+  "status": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "none": "—"
+  },
+  "zones": {
+    "MAIN": "Main Deck",
+    "EXTRA": "Extra Deck",
+    "SIDE": "Side Deck"
+  },
+  "categories": {
+    "MONSTER": "Monsters",
+    "SPELL": "Spells",
+    "TRAP": "Traps",
+    "SKILL": "Skills",
+    "TOKEN": "Tokens"
+  },
+  "locale": {
+    "label": "Language"
+  }
+}

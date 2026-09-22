@@ -6,6 +6,7 @@ import type {
   GenerationMode,
 } from '@ygo/shared';
 import { AlertTriangle, Check, Layers, Wand2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
@@ -19,22 +20,19 @@ import { useCreateDeck } from '@/lib/api/decks';
 import { useGeneratedDeck, type GenerationTarget } from '@/lib/api/suggestions';
 import { DeckGuide } from '@/features/guide/deck-guide';
 import { useAddToWishlist } from '@/lib/api/wishlist';
-import { cn, formatPrice } from '@/lib/utils';
+import { useFormat } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { ScoreBadge, ScoreBreakdown } from './playable-decks';
 
-const ZONES: { zone: DeckZone; label: string }[] = [
-  { zone: 'MAIN', label: 'Main Deck' },
-  { zone: 'EXTRA', label: 'Extra Deck' },
-  { zone: 'SIDE', label: 'Side Deck' },
-];
+const ZONES: DeckZone[] = ['MAIN', 'EXTRA', 'SIDE'];
 
-const SOURCE_LABEL: Partial<Record<GeneratedCardSource, string>> = {
-  FLEX: 'Flex',
-  STAPLE: 'Staple',
-  ARCHETYPE: 'Archétype',
-  SUPPORT: 'Support',
-  FILLER: 'Complément',
-};
+/** Origines affichées en étiquette sur la carte (CORE : pas d'étiquette). */
+const LABELED_SOURCES = ['FLEX', 'STAPLE', 'ARCHETYPE', 'SUPPORT', 'FILLER'] as const;
+type LabeledSource = (typeof LABELED_SOURCES)[number];
+const isLabeled = (s: GeneratedCardSource): s is LabeledSource =>
+  (LABELED_SOURCES as readonly string[]).includes(s);
+
+const MODES = ['OWNED', 'META'] as const satisfies readonly GenerationMode[];
 
 /**
  * Aperçu d'un deck généré automatiquement, avant de le créer.
@@ -47,6 +45,8 @@ export function GenerateDeckDialog({
   target: GenerationTarget | null;
   onClose: () => void;
 }) {
+  const t = useTranslations('suggestions.generate');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [mode, setMode] = useState<GenerationMode>('OWNED');
   const { data: deck, isLoading, isFetching, error } = useGeneratedDeck(target, mode);
@@ -96,7 +96,7 @@ export function GenerateDeckDialog({
           });
         }
       }
-      toast.success(`Deck « ${created.name} » créé`);
+      toast.success(t('created', { name: created.name }));
       onClose();
       router.push(`/decks/${created.id}`);
     } catch (e) {
@@ -114,8 +114,8 @@ export function GenerateDeckDialog({
         onClose={onClose}
         title={
           target?.kind === 'meta'
-            ? `Construire : ${target.name}`
-            : `Deck auto : ${target?.archetype ?? ''}`
+            ? t('titleMeta', { name: target.name })
+            : t('titleArchetype', { archetype: target?.archetype ?? '' })
         }
         variant="sheet"
         className="w-[min(100vw,52rem)]"
@@ -123,31 +123,18 @@ export function GenerateDeckDialog({
         <div className="space-y-5">
           {target?.kind === 'meta' && (
             <div className="grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm">
-              {(
-                [
-                  [
-                    'OWNED',
-                    'Avec mes cartes',
-                    'Uniquement ce que tu possèdes, complété par tes staples',
-                  ],
-                  [
-                    'META',
-                    'Liste meta complète',
-                    'La liste type des tournois, avec ce qu’il te manque',
-                  ],
-                ] as const
-              ).map(([m, label, hint]) => (
+              {MODES.map((m) => (
                 <button
                   key={m}
                   type="button"
                   onClick={() => setMode(m)}
-                  title={hint}
+                  title={t(`modes.${m}.hint`)}
                   className={cn(
                     'rounded-md py-2 font-medium transition',
                     mode === m ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted hover:text-fg',
                   )}
                 >
-                  {label}
+                  {t(`modes.${m}.label`)}
                 </button>
               ))}
             </div>
@@ -180,10 +167,10 @@ export function GenerateDeckDialog({
                       )}
                     >
                       {deck.score.playable
-                        ? 'Deck complet et jouable avec tes cartes'
+                        ? t('status.playable')
                         : deck.complete
-                          ? 'Complet, mais fragile'
-                          : 'Incomplet avec ta collection'}
+                          ? t('status.fragile')
+                          : t('status.incomplete')}
                     </p>
                     <ScoreBreakdown score={deck.score} />
                   </div>
@@ -198,15 +185,15 @@ export function GenerateDeckDialog({
                 </ul>
               )}
 
-              {ZONES.map(({ zone, label }) => {
+              {ZONES.map((zone) => {
                 const cards = deck.cards.filter((c) => c.zone === zone);
                 if (!cards.length) return null;
                 return (
                   <section key={zone}>
                     <h3 className="mb-2 flex items-baseline justify-between text-sm font-semibold">
-                      {label}
+                      {tc(`zones.${zone}`)}
                       <span className="font-mono text-xs font-normal text-fg-subtle tabular-nums">
-                        {deck.counts[zone]} cartes
+                        {t('zoneCount', { count: deck.counts[zone] })}
                       </span>
                     </h3>
                     <div className="grid grid-cols-[repeat(auto-fill,minmax(4.75rem,1fr))] gap-2">
@@ -230,7 +217,7 @@ export function GenerateDeckDialog({
               />
 
               <div className="sticky -bottom-5 -mx-5 -mb-5 space-y-3 border-t border-border bg-bg-elevated/95 px-5 py-4 backdrop-blur">
-                <Field label="Nom du deck">
+                <Field label={t('nameLabel')}>
                   <Input value={name} onChange={(e) => setName(e.target.value)} maxLength={80} />
                 </Field>
                 {missing.length > 0 && (
@@ -240,7 +227,7 @@ export function GenerateDeckDialog({
                       checked={wishlistMissing}
                       onChange={(e) => setWishlistMissing(e.target.checked)}
                     />
-                    Mettre les {deck.missingCopies} exemplaire(s) manquant(s) dans ma wishlist
+                    {t('wishlistMissing', { count: deck.missingCopies })}
                   </label>
                 )}
                 {createError && (
@@ -249,7 +236,7 @@ export function GenerateDeckDialog({
                   </p>
                 )}
                 <Button className="w-full" size="lg" loading={saving} onClick={create}>
-                  <Wand2 className="size-4" /> Créer ce deck
+                  <Wand2 className="size-4" /> {t('create')}
                 </Button>
               </div>
             </div>
@@ -272,25 +259,27 @@ function Summary({
   missingCost: number;
   complete: boolean;
 }) {
+  const t = useTranslations('suggestions.generate.summary');
+  const { price } = useFormat();
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       <SummaryTile
-        label="Main / Extra / Side"
+        label={t('counts')}
         value={`${counts.MAIN} / ${counts.EXTRA} / ${counts.SIDE}`}
         tone={complete ? 'ok' : 'warn'}
       />
       <SummaryTile
-        label="Jouable"
-        value={complete ? 'Oui' : `${40 - counts.MAIN} cartes manquent`}
+        label={t('playable')}
+        value={complete ? t('yes') : t('missingMain', { count: 40 - counts.MAIN })}
         tone={complete ? 'ok' : 'warn'}
         icon={complete ? Check : AlertTriangle}
       />
       <SummaryTile
-        label="À acheter"
-        value={missingCopies ? `${missingCopies} ex.` : 'Rien'}
+        label={t('toBuy')}
+        value={missingCopies ? t('toBuyValue', { count: missingCopies }) : t('nothing')}
         tone={missingCopies ? 'warn' : 'ok'}
       />
-      <SummaryTile label="Coût estimé" value={formatPrice(missingCost)} icon={Layers} />
+      <SummaryTile label={t('cost')} value={price(missingCost)} icon={Layers} />
     </div>
   );
 }
@@ -324,8 +313,10 @@ function SummaryTile({
 }
 
 function GeneratedCard({ entry, onClick }: { entry: GeneratedDeckCardDto; onClick: () => void }) {
+  const t = useTranslations('suggestions.generate');
+  const { percent } = useFormat();
   const missing = entry.quantity - entry.owned;
-  const label = SOURCE_LABEL[entry.source];
+  const label = isLabeled(entry.source) ? t(`sources.${entry.source}`) : null;
   return (
     <button
       type="button"
@@ -334,9 +325,9 @@ function GeneratedCard({ entry, onClick }: { entry: GeneratedDeckCardDto; onClic
       title={[
         entry.card.name,
         entry.inclusion !== null
-          ? `Jouée dans ${Math.round(entry.inclusion * 100)} % des listes`
+          ? t('card.inclusion', { percent: percent(entry.inclusion) })
           : null,
-        missing > 0 ? `${missing} exemplaire(s) à acheter` : 'Tous possédés',
+        missing > 0 ? t('card.toBuy', { count: missing }) : t('card.allOwned'),
       ]
         .filter(Boolean)
         .join('\n')}
@@ -354,7 +345,7 @@ function GeneratedCard({ entry, onClick }: { entry: GeneratedDeckCardDto; onClic
       </span>
       {missing > 0 ? (
         <span className="absolute inset-x-1 bottom-1 rounded bg-danger px-1 text-center font-mono text-[9px] font-bold text-white">
-          {entry.owned > 0 ? `${entry.owned}/${entry.quantity}` : 'MANQUE'}
+          {entry.owned > 0 ? `${entry.owned}/${entry.quantity}` : t('card.missingBadge')}
         </span>
       ) : (
         label && (

@@ -1,0 +1,77 @@
+{
+  "ban": {
+    "Forbidden": "Interdite",
+    "Banned": "Interdite",
+    "Limited": "Limitée",
+    "Semi-Limited": "Semi-limitée"
+  },
+  "conditions": {
+    "MINT": "Mint",
+    "NEAR_MINT": "Near Mint",
+    "EXCELLENT": "Excellent",
+    "GOOD": "Good",
+    "LIGHT_PLAYED": "Light Played",
+    "PLAYED": "Played",
+    "POOR": "Poor"
+  },
+  "detail": {
+    "fallbackTitle": "Carte",
+    "banTcg": "TCG : {status}",
+    "level": "Niv. {level}",
+    "scale": "Échelle {scale}",
+    "ownedPrice": "Possédées : <strong>{owned}</strong> · Cardmarket dès <strong>{price}</strong>",
+    "prints": "Éditions ({count})",
+    "printUnspecified": "Édition non précisée"
+  },
+  "collectionForm": {
+    "title": "Ajouter à ma collection",
+    "print": "Édition",
+    "quantity": "Qté",
+    "condition": "État",
+    "language": "Langue",
+    "firstEdition": "1ère éd.",
+    "success": "{count, plural, one {# exemplaire ajouté à ta collection} other {# exemplaires ajoutés à ta collection}}"
+  },
+  "wishlistForm": {
+    "open": "Ajouter à la wishlist",
+    "success": "Ajoutée à ta wishlist",
+    "title": "Je la cherche",
+    "print": "Édition visée",
+    "quantity": "Qté",
+    "maxPrice": "Budget max (€)"
+  },
+  "interactions": {
+    "title": "Interactions",
+    "ownedLinked": "{count} de tes cartes",
+    "onlyMine": "Seulement mes cartes",
+    "emptyIndexed": "Aucun lien précis trouvé dans les textes : cette carte ne vise aucun nom ni type particulier, et aucune carte ne la vise spécifiquement.",
+    "emptyIndexing": "L’index des interactions est en cours de construction, reviens dans une minute.",
+    "tabs": {
+      "out": "Ce qu’elle fait",
+      "in": "Qui l’utilise"
+    },
+    "noneMine": "Aucune de tes cartes ici.",
+    "none": "Rien de ce côté-là.",
+    "generic": "Effets larges (compatibles avec beaucoup de cartes) : {list}",
+    "byTraits": "(par ses caractéristiques)",
+    "byTraitsTitle": "Ces cartes ne la citent pas : elles visent son niveau, son attribut ou son type",
+    "out": {
+      "SEARCH": "Va chercher",
+      "RECOVER": "Récupère",
+      "SPECIAL_SUMMON": "Invoque",
+      "SUMMON_EXTRA": "Invoque depuis l’Extra Deck",
+      "SEND_GY": "Envoie au cimetière",
+      "MATERIAL": "Matériaux possibles",
+      "MENTION": "Cite"
+    },
+    "in": {
+      "SEARCH": "Cherchée par",
+      "RECOVER": "Récupérée par",
+      "SPECIAL_SUMMON": "Invoquée par",
+      "SUMMON_EXTRA": "Invoquée depuis l’Extra Deck par",
+      "SEND_GY": "Envoyée au cimetière par",
+      "MATERIAL": "Matériau pour",
+      "MENTION": "Citée par"
+    }
+  }
+}

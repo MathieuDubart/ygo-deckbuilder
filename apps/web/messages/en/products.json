@@ -1,0 +1,61 @@
+{
+  "kinds": {
+    "STRUCTURE": "Structure Deck",
+    "STARTER": "Starter Deck",
+    "TIN": "Tin",
+    "BOX": "Box set",
+    "OTHER": "Product"
+  },
+  "tab": {
+    "empty": {
+      "title": "No products yet",
+      "description": "Add a Structure Deck, a tin or a box set: it will show up here with its full contents, plus a play guide for decks."
+    },
+    "addProduct": "Add a product",
+    "deck": "Deck",
+    "cardCount": "{count, plural, one {# card} other {# cards}}",
+    "complete": "All its cards are in your collection",
+    "missing": "{count, plural, one {# copy is} other {# copies are}} no longer in your collection"
+  },
+  "dialog": {
+    "fallbackTitle": "Product",
+    "tabs": {
+      "content": "Contents",
+      "guide": "How to play it"
+    },
+    "header": {
+      "productCount": "{count, plural, one {# product} other {# products}} · {language}",
+      "cardCount": "{total, plural, one {# card} other {# cards}} · {distinct} unique",
+      "verified": "Official quantities",
+      "unverified": "Unverified quantities",
+      "unverifiedHint": "Official list not found: 1 copy counted per card",
+      "addedOn": "Added {date}",
+      "complete": "All its cards are in your collection.",
+      "missing": "{count, plural, one {# copy is} other {# copies are}} no longer in your collection (sold, traded, entered by mistake…).",
+      "createDeck": "Create a deck from it",
+      "copyList": "Copy list",
+      "listCopied": "List copied",
+      "remove": "Remove",
+      "copyFailed": "Couldn’t copy (the browser refused).",
+      "confirmRemove": "Remove “{name}” from your products?",
+      "removeCardsToo": "Also remove its {count, plural, one {# card} other {# cards}} from my collection (otherwise they stay, only the product disappears from the list)"
+    },
+    "content": {
+      "forCopies": "Quantities for {count} products.",
+      "all": "The product’s full contents, with what you still have.",
+      "missingOnly": "Missing only ({count})",
+      "ownedOf": "{owned} owned out of {needed}"
+    },
+    "groups": {
+      "MONSTER": "Monsters",
+      "SPELL": "Spells",
+      "TRAP": "Traps",
+      "EXTRA": "Extra Deck",
+      "OTHER": "Other"
+    },
+    "guideIntro": "Guide for the deck straight out of the box. To improve it with the rest of your collection, create a deck from it and open its suggestions.",
+    "text": {
+      "header": "{name} — {count, plural, one {# product} other {# products}}"
+    }
+  }
+}

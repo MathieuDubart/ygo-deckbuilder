@@ -1,13 +1,18 @@
 import type { Metadata, Viewport } from 'next';
 import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
+import { NextIntlClientProvider } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
 import { Providers } from '@/components/layout/providers';
 import './globals.css';
 
-export const metadata: Metadata = {
-  title: { default: 'YGO Deck Builder', template: '%s · YGO Deck Builder' },
-  description: 'Ta collection Yu-Gi-Oh!, tes decks, et ce qu’il te manque pour jouer le meta.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('layout');
+  return {
+    title: { default: t('metaTitle'), template: `%s · ${t('metaTitle')}` },
+    description: t('metaDescription'),
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -16,11 +21,14 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = await getLocale();
   return (
-    <html lang="fr" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+    <html lang={locale} className={`${GeistSans.variable} ${GeistMono.variable}`}>
       <body className="font-sans">
-        <Providers>{children}</Providers>
+        <NextIntlClientProvider>
+          <Providers>{children}</Providers>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

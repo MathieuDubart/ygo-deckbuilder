@@ -1,0 +1,43 @@
+{
+  "formats": {
+    "TCG": "TCG",
+    "OCG": "OCG",
+    "GOAT": "GOAT",
+    "EDISON": "Edison",
+    "CASUAL": "Casual"
+  },
+  "view": {
+    "title": "My decks",
+    "description": "Build with what you have, see what’s missing.",
+    "newDeck": "New deck",
+    "empty": {
+      "title": "No decks yet",
+      "description": "Start from scratch, import a .ydk, or check the suggestions to see what your collection can already build."
+    },
+    "counts": {
+      "main": "{count} main",
+      "extra": "{count} extra",
+      "side": "{count} side"
+    },
+    "updatedOn": "Edited {date}",
+    "duplicate": "Duplicate",
+    "duplicated": "Deck duplicated",
+    "delete": "Delete",
+    "confirmDelete": "Delete “{name}”?"
+  },
+  "new": {
+    "title": "New deck",
+    "modes": {
+      "empty": "Empty deck",
+      "ydk": "Import a .ydk"
+    },
+    "name": "Name",
+    "format": "Format",
+    "file": ".ydk file",
+    "fileHint": "Pick a file or paste its contents.",
+    "submit": {
+      "empty": "Create and build",
+      "ydk": "Import"
+    }
+  }
+}

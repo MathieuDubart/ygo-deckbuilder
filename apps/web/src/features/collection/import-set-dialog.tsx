@@ -1,6 +1,8 @@
 'use client';
+import { cardLanguageFor } from '@/lib/format';
 import { CARD_LANGUAGES, type CardLanguage, type CardSetDto, type ProductKind } from '@ygo/shared';
 import { ArrowLeft, PackageOpen, Search } from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { ProductCover } from '@/components/products/product-cover';
@@ -10,16 +12,17 @@ import { Skeleton } from '@/components/ui/feedback';
 import { Field, Input, Select } from '@/components/ui/input';
 import { useSets } from '@/lib/api/cards';
 import { useImportSet } from '@/lib/api/collection';
+import { useFormat } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
 
-const KINDS: { value: ProductKind | undefined; label: string }[] = [
-  { value: undefined, label: 'Tout' },
-  { value: 'STRUCTURE', label: 'Decks de structure' },
-  { value: 'TIN', label: 'Boîtes (tins)' },
-  { value: 'STARTER', label: 'Decks de démarrage' },
-  { value: 'BOX', label: 'Coffrets' },
-  { value: 'OTHER', label: 'Boosters & autres' },
+const KINDS: (ProductKind | undefined)[] = [
+  undefined,
+  'STRUCTURE',
+  'TIN',
+  'STARTER',
+  'BOX',
+  'OTHER',
 ];
 
 /**
@@ -36,6 +39,7 @@ export function ImportSetDialog({
   /** Produit ajouté : id du produit dans la collection */
   onImported?: (productId: string) => void;
 }) {
+  const t = useTranslations('collection.import');
   const [q, setQ] = useState('');
   const [kind, setKind] = useState<ProductKind | undefined>();
   const [selected, setSelected] = useState<CardSetDto | null>(null);
@@ -53,7 +57,7 @@ export function ImportSetDialog({
     <Dialog
       open={open}
       onClose={close}
-      title={selected ? selected.name : 'Ajouter un produit entier'}
+      title={selected ? selected.name : t('title')}
       className="w-[min(94vw,56rem)]"
     >
       {selected ? (
@@ -72,7 +76,7 @@ export function ImportSetDialog({
             <Input
               autoFocus
               type="search"
-              placeholder="Filtrer : « dragon », « 2022 », code du set (SDBE)…"
+              placeholder={t('searchPlaceholder')}
               value={q}
               onChange={(e) => setQ(e.target.value)}
               className="pl-9"
@@ -82,23 +86,23 @@ export function ImportSetDialog({
           <div
             className="flex gap-1.5 overflow-x-auto pb-1"
             role="tablist"
-            aria-label="Type de produit"
+            aria-label={t('kindsLabel')}
           >
             {KINDS.map((k) => (
               <button
-                key={k.label}
+                key={k ?? 'ALL'}
                 type="button"
                 role="tab"
-                aria-selected={kind === k.value}
-                onClick={() => setKind(k.value)}
+                aria-selected={kind === k}
+                onClick={() => setKind(k)}
                 className={cn(
                   'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-                  kind === k.value
+                  kind === k
                     ? 'border-accent/50 bg-accent/15 text-fg'
                     : 'border-border text-fg-muted hover:text-fg',
                 )}
               >
-                {k.label}
+                {t(`kinds.${k ?? 'ALL'}`)}
               </button>
             ))}
           </div>
@@ -113,8 +117,7 @@ export function ImportSetDialog({
               Array.from({ length: 10 }, (_, i) => <Skeleton key={i} className="aspect-[3/4]" />)
             ) : !sets?.length ? (
               <p className="col-span-full py-10 text-center text-sm text-fg-subtle">
-                Aucun produit trouvé. Essaie un autre type, un mot-clé ou le code imprimé sur tes
-                cartes.
+                {t('noResults')}
               </p>
             ) : (
               sets.map((s) => <ProductTile key={s.id} set={s} onClick={() => setSelected(s)} />)
@@ -127,6 +130,7 @@ export function ImportSetDialog({
 }
 
 function ProductTile({ set, onClick }: { set: CardSetDto; onClick: () => void }) {
+  const t = useTranslations('collection.import');
   return (
     <button
       type="button"
@@ -141,7 +145,8 @@ function ProductTile({ set, onClick }: { set: CardSetDto; onClick: () => void })
       <span className="line-clamp-2 text-xs leading-snug font-medium">{set.name}</span>
       <span className="font-mono text-[11px] text-fg-subtle">
         {set.code ?? '—'}
-        {set.tcgDate && ` · ${set.tcgDate.slice(0, 4)}`} · {set.cardCount} cartes
+        {set.tcgDate && ` · ${set.tcgDate.slice(0, 4)}`} ·{' '}
+        {t('cardCount', { count: set.cardCount })}
       </span>
     </button>
   );
@@ -156,9 +161,13 @@ function ConfirmImport({
   onBack: () => void;
   onDone: (productId: string) => void;
 }) {
+  const t = useTranslations('collection.import');
+  const tc = useTranslations('common.actions');
+  const { date } = useFormat();
   const importSet = useImportSet();
   const [copies, setCopies] = useState(1);
-  const [language, setLanguage] = useState<CardLanguage>('FR');
+  const uiLocale = useLocale();
+  const [language, setLanguage] = useState<CardLanguage>(cardLanguageFor(uiLocale));
 
   return (
     <div className="grid gap-6 sm:grid-cols-[14rem_1fr]">
@@ -171,18 +180,18 @@ function ConfirmImport({
         <div className="space-y-1 text-sm">
           <p className="font-mono text-fg-subtle">
             {set.code ?? '—'}
-            {set.tcgDate && ` · sorti le ${new Date(set.tcgDate).toLocaleDateString('fr-FR')}`}
+            {set.tcgDate && ` · ${t('confirm.releasedOn', { date: date(set.tcgDate) })}`}
           </p>
           <p className="text-fg-muted">
-            Ses <strong className="text-fg">{set.cardCount} cartes</strong> seront ajoutées à ta
-            collection, avec les quantités officielles du produit quand on les trouve (liste
-            Yugipedia), sinon 1 exemplaire de chaque. Le produit apparaîtra dans l’onglet « Produits
-            » de ta collection.
+            {t.rich('confirm.description', {
+              count: set.cardCount,
+              strong: (c) => <strong className="text-fg">{c}</strong>,
+            })}
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Exemplaires de chaque">
+          <Field label={t('confirm.copiesEach')}>
             <Input
               type="number"
               min={1}
@@ -191,7 +200,7 @@ function ConfirmImport({
               onChange={(e) => setCopies(Math.max(1, +e.target.value))}
             />
           </Field>
-          <Field label="Langue">
+          <Field label={t('confirm.language')}>
             <Select value={language} onChange={(e) => setLanguage(e.target.value as CardLanguage)}>
               {CARD_LANGUAGES.map((l) => (
                 <option key={l}>{l}</option>
@@ -208,7 +217,7 @@ function ConfirmImport({
 
         <div className="mt-auto flex gap-2">
           <Button variant="ghost" onClick={onBack}>
-            <ArrowLeft className="size-4" /> Retour
+            <ArrowLeft className="size-4" /> {tc('back')}
           </Button>
           <Button
             className="flex-1"
@@ -219,9 +228,10 @@ function ConfirmImport({
                 {
                   onSuccess: (r) => {
                     toast.success(
-                      `${r.copiesAdded} cartes ajoutées depuis « ${r.set} »${
-                        r.quantitiesVerified ? ' (quantités officielles)' : ''
-                      }`,
+                      t(r.quantitiesVerified ? 'confirm.toastVerified' : 'confirm.toast', {
+                        count: r.copiesAdded,
+                        set: r.set,
+                      }),
                     );
                     onDone(r.productId);
                   },
@@ -229,7 +239,7 @@ function ConfirmImport({
               )
             }
           >
-            <PackageOpen className="size-4" /> Ajouter ce produit
+            <PackageOpen className="size-4" /> {t('confirm.add')}
           </Button>
         </div>
       </div>

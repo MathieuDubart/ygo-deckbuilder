@@ -1,6 +1,7 @@
 'use client';
 import type { MetaDeckSuggestionDto } from '@ygo/shared';
 import { RefreshCw, ShieldCheck, Sparkles, Trophy, Wand2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -15,11 +16,16 @@ import {
   useMetaSync,
   type GenerationTarget,
 } from '@/lib/api/suggestions';
-import { cn, formatPercent, formatPrice } from '@/lib/utils';
+import { useFormat } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import { GenerateDeckDialog } from './generate-deck-dialog';
 import { PlayableDecks } from './playable-decks';
 
+/** Pourcentage compact (sans espace) pour les badges et l'anneau. */
+const compact = (s: string) => s.replace(/\s/g, '');
+
 export function SuggestionsView() {
+  const t = useTranslations('suggestions');
   const meta = useMetaSuggestions();
   const archetypes = useArchetypeSuggestions();
   const [target, setTarget] = useState<GenerationTarget | null>(null);
@@ -27,18 +33,18 @@ export function SuggestionsView() {
   return (
     <>
       <PageHeader
-        title="Suggestions"
-        description="Les decks du moment, ce que ta collection permet déjà, et des decks construits pour toi."
+        title={t('page.title')}
+        description={t('page.description')}
         actions={<MetaStatusBar />}
       />
 
       <section className="mb-12">
-        <SectionTitle icon={ShieldCheck}>Prêts à jouer · 100 % avec tes cartes</SectionTitle>
+        <SectionTitle icon={ShieldCheck}>{t('page.sections.playable')}</SectionTitle>
         <PlayableDecks onOpen={setTarget} />
       </section>
 
       <section className="mb-12">
-        <SectionTitle icon={Trophy}>Decks du meta · les plus accessibles pour toi</SectionTitle>
+        <SectionTitle icon={Trophy}>{t('page.sections.meta')}</SectionTitle>
         {meta.isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => (
@@ -48,8 +54,8 @@ export function SuggestionsView() {
         ) : !meta.data?.length ? (
           <EmptyState
             icon={Trophy}
-            title="Pas encore de données de tournoi"
-            description="Le meta se calcule automatiquement à partir des tops de tournois récents (YGOPRODeck). La première mise à jour se fait au démarrage de l’API, puis chaque lundi."
+            title={t('meta.empty.title')}
+            description={t('meta.empty.description')}
           />
         ) : (
           <ul className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -65,9 +71,7 @@ export function SuggestionsView() {
       </section>
 
       <section>
-        <SectionTitle icon={Sparkles}>
-          Depuis ta collection · un deck auto par archétype
-        </SectionTitle>
+        <SectionTitle icon={Sparkles}>{t('page.sections.archetypes')}</SectionTitle>
         {archetypes.data?.length ? (
           <div className="flex flex-wrap gap-2">
             {archetypes.data.map((a) => (
@@ -79,15 +83,13 @@ export function SuggestionsView() {
                 <Wand2 className="size-3.5 text-fg-subtle transition group-hover:text-accent" />
                 <span className="font-medium">{a.archetype}</span>
                 <span className="font-mono text-xs text-fg-subtle">
-                  {a.distinctCards} cartes · {a.totalCopies} ex.
+                  {t('page.archetypeStats', { cards: a.distinctCards, copies: a.totalCopies })}
                 </span>
               </button>
             ))}
           </div>
         ) : (
-          <p className="text-sm text-fg-subtle">
-            Ajoute des cartes à ta collection pour voir émerger des archétypes à construire.
-          </p>
+          <p className="text-sm text-fg-subtle">{t('page.archetypesEmpty')}</p>
         )}
       </section>
 
@@ -111,6 +113,8 @@ function SectionTitle({
 }
 
 function MetaStatusBar() {
+  const t = useTranslations('suggestions.meta.status');
+  const { date } = useFormat();
   const { data: me } = useMe();
   const { data: status } = useMetaStatus();
   const sync = useMetaSync();
@@ -118,8 +122,9 @@ function MetaStatusBar() {
     <div className="flex items-center gap-3 text-xs text-fg-subtle">
       {status?.lastSyncAt && (
         <span>
-          Meta mis à jour le {new Date(status.lastSyncAt).toLocaleDateString('fr-FR')}
-          {status.lastStatus === 'OK' ? ` · ${status.cardCount} listes` : ' · échec'}
+          {status.lastStatus === 'OK'
+            ? t('ok', { date: date(status.lastSyncAt), count: status.cardCount })
+            : t('failed', { date: date(status.lastSyncAt) })}
         </span>
       )}
       {me?.role === 'ADMIN' && (
@@ -130,12 +135,12 @@ function MetaStatusBar() {
           onClick={() =>
             sync.mutate(undefined, {
               onSuccess: (r) =>
-                toast.success(`${r.archetypes} archétypes calculés à partir de ${r.lists} listes`),
+                toast.success(t('synced', { archetypes: r.archetypes, lists: r.lists })),
               onError: (e) => toast.error(e.message),
             })
           }
         >
-          <RefreshCw className="size-3.5" /> Mettre à jour
+          <RefreshCw className="size-3.5" /> {t('refresh')}
         </Button>
       )}
     </div>
@@ -143,6 +148,8 @@ function MetaStatusBar() {
 }
 
 function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () => void }) {
+  const t = useTranslations('suggestions.meta.card');
+  const { price, percent } = useFormat();
   const playable = s.missing.length === 0;
   return (
     <li className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-bg-elevated transition hover:border-border-strong">
@@ -159,9 +166,9 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
         )}
         <div className="absolute inset-0 bg-linear-to-t from-bg-elevated via-bg-elevated/40 to-transparent" />
         <div className="absolute top-3 left-3 flex gap-1.5">
-          {s.tier !== null && <Badge tone="accent">Tier {s.tier}</Badge>}
+          {s.tier !== null && <Badge tone="accent">{t('tier', { tier: s.tier })}</Badge>}
           {s.source === 'tournaments' && s.share !== null && (
-            <Badge>{formatPercent(s.share).replace(' ', '')} du meta</Badge>
+            <Badge>{t('share', { share: compact(percent(s.share)) })}</Badge>
           )}
         </div>
       </div>
@@ -173,8 +180,8 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
               {s.name}
             </p>
             <p className="truncate text-xs text-fg-subtle">
-              {s.listCount > 0 ? `${s.listCount} liste(s) de tournoi` : 'Liste importée'}
-              {s.variants.length > 0 && ` · aussi « ${s.variants[0]} »`}
+              {s.listCount > 0 ? t('listCount', { count: s.listCount }) : t('imported')}
+              {s.variants[0] !== undefined && ` · ${t('variant', { name: s.variants[0] })}`}
             </p>
           </div>
           <CoverageRing value={s.coverage} />
@@ -182,12 +189,14 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
 
         <p className="text-sm text-fg-muted">
           {playable ? (
-            <span className="text-success">Tu peux le jouer tel quel.</span>
+            <span className="text-success">{t('playable')}</span>
           ) : (
-            <>
-              {s.ownedCopies}/{s.requiredCopies} exemplaires · il manque{' '}
-              <strong className="text-fg">{formatPrice(s.estimatedCostToComplete)}</strong>
-            </>
+            t.rich('missing', {
+              owned: s.ownedCopies,
+              required: s.requiredCopies,
+              cost: price(s.estimatedCostToComplete),
+              strong: (c) => <strong className="text-fg">{c}</strong>,
+            })
           )}
         </p>
 
@@ -196,7 +205,7 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
           variant={s.coverage >= 0.5 ? 'primary' : 'secondary'}
           onClick={onBuild}
         >
-          <Wand2 className="size-4" /> Construire ce deck
+          <Wand2 className="size-4" /> {t('build')}
         </Button>
       </div>
     </li>
@@ -204,11 +213,13 @@ function MetaDeckCard({ s, onBuild }: { s: MetaDeckSuggestionDto; onBuild: () =>
 }
 
 function CoverageRing({ value }: { value: number }) {
+  const t = useTranslations('suggestions.meta.card');
+  const { percent } = useFormat();
   const r = 18;
   const c = 2 * Math.PI * r;
   const tone = value >= 0.8 ? 'text-success' : value >= 0.5 ? 'text-accent' : 'text-fg-subtle';
   return (
-    <div className="relative size-12 shrink-0" title="Part de la liste type que tu possèdes déjà">
+    <div className="relative size-12 shrink-0" title={t('coverage')}>
       <svg viewBox="0 0 44 44" className="size-full -rotate-90">
         <circle cx="22" cy="22" r={r} fill="none" strokeWidth="4" className="stroke-border" />
         <circle
@@ -224,7 +235,7 @@ function CoverageRing({ value }: { value: number }) {
         />
       </svg>
       <span className="absolute inset-0 grid place-items-center font-mono text-[11px] font-semibold tabular-nums">
-        {formatPercent(value).replace(' ', '')}
+        {compact(percent(value))}
       </span>
     </div>
   );

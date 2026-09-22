@@ -1,0 +1,26 @@
+{
+  "view": {
+    "title": "Wishlist",
+    "description": "Les cartes à chasser, avec l’édition visée et ton budget.",
+    "stats": {
+      "cards": "Cartes",
+      "estimatedCost": "Coût estimé"
+    },
+    "empty": {
+      "title": "Wishlist vide",
+      "description": "Ajoute des cartes depuis leur fiche, ou envoie d’un clic tout ce qui manque à un deck."
+    }
+  },
+  "priorities": {
+    "HIGH": "Urgent",
+    "MEDIUM": "Normal",
+    "LOW": "Un jour"
+  },
+  "row": {
+    "budget": "budget {price}",
+    "priority": "Priorité",
+    "acquired": "Je l’ai",
+    "acquiredToast": "Ajoutée à ta collection 🎉",
+    "remove": "Retirer"
+  }
+}
