@@ -13,7 +13,8 @@
     "prisma:studio": "prisma studio",
     "cards:sync": "nest build && node dist/cli/sync-cards.js",
     "generate": "prisma generate",
-    "meta:sync": "nest build && node dist/cli/sync-meta.js"
+    "meta:sync": "nest build && node dist/cli/sync-meta.js",
+    "interactions:index": "nest build && node dist/cli/index-interactions.js"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
