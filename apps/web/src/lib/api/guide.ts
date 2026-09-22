@@ -36,5 +36,7 @@ export const useDeckGuide = (
     staleTime: Infinity,
     // Une rédaction IA qui échoue ne doit pas être relancée en boucle (modèle local lent)
     retry: opts.ai ? false : 1,
+    // La rédaction IA tourne en arrière-plan côté API : on redemande jusqu'à ce qu'elle soit prête
+    refetchInterval: (query) => (query.state.data?.aiStatus === 'PENDING' ? 3000 : false),
     placeholderData: keepPreviousData,
   });

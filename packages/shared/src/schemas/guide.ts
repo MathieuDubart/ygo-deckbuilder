@@ -65,6 +65,11 @@ export interface DeckGuideDto {
   model: string | null;
   /** Une IA est configurée sur le serveur */
   aiAvailable: boolean;
+  /**
+   * Rédaction IA (quand demandée) : OFF = pas demandée / pas d'IA · PENDING = en cours en
+   * arrière-plan (redemander plus tard) · READY = ce guide · ERROR = échec (cf. aiError)
+   */
+  aiStatus: 'OFF' | 'PENDING' | 'READY' | 'ERROR';
   /** Raison de l'échec quand l'IA était demandée mais n'a pas pu rédiger le guide */
   aiError: string | null;
   /** false = effets des cartes illisibles : guide réduit (pas de combos ni de stats) */

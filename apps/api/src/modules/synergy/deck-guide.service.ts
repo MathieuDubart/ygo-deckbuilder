@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type { CardSummaryDto, DeckGuideDto, DeckGuideRequest, GuideRole } from '@ygo/shared';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { AiGuideService, type AiGuide } from './ai-guide.service';
+import { AiGuideService, type AiGuide, type AiResult } from './ai-guide.service';
 import { findCombos } from './engine/combos';
 import { analyzeDeck, type DeckEntry } from './engine/graph';
 import { buildRuleGuide, ROLE_LABELS, type RuleGuide } from './engine/guide';
@@ -44,10 +44,9 @@ export class DeckGuideService {
     const name = (id: number) => summary.get(id)?.name ?? byId.get(id)?.name ?? `#${id}`;
     const rules = buildRuleGuide(entries, analysis, combos, name);
 
-    let ai: AiGuide | null = null;
-    let aiError: string | null = null;
+    let result: AiResult = { status: 'OFF' };
     if (input.ai && this.ai.enabled) {
-      ({ guide: ai, error: aiError } = await this.ai.write(
+      result = await this.ai.request(
         input.name,
         entries.map((e) => ({
           name: e.card.name,
@@ -59,8 +58,10 @@ export class DeckGuideService {
           roles: (analysis.roles.get(e.card.id) ?? []).map((r) => ROLE_LABELS[r]),
         })),
         rules,
-      ));
+      );
     }
+    const ai: AiGuide | null = result.status === 'READY' ? result.guide : null;
+    const aiError = result.status === 'ERROR' ? result.error : null;
 
     const guide = ai ? merge(rules, ai, entries, name) : { ...rules, tips: [] };
     const referenced = new Set<number>([
@@ -81,6 +82,7 @@ export class DeckGuideService {
       source: ai ? 'AI' : 'RULES',
       model: ai ? this.ai.model : null,
       aiAvailable: this.ai.enabled,
+      aiStatus: result.status,
       aiError,
       ...guide,
       keyCards: guide.keyCards.map((k) => ({ ...k, roles: k.roles as GuideRole[] })),
