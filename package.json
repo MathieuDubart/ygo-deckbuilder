@@ -15,7 +15,8 @@
     "db:up": "docker compose -f docker-compose.dev.yml up -d --wait",
     "db:migrate": "pnpm --filter @ygo/api prisma:migrate",
     "cards:sync": "pnpm --filter @ygo/api cards:sync",
-    "meta:sync": "pnpm --filter @ygo/api meta:sync"
+    "meta:sync": "pnpm --filter @ygo/api meta:sync",
+    "interactions:index": "pnpm --filter @ygo/api interactions:index"
   },
   "devDependencies": {
     "prettier": "^3.6.2",

@@ -4,6 +4,7 @@ import { CronJob } from 'cron';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapCard, mapPrint, parseDate, setPrefixOf } from './ygoprodeck.mapper';
+import { InteractionIndexService } from '../synergy/interaction-index.service';
 import { ProductCoversService } from './product-covers.service';
 import { YgoprodeckClient } from './ygoprodeck.client';
 
@@ -30,6 +31,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
     private readonly config: AppConfig,
     private readonly scheduler: SchedulerRegistry,
     private readonly covers: ProductCoversService,
+    private readonly interactions: InteractionIndexService,
   ) {}
 
   onModuleInit(): void {
@@ -86,6 +88,10 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       const printCount = await this.upsertPrints(cards, setIds);
       await this.upsertArts(cards);
       await this.refreshSearchIndex();
+      // Nouveaux textes → nouvelles interactions (un échec ici ne fait pas échouer la sync)
+      await this.interactions
+        .rebuild()
+        .catch((e) => this.logger.warn(`Index des interactions non reconstruit : ${e}`));
 
       const result: SyncResult = {
         skipped: false,

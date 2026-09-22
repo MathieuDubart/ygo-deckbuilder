@@ -13,6 +13,7 @@ vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui ma
 - **Meta automatique** : les tops de tournois récents (YGOPRODeck) sont regroupés en archétypes par similarité de contenu, avec une liste type par archétype, un tier et la part du meta
 - **Suggestions & génération de decks** : pour chaque deck du meta, ta couverture et le coût pour compléter ; génération en un clic de la liste meta complète ou d'une version « avec mes cartes » (cœur de la liste, cartes flex, staples que tu possèdes) ; deck auto pour tout archétype de ta collection ; les manquantes partent en wishlist
 - **Synergie & guides** : les effets des cartes sont lus (qui cherche / invoque / envoie quoi, starters, extenders, hand traps, Extra Deck réellement invocable) ; les decks générés privilégient les cartes qui s'emboîtent, et chaque deck a son **guide de jeu** : plan, cartes clés, combos pas à pas, en premier / en second, erreurs à éviter (rédaction par IA en option)
+- **Exploration des cartes** : sur chaque fiche, ce que la carte va chercher / invoquer / utiliser, et quelles cartes la cherchent, l'invoquent ou l'utilisent comme matériau — tes cartes en premier, un clic pour naviguer de carte en carte
 
 ## Stack
 
@@ -127,6 +128,13 @@ AI_MODEL=qwen2.5-14b-instruct
 ```
 
 Les réponses sont validées (zod) et mises en cache en base (`DeckGuideCache`) par liste + modèle.
+
+**Interactions entre cartes** : après chaque sync du catalogue, les cibles *précises* de chaque carte
+(un nom / archétype cité, ou un filtre serré type « Syntoniseur LUMIÈRE de niveau 1 ») sont indexées dans
+`CardEffectTarget` (quelques secondes pour tout le catalogue). La fiche d'une carte calcule ses cibles à la
+volée et interroge l'index pour la question inverse (`GET /api/cards/:id/interactions`). Les effets
+génériques (« 1 monstre ») ne sont pas indexés : ils visent tout le monde. Reconstruction manuelle :
+`pnpm interactions:index` (automatique au démarrage si le lecteur de textes a changé).
 
 ## Qualité
 

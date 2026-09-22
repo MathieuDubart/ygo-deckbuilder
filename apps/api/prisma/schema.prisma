@@ -77,6 +77,7 @@ model Card {
   deckCards       DeckCard[]
   wishlistItems   WishlistItem[]
   metaDeckCards   MetaDeckCard[]
+  effectTargets   CardEffectTarget[]
 
   @@index([name])
   @@index([archetype])
@@ -387,4 +388,38 @@ model DeckGuideCache {
   createdAt DateTime @default(now())
 
   @@index([createdAt])
+}
+
+/// Cibles "précises" des effets de chaque carte (cite un nom / archétype, ou filtre serré),
+/// lues dans son texte à chaque sync du catalogue. Sert à la question inverse :
+/// « quelles cartes peuvent chercher / invoquer / utiliser celle-ci ? ».
+/// Les cibles génériques ("1 monster") ne sont pas stockées : elles visent tout le monde.
+model CardEffectTarget {
+  id         Int      @id @default(autoincrement())
+  cardId     Int
+  /// SEARCH, SPECIAL_SUMMON, SEND_GY, RECOVER, SUMMON_EXTRA, MATERIAL, MENTION
+  verb       String
+  locations  String[]
+  /// Noms / archétypes cités, tels quels (pour le contrôle exact)
+  quoted     String[]
+  /// Les mêmes en minuscules (index GIN pour la recherche inverse)
+  keys       String[]
+  except     String[]
+  kinds      String[]
+  subtypes   String[]
+  races      String[]
+  attributes String[]
+  levelEq    Int?
+  levelMin   Int?
+  levelMax   Int?
+  tuner      Boolean?
+  nonTuner   Boolean?
+  /// 2 = direct (nom / archétype) · 1 = précis (filtre serré)
+  precision  Int
+
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([keys], type: Gin)
+  @@index([precision])
 }
