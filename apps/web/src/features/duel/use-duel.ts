@@ -1,6 +1,7 @@
 'use client';
 import type {
   CardSummaryDto,
+  DuelChainPrompts,
   CreateDuelInput,
   DuelEventDto,
   DuelResponseInput,
@@ -126,6 +127,26 @@ export function useDuelSession() {
     [apply, clear, run, state],
   );
 
+  const setChainPrompts = useCallback(
+    (chainPrompts: DuelChainPrompts) =>
+      run(async () => {
+        if (!state) return;
+        try {
+          apply(await duelApi.settings(state.id, { chainPrompts }));
+          // « Recommencer » garde le réglage
+          setLastSetup((setup) => {
+            if (!setup) return setup;
+            const next = { ...setup, chainPrompts };
+            storage()?.setItem(SETUP_KEY, JSON.stringify(next));
+            return next;
+          });
+        } catch (e) {
+          toast.error(e instanceof Error ? e.message : String(e));
+        }
+      }),
+    [apply, run, state],
+  );
+
   const leave = useCallback(
     () =>
       run(async () => {
@@ -135,7 +156,18 @@ export function useDuelSession() {
     [clear, run, state],
   );
 
-  return { state, log, cards, busy, resuming, lastSetup, start, respond, leave };
+  return {
+    state,
+    log,
+    cards,
+    busy,
+    resuming,
+    lastSetup,
+    start,
+    respond,
+    leave,
+    setChainPrompts,
+  };
 }
 
 export type DuelSession = ReturnType<typeof useDuelSession>;

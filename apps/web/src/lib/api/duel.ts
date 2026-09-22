@@ -4,6 +4,7 @@ import type {
   CreateDuelInput,
   DuelEngineStatusDto,
   DuelResponseInput,
+  DuelSettingsInput,
   DuelStateDto,
 } from '@ygo/shared';
 import { api } from './client';
@@ -22,5 +23,7 @@ export const duelApi = {
   get: (id: string) => api<DuelStateDto>(`/duels/${id}`),
   respond: (id: string, body: DuelResponseInput) =>
     api<DuelStateDto>(`/duels/${id}/respond`, { method: 'POST', body }),
+  settings: (id: string, body: DuelSettingsInput) =>
+    api<DuelStateDto>(`/duels/${id}`, { method: 'PATCH', body }),
   remove: (id: string) => api<void>(`/duels/${id}`, { method: 'DELETE' }),
 };

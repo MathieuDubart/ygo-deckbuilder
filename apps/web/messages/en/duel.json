@@ -29,8 +29,7 @@
       "ME": "Controlled by me",
       "ME_hint": "You make every choice for both players: test interactions, hand traps, lines.",
       "BOT": "Bot",
-      "BOT_hint": "An AI that plays its own deck.",
-      "soon": "Soon"
+      "BOT_hint": "Plays the opponent deck on its own: builds its board, attacks when it's worth it and answers your plays with hand traps and traps."
     },
     "opponentDeck": {
       "label": "Opponent deck",
@@ -125,7 +124,13 @@
     "end": "End turn",
     "leave": "Leave",
     "restart": "Restart",
-    "thinking": "The engine is resolving…"
+    "thinking": "The engine is resolving…",
+    "chains": {
+      "label": "Chains",
+      "SMART": "Auto",
+      "ALWAYS": "Always",
+      "hint": "Auto: you're only asked to chain after an opponent's action (or when it's mandatory). Always: at every chain window, as in EDOPro."
+    }
   },
   "prompt": {
     "opponent": "Opponent's choice",

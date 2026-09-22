@@ -29,8 +29,7 @@
       "ME": "Controllato da me",
       "ME_hint": "Fai tu tutte le scelte per entrambi i giocatori: interazioni, hand trap, linee di gioco.",
       "BOT": "Bot",
-      "BOT_hint": "Un’IA che gioca il proprio deck.",
-      "soon": "Presto"
+      "BOT_hint": "Gioca da solo il Deck avversario: sviluppa il suo Terreno, attacca quando conviene e risponde alle tue mosse con hand trap e Trappole."
     },
     "opponentDeck": {
       "label": "Deck avversario",
@@ -125,7 +124,13 @@
     "end": "Fine turno",
     "leave": "Esci",
     "restart": "Ricomincia",
-    "thinking": "Il motore sta risolvendo…"
+    "thinking": "Il motore sta risolvendo…",
+    "chains": {
+      "label": "Catene",
+      "SMART": "Auto",
+      "ALWAYS": "Sempre",
+      "hint": "Auto: ti viene chiesto di concatenare solo dopo un’azione avversaria (o quando è obbligatorio). Sempre: a ogni finestra di Catena, come su EDOPro."
+    }
   },
   "prompt": {
     "opponent": "Scelta dell’avversario",
