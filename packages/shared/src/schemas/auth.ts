@@ -9,8 +9,8 @@ export const registerSchema = z.object({
     .string()
     .min(3)
     .max(32)
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Lettres, chiffres, _ et - uniquement'),
-  password: z.string().min(10, '10 caractères minimum').max(128),
+    .regex(/^[a-zA-Z0-9_-]+$/, 'Letters, numbers, _ and - only'),
+  password: z.string().min(10).max(128),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 

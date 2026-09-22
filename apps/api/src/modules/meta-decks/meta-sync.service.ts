@@ -11,6 +11,7 @@ import { clusterLists } from './engine/clustering';
 import { buildConsensus } from './engine/consensus';
 import { cardStats, crossArchetypeStaples } from './engine/stats';
 import type { TournamentList } from './engine/types';
+import { t } from '../../common/i18n/locale-context';
 
 const SYNC_ID = 'meta';
 /** Listes conservées pour le calcul (les plus récentes). */
@@ -71,7 +72,7 @@ export class MetaSyncService implements OnModuleInit, OnApplicationBootstrap {
   }
 
   async sync(): Promise<MetaSyncResult> {
-    if (this.running) throw new Error('Mise à jour du meta déjà en cours');
+    if (this.running) throw new Error(t('errors.metaSyncRunning'));
     this.running = true;
     try {
       const fetched = await this.fetchLists();

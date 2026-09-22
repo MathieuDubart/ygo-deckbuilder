@@ -15,6 +15,7 @@ import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapp
 import type { Prisma } from '../../generated/prisma/client';
 import { CardResolver } from '../../common/catalog/card-resolver.service';
 import { OwnershipService } from '../collection/ownership.service';
+import { t } from '../../common/i18n/locale-context';
 
 const deckInclude = {
   cards: { include: { card: { select: cardSummarySelect } } },
@@ -60,7 +61,7 @@ export class DecksService {
       where: { id, OR: [{ userId }, { isPublic: true }] },
       include: deckInclude,
     });
-    if (!deck) throw new NotFoundException('Deck introuvable');
+    if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
     return this.toDto(deck, userId);
   }
 
@@ -116,7 +117,7 @@ export class DecksService {
 
   async importYdk(userId: string, input: ImportYdkInput): Promise<DeckDto> {
     const parsed = parseYdk(input.content);
-    if (!parsed.length) throw new BadRequestException('Fichier .ydk vide ou invalide');
+    if (!parsed.length) throw new BadRequestException(t('errors.ydkEmpty'));
     // Artworks alternatifs → carte principale ; cartes inconnues ignorées plutôt que de tout rejeter
     const ids = await this.resolver.resolve(parsed.map((e) => e.cardId));
     const cards = parsed.flatMap((e) => {
@@ -170,15 +171,14 @@ export class DecksService {
 
   private async assertOwned(userId: string, id: string) {
     const deck = await this.prisma.deck.findFirst({ where: { id, userId }, select: { id: true } });
-    if (!deck) throw new NotFoundException('Deck introuvable');
+    if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
   }
 
   private async assertCardsExist(cards: DeckCardInput[]) {
     const ids = [...new Set(cards.map((c) => c.cardId))];
     if (!ids.length) return;
     const count = await this.prisma.card.count({ where: { id: { in: ids } } });
-    if (count !== ids.length)
-      throw new BadRequestException('Carte(s) inconnue(s) dans la decklist');
+    if (count !== ids.length) throw new BadRequestException(t('errors.unknownCards'));
   }
 }
 

@@ -22,6 +22,7 @@ import { analyzeDeck, type DeckAnalysis } from '../synergy/engine/graph';
 import type { SynCard } from '../synergy/engine/types';
 import { SynergyCardsService, type FullCard } from '../synergy/synergy-cards.service';
 import { computeCoverage } from './coverage';
+import { t } from '../../common/i18n/locale-context';
 
 /** Archétypes de la collection évalués pour les propositions automatiques. */
 const MAX_OWNED_ARCHETYPES = 12;
@@ -68,16 +69,16 @@ export class DeckGeneratorService {
     mode: GenerationMode,
   ): Promise<GeneratedDeckDto> {
     const meta = await this.loadMeta(metaDeckId);
-    if (!meta) throw new NotFoundException('Deck meta introuvable');
+    if (!meta) throw new NotFoundException(t('errors.metaDeckNotFound'));
     const shared = await this.shared(userId);
     const { result, score } = await this.buildMeta(userId, meta, mode, shared);
 
     const notes: string[] = [];
     if (mode === 'OWNED') notes.push(...explain(result, score));
-    if (meta.listCount) notes.push(`Basé sur ${meta.listCount} liste(s) de tournoi récente(s).`);
+    if (meta.listCount) notes.push(t('generator.basedOn', { count: meta.listCount }));
 
     return this.toDto(result, score, {
-      name: mode === 'OWNED' ? `${meta.name} (ma collection)` : meta.name,
+      name: mode === 'OWNED' ? t('generator.ownedName', { name: meta.name }) : meta.name,
       mode,
       metaDeckId: meta.id,
       archetype: meta.archetype,
@@ -88,7 +89,7 @@ export class DeckGeneratorService {
   async fromArchetype(userId: string, archetype: string): Promise<GeneratedDeckDto> {
     const shared = await this.shared(userId);
     const built = await this.buildArchetype(userId, archetype, shared);
-    if (!built) throw new NotFoundException(`Aucune carte « ${archetype} » dans ta collection`);
+    if (!built) throw new NotFoundException(t('errors.archetypeNotOwned', { archetype }));
 
     const metaVersion = await this.prisma.metaDeck.findFirst({
       where: { archetype: { equals: archetype, mode: 'insensitive' } },
@@ -96,11 +97,10 @@ export class DeckGeneratorService {
       select: { name: true },
     });
     const notes = explain(built.result, built.score);
-    if (metaVersion)
-      notes.push(`Une version tournoi existe : « ${metaVersion.name} » dans les decks meta.`);
+    if (metaVersion) notes.push(t('generator.metaVersion', { name: metaVersion.name }));
 
     return this.toDto(built.result, built.score, {
-      name: `${archetype} (auto)`,
+      name: t('generator.autoName', { name: archetype }),
       mode: 'ARCHETYPE',
       metaDeckId: null,
       archetype,
@@ -476,19 +476,14 @@ function toScoreDto(s: DeckScore) {
 /** Explications lisibles de la composition d'un deck "avec mes cartes". */
 function explain(result: GenerationResult, score: DeckScore): string[] {
   const main = result.counts.MAIN;
-  const engine = Math.round(score.engineShare * main);
-  const fillers = Math.round(score.fillerShare * main);
   const notes = [
-    `Composition : ${engine} cartes moteur, ${score.staples} staples, ${fillers} compléments génériques.`,
+    t('generator.composition', {
+      engine: Math.round(score.engineShare * main),
+      staples: score.staples,
+      fillers: Math.round(score.fillerShare * main),
+    }),
   ];
-  if (!result.complete) {
-    notes.push(
-      `Il manque ${40 - main} cartes pour atteindre 40 avec ta collection : bascule sur la liste meta pour voir quoi acheter.`,
-    );
-  } else if (!score.playable) {
-    notes.push(
-      'Deck complet mais fragile : trop de cartes génériques par rapport au moteur. Renforce l’archétype pour le rendre vraiment jouable.',
-    );
-  }
+  if (!result.complete) notes.push(t('generator.incomplete', { count: 40 - main }));
+  else if (!score.playable) notes.push(t('generator.fragile'));
   return notes;
 }

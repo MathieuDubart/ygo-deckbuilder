@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ACCESS_COOKIE } from '../../modules/auth/auth.constants';
 import type { AuthenticatedRequest, AuthUser } from '../decorators/current-user.decorator';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { t } from '../i18n/locale-context';
 
 interface AccessPayload {
   sub: string;
@@ -34,7 +35,7 @@ export class JwtAuthGuard implements CanActivate {
         const payload = await this.jwt.verifyAsync<AccessPayload>(token);
         req.user = { id: payload.sub, role: payload.role };
       } catch {
-        if (!isPublic) throw new UnauthorizedException('Session expirée');
+        if (!isPublic) throw new UnauthorizedException(t('errors.sessionExpired'));
       }
     }
 

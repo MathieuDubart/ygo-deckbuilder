@@ -15,6 +15,7 @@ import { matches } from './engine/parse';
 import type { CardFilter, Location, SynCard } from './engine/types';
 import { InteractionIndexService } from './interaction-index.service';
 import { synCardSelect, type FullCard } from './synergy-cards.service';
+import { t, translator } from '../../common/i18n/locale-context';
 
 /** Cartes affichées par groupe (le total reste exact dans la limite des candidats lus). */
 const PER_GROUP = 30;
@@ -64,7 +65,7 @@ export class InteractionsService {
       where: { id: cardId },
       select: synCardSelect,
     });
-    if (!card) throw new NotFoundException('Carte introuvable');
+    if (!card) throw new NotFoundException(t('errors.cardNotFound'));
     const features = featuresOf(card);
     const targets = targetsOfCard(card, features);
 
@@ -112,7 +113,10 @@ export class InteractionsService {
       groups: groups.map(toDto),
       generic: targets
         .filter((t) => t.precision === 0 && t.verb !== 'MENTION')
-        .map((t) => ({ verb: t.verb as InteractionVerb, target: describeFilter(t.filter) })),
+        .map((t) => ({
+          verb: t.verb as InteractionVerb,
+          target: describeFilter(t.filter, translator()),
+        })),
       ownedLinked: ids.filter((id) => (owned.get(id) ?? 0) > 0).length,
       indexed: !!state?.lastSyncAt,
     };
@@ -134,7 +138,7 @@ export class InteractionsService {
     return {
       direction: 'OUT',
       verb: t.verb as InteractionVerb,
-      target: describeFilter(t.filter),
+      target: describeFilter(t.filter, translator()),
       precision: t.precision === 2 ? 'DIRECT' : 'PRECISE',
       ids,
     };
