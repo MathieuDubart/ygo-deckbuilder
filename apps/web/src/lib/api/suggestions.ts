@@ -5,6 +5,7 @@ import type {
   GeneratedDeckDto,
   GenerationMode,
   MetaDeckSuggestionDto,
+  PlayableDeckDto,
 } from '@ygo/shared';
 import { api } from './client';
 import { qk } from './keys';
@@ -20,6 +21,14 @@ export const useArchetypeSuggestions = () =>
   useQuery({
     queryKey: qk.archetypeSuggestions,
     queryFn: () => api<ArchetypeSuggestionDto[]>('/suggestions/archetypes'),
+  });
+
+/** Decks complets et jouables avec la collection (calcul côté API, ~1 s). */
+export const usePlayableDecks = () =>
+  useQuery({
+    queryKey: qk.playable,
+    queryFn: () => api<PlayableDeckDto[]>('/suggestions/playable'),
+    staleTime: 5 * 60_000,
   });
 
 /** Ce qu'on veut générer : un archétype du meta (avec un mode) ou un archétype de la collection. */

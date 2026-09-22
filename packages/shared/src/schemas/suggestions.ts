@@ -78,8 +78,27 @@ export type GenerateFromArchetypeInput = z.infer<typeof generateFromArchetypeSch
  * Origine d'une carte dans un deck généré :
  *  CORE = liste type de l'archétype · FLEX = jouée par une partie des listes
  *  STAPLE = carte générique du meta · ARCHETYPE = carte de l'archétype · SUPPORT = la cite
+ *  FILLER = complément générique pour atteindre un deck jouable
  */
-export type GeneratedCardSource = 'CORE' | 'FLEX' | 'STAPLE' | 'ARCHETYPE' | 'SUPPORT';
+export type GeneratedCardSource = 'CORE' | 'FLEX' | 'STAPLE' | 'ARCHETYPE' | 'SUPPORT' | 'FILLER';
+
+/** Note de solidité d'un deck généré (heuristique lisible, cf. scoreDeck côté API). */
+export interface DeckScoreDto {
+  /** 0..100 */
+  score: number;
+  /** Part du main deck tenue par le moteur (archétype, liste type, support) */
+  engineShare: number;
+  /** Nombre de staples du meta dans le main */
+  staples: number;
+  /** Part des cartes moteur jouées en 3 exemplaires */
+  consistency: number;
+  /** Part du main complétée avec des cartes génériques */
+  fillerShare: number;
+  /** Proximité de la liste de tournoi (0..1) si basé sur un deck du meta */
+  metaCoverage: number | null;
+  /** 40 cartes, légal, et un vrai moteur */
+  playable: boolean;
+}
 
 export interface GeneratedDeckCardDto {
   card: CardSummaryDto;
@@ -103,5 +122,20 @@ export interface GeneratedDeckDto {
   missingCost: number;
   /** Main deck ≥ 40 cartes */
   complete: boolean;
+  score: DeckScoreDto;
   notes: string[];
+}
+
+/** Deck complet et jouable proposé automatiquement à partir de la collection. */
+export interface PlayableDeckDto {
+  /** Pour ouvrir l'aperçu : deck du meta (mode "avec mes cartes") ou archétype de la collection */
+  target: { kind: 'meta'; metaDeckId: string; name: string } | { kind: 'archetype'; archetype: string };
+  name: string;
+  archetype: string | null;
+  /** Tier du deck meta dont il s'inspire, s'il y en a un */
+  tier: number | null;
+  score: DeckScoreDto;
+  counts: { MAIN: number; EXTRA: number; SIDE: number };
+  /** Cartes phares du moteur (pour l'illustration) */
+  highlights: CardSummaryDto[];
 }

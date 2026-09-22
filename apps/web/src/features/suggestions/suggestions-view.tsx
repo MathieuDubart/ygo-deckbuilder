@@ -1,6 +1,6 @@
 'use client';
 import type { MetaDeckSuggestionDto } from '@ygo/shared';
-import { RefreshCw, Sparkles, Trophy, Wand2 } from 'lucide-react';
+import { RefreshCw, ShieldCheck, Sparkles, Trophy, Wand2 } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -17,6 +17,7 @@ import {
 } from '@/lib/api/suggestions';
 import { cn, formatPercent, formatPrice } from '@/lib/utils';
 import { GenerateDeckDialog } from './generate-deck-dialog';
+import { PlayableDecks } from './playable-decks';
 
 export function SuggestionsView() {
   const meta = useMetaSuggestions();
@@ -30,6 +31,11 @@ export function SuggestionsView() {
         description="Les decks du moment, ce que ta collection permet déjà, et des decks construits pour toi."
         actions={<MetaStatusBar />}
       />
+
+      <section className="mb-12">
+        <SectionTitle icon={ShieldCheck}>Prêts à jouer · 100 % avec tes cartes</SectionTitle>
+        <PlayableDecks onOpen={setTarget} />
+      </section>
 
       <section className="mb-12">
         <SectionTitle icon={Trophy}>Decks du meta · les plus accessibles pour toi</SectionTitle>
