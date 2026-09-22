@@ -7,26 +7,13 @@ import type {
   Paginated,
   SetSearchInput,
 } from '@ygo/shared';
+import { PRODUCT_KIND, SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardDetail, toCardSummary } from '../../common/mappers/card.mapper';
 import { normalizeProductQuery, parsePrintCode } from '../../common/search/normalize';
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
-
-/** Type de produit déduit du nom normalisé (YGOPRODeck ne le fournit pas). */
-const PRODUCT_KIND = Prisma.sql`CASE
-  WHEN s."searchText" ~ '(^| )(structure deck|structure decks)( |$)' THEN 'STRUCTURE'
-  WHEN s."searchText" ~ '(^| )(mega )?tins?( |$)' THEN 'TIN'
-  WHEN s."searchText" ~ '(^| )starter decks?( |$)' THEN 'STARTER'
-  WHEN s."searchText" ~ '(^| )(box|collection|legendary decks|chronicles deck|anniversary pack)( |$)' THEN 'BOX'
-  ELSE 'OTHER' END`;
-
-/** Illustration de la première carte du produit (dernier recours pour le visuel). */
-const FIRST_CARD_IMAGE = Prisma.sql`(
-  SELECT c."imageUrl" FROM "CardPrint" p JOIN "Card" c ON c.id = p."cardId"
-  WHERE p."setId" = s.id AND c."imageUrl" IS NOT NULL
-  ORDER BY p."printCode" LIMIT 1)`;
 
 /** Nom affiché = nom FR s'il existe. On trie sur sa forme normalisée (É = E). */
 const DISPLAY_NAME = Prisma.sql`ygo_normalize(coalesce(c."nameFr", c."name"))`;
@@ -131,12 +118,7 @@ export class CardsService {
     const rows = await this.prisma.$queryRaw<
       (Omit<CardSetDto, 'tcgDate'> & { tcgDate: Date | null })[]
     >`
-      SELECT s.id, s.name, s.code, s."tcgDate",
-             ${PRODUCT_KIND} AS kind,
-             COALESCE(s."coverUrl", s."imageUrl", ${FIRST_CARD_IMAGE}) AS "imageUrl",
-             CASE WHEN s."coverUrl" IS NOT NULL
-               THEN COALESCE(s."imageUrl", ${FIRST_CARD_IMAGE}) END AS "fallbackImageUrl",
-             (SELECT COUNT(DISTINCT p."cardId")::int FROM "CardPrint" p WHERE p."setId" = s.id) AS "cardCount"
+      SELECT ${SET_DTO_COLUMNS}
       FROM "CardSet" s
       WHERE ${Prisma.join(conditions, ' AND ')}
       ORDER BY ${text ? Prisma.sql`${text.similarity} DESC,` : Prisma.empty} s."tcgDate" DESC NULLS LAST, s.name
