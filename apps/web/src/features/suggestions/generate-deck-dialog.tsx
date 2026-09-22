@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
@@ -20,6 +19,7 @@ import { useCreateDeck } from '@/lib/api/decks';
 import { useGeneratedDeck, type GenerationTarget } from '@/lib/api/suggestions';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { cn, formatPrice } from '@/lib/utils';
+import { ScoreBadge, ScoreBreakdown } from './playable-decks';
 
 const ZONES: { zone: DeckZone; label: string }[] = [
   { zone: 'MAIN', label: 'Main Deck' },
@@ -32,6 +32,7 @@ const SOURCE_LABEL: Partial<Record<GeneratedCardSource, string>> = {
   STAPLE: 'Staple',
   ARCHETYPE: 'Archétype',
   SUPPORT: 'Support',
+  FILLER: 'Complément',
 };
 
 /**
@@ -162,6 +163,27 @@ export function GenerateDeckDialog({
                 missingCost={deck.missingCost}
                 complete={deck.complete}
               />
+
+              {deck.mode !== 'META' && (
+                <div className="flex items-center gap-3 rounded-xl border border-border p-3">
+                  <ScoreBadge score={deck.score.score} />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        deck.score.playable ? 'text-success' : 'text-warning',
+                      )}
+                    >
+                      {deck.score.playable
+                        ? 'Deck complet et jouable avec tes cartes'
+                        : deck.complete
+                          ? 'Complet, mais fragile'
+                          : 'Incomplet avec ta collection'}
+                    </p>
+                    <ScoreBreakdown score={deck.score} />
+                  </div>
+                </div>
+              )}
 
               {deck.notes.length > 0 && (
                 <ul className="space-y-1 text-sm text-fg-muted">
@@ -318,15 +340,16 @@ function GeneratedCard({ entry, onClick }: { entry: GeneratedDeckCardDto; onClic
       <span className="absolute top-1 right-1 rounded bg-black/75 px-1 font-mono text-[10px] font-bold text-white tabular-nums">
         ×{entry.quantity}
       </span>
-      {missing > 0 && (
+      {missing > 0 ? (
         <span className="absolute inset-x-1 bottom-1 rounded bg-danger px-1 text-center font-mono text-[9px] font-bold text-white">
           {entry.owned > 0 ? `${entry.owned}/${entry.quantity}` : 'MANQUE'}
         </span>
-      )}
-      {label && (
-        <Badge className="absolute top-1 left-1 px-1 py-px text-[9px]" tone="accent">
-          {label}
-        </Badge>
+      ) : (
+        label && (
+          <span className="absolute inset-x-1 bottom-1 truncate rounded bg-black/75 px-1 text-center text-[9px] font-semibold text-accent">
+            {label}
+          </span>
+        )
       )}
     </button>
   );

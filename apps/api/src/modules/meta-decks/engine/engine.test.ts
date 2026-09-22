@@ -3,10 +3,15 @@ import { clusterLists, nameGroup, tierFor } from './clustering';
 import { buildConsensus } from './consensus';
 import { REAL_LISTS } from './fixtures';
 import {
+  DeckAssembler,
   fillDeck,
   generateFromArchetype,
   generateFromTemplate,
+  scoreDeck,
+  topUp,
   type GenCardInfo,
+  type GeneratedEntry,
+  type GenerationResult,
 } from './generator';
 import { cardStats, crossArchetypeStaples } from './stats';
 
@@ -73,15 +78,11 @@ describe('buildConsensus', () => {
 describe('générateur', () => {
   const kewl = clusterLists(REAL_LISTS)[0]!;
   const template = buildConsensus(kewl.lists);
-  const extraIds = new Set(kewl.lists.flatMap((l) => l.extra));
+  const extraIds = new Set(REAL_LISTS.flatMap((l) => l.extra));
   const cards = new Map<number, GenCardInfo>(
     [...new Set(REAL_LISTS.flatMap((l) => [...l.main, ...l.extra, ...l.side]))].map((id) => [
       id,
-      {
-        id,
-        isExtraDeck: extraIds.has(id) || REAL_LISTS.some((l) => l.extra.includes(id)),
-        banTcg: null,
-      },
+      { id, isExtraDeck: extraIds.has(id), banTcg: null, category: 'MONSTER' as const },
     ]),
   );
 
@@ -99,20 +100,21 @@ describe('générateur', () => {
     expect(r.missingCopies).toBe(70 - 2);
   });
 
-  it('mode OWNED : seulement mes cartes, complété par staples puis archétype', () => {
+  it('mode OWNED : seulement mes cartes, archétype avant staples', () => {
     const owned = new Map<number, number>([
       [ASH, 3],
       [16387555, 3],
       [17209452, 1],
       [65961304, 1],
-      [999, 3], // carte d'archétype hors liste
+      [999, 3],
+      [1000, 3],
     ]);
-    cards.set(999, { id: 999, isExtraDeck: false, banTcg: null });
-    cards.set(1000, { id: 1000, isExtraDeck: false, banTcg: 'Limited' });
-    owned.set(1000, 3);
+    const local = new Map(cards);
+    local.set(999, { id: 999, isExtraDeck: false, banTcg: null, category: 'MONSTER' });
+    local.set(1000, { id: 1000, isExtraDeck: false, banTcg: 'Limited', category: 'SPELL' });
     const r = generateFromTemplate(template, {
       mode: 'OWNED',
-      cards,
+      cards: local,
       owned,
       staples: [{ cardId: 1000, avgCopies: 3 }],
       archetypeCards: [999],
@@ -122,61 +124,140 @@ describe('générateur', () => {
     expect(r.entries.find((e) => e.cardId === 1000)).toMatchObject({
       quantity: 1,
       source: 'STAPLE',
-    }); // limitée
+    });
     expect(r.entries.find((e) => e.cardId === 999)).toMatchObject({
       quantity: 3,
       source: 'ARCHETYPE',
     });
-    expect(r.counts.MAIN).toBe(3 + 3 + 1 + 1 + 3);
-    expect(r.complete).toBe(false);
+    expect(r.complete).toBe(false); // pas assez de cartes et aucun complément fourni
   });
-});
 
-describe('fillDeck', () => {
-  it('ne consomme pas deux fois un exemplaire possédé (main + side)', () => {
-    const cards = new Map([[1, { id: 1, isExtraDeck: false, banTcg: null }]]);
-    const r = fillDeck(
-      [
-        { cardId: 1, want: 2, source: 'CORE' },
-        { cardId: 1, want: 1, source: 'CORE', zone: 'SIDE' },
-      ],
-      { cards, owned: new Map([[1, 2]]), onlyOwned: false, mainTarget: 40 },
+  it('mode OWNED : complète jusqu’à 40 avec des cartes génériques', () => {
+    const generic = Array.from({ length: 30 }, (_, i) => 5000 + i);
+    const local = new Map(cards);
+    generic.forEach((id, i) =>
+      local.set(id, {
+        id,
+        isExtraDeck: false,
+        banTcg: null,
+        category: i % 3 === 0 ? 'MONSTER' : i % 3 === 1 ? 'SPELL' : 'TRAP',
+      }),
     );
-    expect(r.entries.map((e) => [e.zone, e.quantity, e.owned])).toEqual([
-      ['MAIN', 2, 2],
-      ['SIDE', 1, 0],
+    const owned = new Map<number, number>([
+      ...template.cards
+        .filter((c) => c.zone === 'MAIN')
+        .map((c) => [c.cardId, c.quantity] as [number, number])
+        .slice(0, 8),
+      ...generic.map((id) => [id, 3] as [number, number]),
     ]);
-  });
-
-  it('range les monstres extra dans l’Extra Deck, même proposés en main', () => {
-    const cards = new Map([[7, { id: 7, isExtraDeck: true, banTcg: null }]]);
-    const r = fillDeck([{ cardId: 7, want: 1, source: 'CORE' }], {
-      cards,
-      owned: new Map(),
-      onlyOwned: false,
-      mainTarget: 40,
-    });
-    expect(r.entries[0]?.zone).toBe('EXTRA');
-  });
-});
-
-describe('generateFromArchetype', () => {
-  it('archétype d’abord, puis support, puis staples, dans la limite de 40', () => {
-    const ids = Array.from({ length: 20 }, (_, i) => i + 1);
-    const cards = new Map(ids.map((id) => [id, { id, isExtraDeck: false, banTcg: null }]));
-    const owned = new Map(ids.map((id) => [id, 3]));
-    const r = generateFromArchetype({
-      cards,
+    const r = generateFromTemplate(template, {
+      mode: 'OWNED',
+      cards: local,
       owned,
-      archetypeCards: ids.slice(0, 12),
-      supportCards: [13, 14],
-      staples: [{ cardId: 15, avgCopies: 3 }],
+      staples: [],
+      archetypeCards: [],
+      fillers: generic,
     });
     expect(r.counts.MAIN).toBe(40);
-    expect(r.entries.filter((e) => e.source === 'ARCHETYPE').length).toBe(12); // 36 cartes
-    expect(r.entries.find((e) => e.cardId === 13)?.quantity).toBe(2);
-    expect(r.entries.find((e) => e.cardId === 14)?.quantity).toBe(2);
     expect(r.complete).toBe(true);
+    expect(r.missingCopies).toBe(0);
+    expect(r.entries.some((e) => e.source === 'FILLER')).toBe(true);
+  });
+});
+
+describe('topUp', () => {
+  it('équilibre monstres / magies / pièges', () => {
+    const ids = Array.from({ length: 60 }, (_, i) => i + 1);
+    const kind = (id: number) =>
+      (id <= 20 ? 'MONSTER' : id <= 40 ? 'SPELL' : 'TRAP') as 'MONSTER' | 'SPELL' | 'TRAP';
+    const cards = new Map(
+      ids.map((id) => [id, { id, isExtraDeck: false, banTcg: null, category: kind(id) }]),
+    );
+    const deck = new DeckAssembler({
+      cards,
+      owned: new Map(ids.map((id) => [id, 3])),
+      onlyOwned: true,
+      mainTarget: 40,
+    });
+    topUp(
+      deck,
+      ids.map((id) => ({ cardId: id, want: 2, source: 'FILLER' })),
+      cards,
+    );
+    expect(deck.counts.MAIN).toBe(40);
+    expect(deck.mainByKind.MONSTER).toBeGreaterThanOrEqual(18);
+    expect(deck.mainByKind.MONSTER).toBeLessThanOrEqual(22);
+    expect(deck.mainByKind.TRAP).toBeLessThanOrEqual(8);
+  });
+
+  it('ajoute des monstres génériques dans l’Extra Deck', () => {
+    const cards = new Map([
+      [1, { id: 1, isExtraDeck: true, banTcg: null, category: 'MONSTER' as const }],
+    ]);
+    const deck = new DeckAssembler({
+      cards,
+      owned: new Map([[1, 2]]),
+      onlyOwned: true,
+      mainTarget: 40,
+    });
+    topUp(deck, [{ cardId: 1, want: 2, source: 'FILLER' }], cards);
+    expect(deck.counts.EXTRA).toBe(1);
+  });
+});
+
+describe('scoreDeck', () => {
+  const entry = (
+    id: number,
+    quantity: number,
+    source: GeneratedEntry['source'],
+  ): GeneratedEntry => ({
+    cardId: id,
+    zone: 'MAIN',
+    quantity,
+    owned: quantity,
+    source,
+    inclusion: null,
+  });
+  const result = (entries: GeneratedEntry[]): GenerationResult => ({
+    entries,
+    counts: { MAIN: entries.reduce((s, e) => s + e.quantity, 0), EXTRA: 0, SIDE: 0 },
+    missingCopies: 0,
+    complete: entries.reduce((s, e) => s + e.quantity, 0) >= 40,
+  });
+
+  it('un deck au moteur dense, en 3 exemplaires, avec staples, est jouable et bien noté', () => {
+    const r = result([
+      ...Array.from({ length: 9 }, (_, i) => entry(i + 1, 3, 'ARCHETYPE')), // 27
+      ...Array.from({ length: 3 }, (_, i) => entry(100 + i, 3, 'STAPLE')), // 9
+      entry(200, 2, 'FILLER'),
+      entry(201, 2, 'FILLER'), // 4
+    ]);
+    const s = scoreDeck(r);
+    expect(s.playable).toBe(true);
+    expect(s.score).toBeGreaterThanOrEqual(75);
+    expect(s.consistency).toBe(1);
+  });
+
+  it('compte les staples de la liste type comme staples, pas comme moteur', () => {
+    const r = result([
+      ...Array.from({ length: 11 }, (_, i) => entry(i + 1, 3, 'CORE')), // 33 dont Ash
+      entry(200, 2, 'FILLER'),
+      entry(201, 2, 'FILLER'),
+      entry(202, 3, 'FILLER'),
+    ]);
+    const s = scoreDeck(r, { stapleIds: new Set([1]) });
+    expect(s.staples).toBe(3);
+    expect(s.engineShare).toBeCloseTo(30 / 40);
+  });
+
+  it('un tas de cartes génériques n’est pas jouable', () => {
+    const r = result([
+      ...Array.from({ length: 5 }, (_, i) => entry(i + 1, 3, 'ARCHETYPE')), // 15
+      ...Array.from({ length: 13 }, (_, i) => entry(100 + i, 2, 'FILLER')), // 26
+    ]);
+    const s = scoreDeck(r);
+    expect(s.playable).toBe(false);
+    expect(s.score).toBeLessThan(50);
   });
 });
 

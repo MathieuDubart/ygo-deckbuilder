@@ -17,4 +17,5 @@ export const qk = {
   generated: (target: object | null, mode: string) =>
     ['suggestions', 'generate', target, mode] as const,
   metaStatus: ['meta-status'] as const,
+  playable: ['suggestions', 'playable'] as const,
 };

@@ -37,6 +37,12 @@ export class SuggestionsController {
     return this.suggestions.forDeck(user.id, deckId);
   }
 
+  /** Decks complets et jouables montables avec la collection, du plus solide au moins solide. */
+  @Get('playable')
+  playable(@CurrentUser() user: AuthUser) {
+    return this.generator.playable(user.id);
+  }
+
   /** Aperçu d'un deck généré depuis un archétype du meta (rien n'est enregistré). */
   @Get('generate/meta/:metaDeckId')
   generateFromMeta(
