@@ -9,6 +9,7 @@ import type {
 import {
   AlertTriangle,
   BookOpen,
+  Calculator,
   ChevronDown,
   Lightbulb,
   Loader2,
@@ -19,7 +20,7 @@ import {
   Swords,
   Workflow,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CardImage } from '@/components/cards/card-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -65,19 +66,28 @@ export function DeckGuide({
   onInspect?: (cardId: number) => void;
   className?: string;
 }) {
-  // 1. Guide calculé (instantané) — 2. si le serveur a une IA, version rédigée en arrière-plan
+  // Guide calculé (instantané) ; version IA à la demande, via le switch (mémorisé)
+  const [mode, setModeState] = useState<GuideMode>('RULES');
+  // Lu après le montage : pas d'écart entre rendu serveur et client
+  useEffect(() => setModeState(readMode()), []);
+  const setMode = (m: GuideMode) => {
+    setModeState(m);
+    saveMode(m);
+  };
   const rules = useDeckGuide(cards, { name, ai: false });
   const aiAvailable = !!rules.data?.aiAvailable;
-  const ai = useDeckGuide(cards, { name, ai: true, enabled: aiAvailable });
-  const [preferRules, setPreferRules] = useState(false);
+  const wantAi = aiAvailable && mode === 'AI';
+  const ai = useDeckGuide(cards, { name, ai: true, enabled: wantAi });
 
   const aiGuide = !ai.isPlaceholderData && ai.data?.source === 'AI' ? ai.data : null;
-  const aiError = !ai.isPlaceholderData ? (ai.error?.message ?? ai.data?.aiError ?? null) : null;
+  const aiError =
+    wantAi && !ai.isPlaceholderData ? (ai.error?.message ?? ai.data?.aiError ?? null) : null;
   // En cours : 1re requête, ou rédaction en arrière-plan côté API (on repasse toutes les 3 s)
   const writing =
-    aiAvailable &&
+    wantAi &&
+    !aiGuide &&
     (ai.isPlaceholderData || ai.data?.aiStatus === 'PENDING' || (ai.isFetching && !ai.data));
-  const guide = aiGuide && !preferRules ? aiGuide : rules.data;
+  const guide = wantAi && aiGuide ? aiGuide : rules.data;
 
   return (
     <section className={cn('space-y-4', className)} aria-labelledby="deck-guide-title">
@@ -92,23 +102,15 @@ export function DeckGuide({
               : 'Calculé à partir des effets'}
           </Badge>
         )}
-        {writing && (
-          <span className="flex items-center gap-1.5 text-xs text-fg-muted" aria-live="polite">
-            <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide… (un modèle local
-            peut prendre une minute ou deux)
-          </span>
-        )}
-        {aiGuide && (
-          <Button
-            size="sm"
-            variant="ghost"
-            className="ml-auto"
-            onClick={() => setPreferRules((v) => !v)}
-          >
-            <Sparkles className="size-4" /> {preferRules ? 'Version IA' : 'Version calculée'}
-          </Button>
-        )}
+        {aiAvailable && <ModeSwitch mode={mode} onChange={setMode} writing={writing} />}
       </header>
+
+      {writing && (
+        <p className="flex items-center gap-1.5 text-xs text-fg-muted" aria-live="polite">
+          <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide… (un modèle local peut
+          prendre une minute ou deux) — version calculée en attendant.
+        </p>
+      )}
 
       {aiError && !writing && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
@@ -131,9 +133,75 @@ export function DeckGuide({
           <Skeleton className="h-32" />
         </div>
       ) : (
-        <GuideBody guide={guide} onInspect={onInspect} dimmed={rules.isFetching && !aiGuide} />
+        <GuideBody
+          guide={guide}
+          onInspect={onInspect}
+          dimmed={guide.source === 'RULES' && rules.isFetching}
+        />
       )}
     </section>
+  );
+}
+
+type GuideMode = 'RULES' | 'AI';
+const MODE_KEY = 'ygo.guide-mode';
+
+/** Préférence du navigateur (facultative : localStorage peut être indisponible). */
+function readMode(): GuideMode {
+  try {
+    return localStorage.getItem(MODE_KEY) === 'AI' ? 'AI' : 'RULES';
+  } catch {
+    return 'RULES';
+  }
+}
+function saveMode(m: GuideMode) {
+  try {
+    localStorage.setItem(MODE_KEY, m);
+  } catch {
+    // navigation privée, stockage bloqué : tant pis, le choix vaut pour la session
+  }
+}
+
+function ModeSwitch({
+  mode,
+  onChange,
+  writing,
+}: {
+  mode: GuideMode;
+  onChange: (m: GuideMode) => void;
+  writing: boolean;
+}) {
+  const options: { value: GuideMode; label: string; icon: typeof BookOpen }[] = [
+    { value: 'RULES', label: 'Calculé', icon: Calculator },
+    { value: 'AI', label: 'Rédigé par IA', icon: Sparkles },
+  ];
+  return (
+    <div
+      role="radiogroup"
+      aria-label="Version du guide"
+      className="ml-auto grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-xs"
+    >
+      {options.map(({ value, label, icon: Icon }) => (
+        <button
+          key={value}
+          type="button"
+          role="radio"
+          aria-checked={mode === value}
+          onClick={() => onChange(value)}
+          className={cn(
+            'flex items-center justify-center gap-1.5 rounded-md px-2.5 py-1 font-medium transition',
+            mode === value ? 'bg-bg-elevated text-fg shadow-sm' : 'text-fg-muted hover:text-fg',
+          )}
+        >
+          {value === 'AI' && writing ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <Icon className="size-3.5" />
+          )}
+          {label}
+        </button>
+      ))}
+    </div>
   );
 }
 
