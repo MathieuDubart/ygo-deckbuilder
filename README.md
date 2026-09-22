@@ -118,6 +118,29 @@ docker compose up -d --build
 - The sync then runs on `CARD_SYNC_CRON` (Mondays 4am by default) and does nothing if YGOPRODeck has not changed.
 - Put an HTTPS reverse proxy in front of port 3000 (see `Caddyfile.example`). Over plain HTTP, set `COOKIE_SECURE=false`.
 
+### Coolify (or any Docker host, prebuilt images)
+
+`.github/workflows/docker.yml` publishes two public images to GHCR on every push to `main` and on
+every `v*` tag: `ghcr.io/mathieudubart/ygo-deckbuilder-api` and `…-web` (tags `latest`, the version,
+and the short commit sha). After the first run, switch both packages to **Public** in the
+repository's *Packages* tab.
+
+In Coolify: **+ New → Docker Compose**, paste [`docker-compose.coolify.yml`](docker-compose.coolify.yml),
+deploy. Coolify generates the domain (service `web`, port 3000), the Postgres password and the JWT
+secret; the only variable worth setting is `ADMIN_EMAIL` (that account becomes admin when it signs up).
+Nothing is exposed but the web service: the API and the database stay on the internal network. The
+catalog syncs itself on first start, and the duel engine downloads its data into the `ygo-duel` volume.
+
+To build on the server instead of pulling the images, point Coolify at this repository with
+`docker-compose.yml`.
+
+- The web image bakes `API_URL=http://api:4000` at build time (Next serialises its rewrites), so the
+  API service has to keep the name `api`.
+- Running a fork? Build with `--build-arg SOURCE_URL=<your fork>` so the duel page links to your
+  source (AGPL-3.0).
+- The published images are amd64. For an arm64 server, add `platforms: linux/amd64,linux/arm64` to
+  the build step of the workflow.
+
 ### Duel simulator
 
 The duel engine needs the card scripts and databases from Project Ignis (~60 MB). The API downloads
