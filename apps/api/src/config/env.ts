@@ -21,6 +21,12 @@ export const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  YUGIPEDIA_API_URL: z.url().default('https://yugipedia.com/api.php'),
+  /** Visuels HD des produits via Yugipedia (sinon, petits visuels YGOPRODeck). */
+  PRODUCT_COVERS_ENABLED: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
   ADMIN_EMAIL: z
     .string()
     .optional()

@@ -22,6 +22,12 @@ const PRODUCT_KIND = Prisma.sql`CASE
   WHEN s."searchText" ~ '(^| )(box|collection|legendary decks|chronicles deck|anniversary pack)( |$)' THEN 'BOX'
   ELSE 'OTHER' END`;
 
+/** Illustration de la première carte du produit (dernier recours pour le visuel). */
+const FIRST_CARD_IMAGE = Prisma.sql`(
+  SELECT c."imageUrl" FROM "CardPrint" p JOIN "Card" c ON c.id = p."cardId"
+  WHERE p."setId" = s.id AND c."imageUrl" IS NOT NULL
+  ORDER BY p."printCode" LIMIT 1)`;
+
 /** Nom affiché = nom FR s'il existe. On trie sur sa forme normalisée (É = E). */
 const DISPLAY_NAME = Prisma.sql`ygo_normalize(coalesce(c."nameFr", c."name"))`;
 
@@ -127,11 +133,9 @@ export class CardsService {
     >`
       SELECT s.id, s.name, s.code, s."tcgDate",
              ${PRODUCT_KIND} AS kind,
-             COALESCE(s."imageUrl", (
-               SELECT c."imageUrlSmall" FROM "CardPrint" p JOIN "Card" c ON c.id = p."cardId"
-               WHERE p."setId" = s.id AND c."imageUrlSmall" IS NOT NULL
-               ORDER BY p."printCode" LIMIT 1
-             )) AS "imageUrl",
+             COALESCE(s."coverUrl", s."imageUrl", ${FIRST_CARD_IMAGE}) AS "imageUrl",
+             CASE WHEN s."coverUrl" IS NOT NULL
+               THEN COALESCE(s."imageUrl", ${FIRST_CARD_IMAGE}) END AS "fallbackImageUrl",
              (SELECT COUNT(DISTINCT p."cardId")::int FROM "CardPrint" p WHERE p."setId" = s.id) AS "cardCount"
       FROM "CardSet" s
       WHERE ${Prisma.join(conditions, ' AND ')}
