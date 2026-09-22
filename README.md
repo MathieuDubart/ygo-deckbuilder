@@ -19,6 +19,8 @@ and generated play guides.
 - **Automatic meta** — recent tournament top decks are clustered into archetypes by content, with a consensus list, flex cards, a tier and the meta share.
 - **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; **official preconstructed decks** (structure decks, starters, the decks inside boxes such as *Legendary 5D's Decks* or the *2-Player Starter Set*) with what you own of each; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
 - **Synergy & play guides** — card effects are read (who searches, summons or sends what; starters, extenders, hand traps; which Extra Deck monsters are actually reachable). Generated decks favour cards that work together, and every deck gets a **play guide**: game plan, key cards, step-by-step combos, going first/second, mistakes to avoid. Optionally rewritten by an AI model (OpenAI-compatible or Anthropic, local models welcome).
+- **Duel simulator** — test your decks with the **real card effects**: the [EDOPro](https://github.com/edo9300/ygopro-core) engine (compiled to WebAssembly) and the [Project Ignis](https://github.com/ProjectIgnis) card scripts run on the server. Force your opening hand, set up the opponent's board (monsters, set cards, hand traps, graveyard), then play against a passive opponent (combo testing) or make the opponent's choices yourself (interactions). Every summon type, chains, battle and the duel log are supported. A bot opponent is coming.
+- **Rules reminder** — the official rules (current Master Rule) in 5 languages: turn structure, every summon type (Fusion, Ritual, Synchro, Xyz, Pendulum, Link), Extra Monster Zones, chains, battle.
 - **Wishlist** — target print, max budget, priority, link to the deck that needs it, "Got it" moves it to the collection.
 
 <!-- Screenshots to add in docs/screenshots/ (collection, deck-builder, card-interactions, suggestions, guide, products, languages):
@@ -65,6 +67,7 @@ apps/
         meta-decks/    tournament lists, meta engine (engine/), sync
         suggestions/   coverage, deck generation, playable decks
         synergy/       effect reader, synergy graph, combos, guides (engine/), card interactions
+        duel/          duel simulator: EDOPro engine (WebAssembly), card data/scripts (data/), prompts & log (engine/)
   web/                 Next.js
     messages/          UI translations, one folder per language
     src/
@@ -114,6 +117,19 @@ docker compose up -d --build
 - HD product covers and official product quantities come from Yugipedia (`PRODUCT_COVERS_ENABLED`).
 - The sync then runs on `CARD_SYNC_CRON` (Mondays 4am by default) and does nothing if YGOPRODeck has not changed.
 - Put an HTTPS reverse proxy in front of port 3000 (see `Caddyfile.example`). Over plain HTTP, set `COOKIE_SECURE=false`.
+
+### Duel simulator
+
+The duel engine needs the card scripts and databases from Project Ignis (~60 MB). The API downloads
+them on first start into `DUEL_DATA_DIR` (a Docker volume, `duel-data`) and refreshes them on
+`DUEL_DATA_CRON` (Tuesday 3 am by default); the page shows a waiting state until they are ready.
+Each duel runs in memory on the API (a few MB); `DUEL_MAX_SESSIONS` caps simultaneous duels and idle
+duels are closed after `DUEL_IDLE_MINUTES`. `DUEL_ENABLED=false` turns the simulator off.
+
+There is no WebSocket: every answer to the engine is a plain HTTP request that returns the new state,
+the log events and the next choice, so the simulator works behind any reverse proxy.
+
+If you run a modified version, set `SOURCE_URL` to your fork (AGPL-3.0, see [License](#license)).
 
 ## Languages
 
@@ -194,7 +210,7 @@ from your cards only.
 
 ```bash
 pnpm typecheck
-pnpm test        # deck rules, .ydk, search, locales, YGOPRODeck/Yugipedia parsing, meta engine, synergy engine, product quantities
+pnpm test        # deck rules, .ydk, search, locales, YGOPRODeck/Yugipedia parsing, meta engine, synergy engine, product quantities, duel engine bridge
 pnpm build
 ```
 
@@ -204,13 +220,23 @@ pnpm build
 - [x] Synergy engine (roles, card links, reachable Extra Deck, combos) + play guides
 - [x] Real structure deck quantities (Yugipedia set lists)
 - [x] Five languages
+- [x] Duel simulator (EDOPro engine) + rules reminder
+- [ ] Bot opponent in the duel simulator (WindBot)
 - [ ] Opening-hand simulator (odds of opening each combo)
 - [ ] Deck builder suggestions from the interaction index (owned cards linked to the deck, beyond its archetype)
 - [ ] Shareable read-only public decks
 - [ ] End-to-end tests (Playwright) in CI
 
+## License
+
+[AGPL-3.0-or-later](LICENSE). The duel simulator embeds the EDOPro engine (ygopro-core, AGPL-3.0),
+so the whole application is distributed under the same license: if you run a modified version on a
+server, you must offer its source code to its users (the duel page links to it through `SOURCE_URL`).
+
 ## Credits
 
 Card data and images: [YGOPRODeck](https://ygoprodeck.com/). Product box art and set lists:
-[Yugipedia](https://yugipedia.com/). Yu-Gi-Oh! is a trademark of Konami; this project is not affiliated
+[Yugipedia](https://yugipedia.com/). Duel engine: [ygopro-core](https://github.com/edo9300/ygopro-core)
+(EDOPro, AGPL-3.0) through [ocgcore-wasm](https://www.npmjs.com/package/ocgcore-wasm) (MIT); card
+scripts and databases: [Project Ignis](https://github.com/ProjectIgnis) (CardScripts, BabelCDB). Yu-Gi-Oh! is a trademark of Konami; this project is not affiliated
 with or endorsed by Konami.
