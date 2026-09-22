@@ -17,7 +17,13 @@ const nextConfig: NextConfig = {
   images: {
     // Les images passent par l'optimiseur Next → mises en cache chez nous,
     // on ne hotlinke pas YGOPRODeck à chaque affichage (cf. leurs règles d'usage).
-    remotePatterns: [new URL('https://images.ygoprodeck.com/images/**')],
+    remotePatterns: [
+      new URL('https://images.ygoprodeck.com/images/**'),
+      // Visuels HD des produits (boîtes, tins, structure decks)
+      new URL('https://ms.yugipedia.com/**'),
+    ],
+    // 90 pour les visuels (texte fin sur les boîtes/cartes), 75 par défaut ailleurs
+    qualities: [75, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30,
   },
 };

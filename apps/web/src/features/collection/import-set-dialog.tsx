@@ -119,18 +119,22 @@ function ProductCover({
   className?: string;
   sizes: string;
 }) {
-  // Image introuvable côté YGOPRODeck → pictogramme plutôt qu'une image cassée
-  const [failed, setFailed] = useState(false);
+  // Visuel HD indisponible → visuel de secours → pictogramme (jamais d'image cassée)
+  const sources = [set.imageUrl, set.fallbackImageUrl].filter((u): u is string => !!u);
+  const [attempt, setAttempt] = useState(0);
+  const src = sources[attempt];
   return (
     <div className={cn('relative overflow-hidden rounded-lg bg-bg-sunken', className)}>
-      {set.imageUrl && !failed ? (
+      {src ? (
         <Image
-          src={set.imageUrl}
+          key={src}
+          src={src}
           alt=""
           fill
           sizes={sizes}
+          quality={90}
           className="object-contain p-1.5"
-          onError={() => setFailed(true)}
+          onError={() => setAttempt((a) => a + 1)}
         />
       ) : (
         <div className="grid h-full place-items-center">
@@ -150,7 +154,7 @@ function ProductTile({ set, onClick }: { set: CardSetDto; onClick: () => void })
     >
       <ProductCover
         set={set}
-        sizes="140px"
+        sizes="(max-width: 640px) 45vw, 170px"
         className="aspect-[3/4] w-full transition group-hover:-translate-y-0.5"
       />
       <span className="line-clamp-2 text-xs leading-snug font-medium">{set.name}</span>
@@ -177,7 +181,11 @@ function ConfirmImport({
 
   return (
     <div className="grid gap-6 sm:grid-cols-[14rem_1fr]">
-      <ProductCover set={set} sizes="224px" className="mx-auto aspect-[3/4] w-full max-w-56" />
+      <ProductCover
+        set={set}
+        sizes="(max-width: 640px) 80vw, 224px"
+        className="mx-auto aspect-[3/4] w-full max-w-56"
+      />
       <div className="flex flex-col gap-4">
         <div className="space-y-1 text-sm">
           <p className="font-mono text-fg-subtle">

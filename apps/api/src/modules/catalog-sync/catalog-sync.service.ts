@@ -4,6 +4,7 @@ import { CronJob } from 'cron';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { mapCard, mapPrint, parseDate, setPrefixOf } from './ygoprodeck.mapper';
+import { ProductCoversService } from './product-covers.service';
 import { YgoprodeckClient } from './ygoprodeck.client';
 
 const SYNC_ID = 'ygoprodeck';
@@ -28,6 +29,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
     private readonly ygo: YgoprodeckClient,
     private readonly config: AppConfig,
     private readonly scheduler: SchedulerRegistry,
+    private readonly covers: ProductCoversService,
   ) {}
 
   onModuleInit(): void {
@@ -93,6 +95,8 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
         durationMs: Date.now() - started,
       };
       await this.saveState({ ...result, status: 'OK' });
+      // Nouveaux produits → visuels HD en arrière-plan (ne bloque pas la sync)
+      if (this.config.get('PRODUCT_COVERS_ENABLED')) this.covers.refreshInBackground();
       this.logger.log(
         `Sync OK : ${result.cards} cartes, ${result.prints} impressions, ${result.sets} sets en ${Math.round(result.durationMs / 1000)}s`,
       );

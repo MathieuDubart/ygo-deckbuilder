@@ -87,7 +87,11 @@ model CardSet {
   code      String? // préfixe, ex: "SDBE" (pas unique : certains sets partagent un préfixe)
   cardCount Int?
   tcgDate   DateTime? @db.Date
-  imageUrl  String?
+  imageUrl  String? // visuel YGOPRODeck (petit)
+  /// Visuel HD du produit (Yugipedia), prioritaire sur imageUrl
+  coverUrl       String?
+  /// Dernière recherche du visuel HD (null = jamais cherché)
+  coverCheckedAt DateTime?
   /// Nom normalisé pour la recherche (cf. Card.searchText)
   searchText String @default("")
 

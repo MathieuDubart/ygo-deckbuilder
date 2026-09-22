@@ -7,7 +7,7 @@ vraiment, et savoir quels decks meta on peut monter (et combien coûte ce qui ma
 
 - **Comptes** multi-utilisateurs (Argon2id, JWT court + refresh token roté en cookie httpOnly)
 - **Catalogue** complet synchronisé depuis [YGOPRODeck](https://ygoprodeck.com/api-guide/) (EN + noms FR), éditions, raretés, prix Cardmarket
-- **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck…), valeur estimée
+- **Collection** par édition / état / langue / 1ère édition, import d'un produit entier (Structure Deck, tin…) depuis une galerie de visuels HD (Yugipedia), valeur estimée
 - **Deck builder** : recherche limitée à tes cartes (ou tout le catalogue), validation live (40–60, 3 max, banlist, zone Extra), exemplaires manquants signalés, auto-save, import/export `.ydk`
 - **Wishlist** : édition visée, budget max, priorité, lien vers le deck qui la réclame, « Je l'ai » → bascule en collection
 - **Suggestions** : couverture de ta collection sur chaque deck meta de référence + coût pour compléter ; archétypes les plus fournis ; cartes possédées qui collent à un deck en cours
@@ -78,6 +78,7 @@ docker compose up -d --build
 
 - Les migrations s'appliquent au démarrage de l'API.
 - Au premier démarrage, le catalogue vide déclenche une sync automatique (logs : `docker compose logs -f api`).
+- Les visuels HD des produits sont récupérés sur Yugipedia en arrière-plan (`PRODUCT_COVERS_ENABLED`).
 - Ensuite la sync tourne selon `CARD_SYNC_CRON` (lundi 4h par défaut) et ne fait rien si YGOPRODeck n'a pas bougé.
 - Mets un reverse proxy HTTPS devant le port 3000 (voir `Caddyfile.example`). En HTTP pur, passe `COOKIE_SECURE=false`.
 
