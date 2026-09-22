@@ -130,6 +130,13 @@
       "SMART": "Auto",
       "ALWAYS": "Sempre",
       "hint": "Auto: ti viene chiesto di concatenare solo dopo un’azione avversaria (o quando è obbligatorio). Sempre: a ogni finestra di Catena, come su EDOPro."
+    },
+    "sound": "Audio",
+    "speed": {
+      "label": "Animazioni",
+      "normal": "Normali",
+      "fast": "Veloci",
+      "off": "Nessuna"
     }
   },
   "prompt": {
@@ -299,5 +306,21 @@
   "inspector": {
     "empty": "Passa sopra o tocca una carta per leggerla.",
     "hidden": "Carta coperta."
+  },
+  "fx": {
+    "duel": "Duello!",
+    "summon": {
+      "NORMAL": "Evocazione Normale",
+      "SPECIAL": "Evocazione Speciale",
+      "FLIP": "Evocazione Scoperta"
+    },
+    "activate": "Anello di Catena {link}",
+    "negated": "Annullato!",
+    "attack": "Attacco!",
+    "direct": "Attacco diretto!",
+    "set": "Carta posizionata",
+    "skip": "Salta",
+    "you": "Tu",
+    "opponent": "Avv."
   }
 }

@@ -130,6 +130,13 @@
       "SMART": "Auto",
       "ALWAYS": "Immer",
       "hint": "Auto: Du wirst nur nach einer Aktion des Gegners (oder wenn es Pflicht ist) gefragt, ob du kettest. Immer: bei jedem Kettenfenster, wie in EDOPro."
+    },
+    "sound": "Ton",
+    "speed": {
+      "label": "Animationen",
+      "normal": "Normal",
+      "fast": "Schnell",
+      "off": "Aus"
     }
   },
   "prompt": {
@@ -299,5 +306,21 @@
   "inspector": {
     "empty": "Fahre über eine Karte oder tippe sie an, um sie zu lesen.",
     "hidden": "Verdeckte Karte."
+  },
+  "fx": {
+    "duel": "Duell!",
+    "summon": {
+      "NORMAL": "Normalbeschwörung",
+      "SPECIAL": "Spezialbeschwörung",
+      "FLIP": "Flippbeschwörung"
+    },
+    "activate": "Kettenglied {link}",
+    "negated": "Annulliert!",
+    "attack": "Angriff!",
+    "direct": "Direkter Angriff!",
+    "set": "Karte gesetzt",
+    "skip": "Überspringen",
+    "you": "Du",
+    "opponent": "Gegner"
   }
 }

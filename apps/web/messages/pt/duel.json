@@ -130,6 +130,13 @@
       "SMART": "Auto",
       "ALWAYS": "Sempre",
       "hint": "Auto: você só é consultado para encadear após uma ação do oponente (ou quando é obrigatório). Sempre: a cada janela de Corrente, como no EDOPro."
+    },
+    "sound": "Som",
+    "speed": {
+      "label": "Animações",
+      "normal": "Normais",
+      "fast": "Rápidas",
+      "off": "Nenhuma"
     }
   },
   "prompt": {
@@ -299,5 +306,21 @@
   "inspector": {
     "empty": "Passe o mouse ou toque em um card para lê-lo.",
     "hidden": "Card com a face para baixo."
+  },
+  "fx": {
+    "duel": "Duelo!",
+    "summon": {
+      "NORMAL": "Invocação-Normal",
+      "SPECIAL": "Invocação-Especial",
+      "FLIP": "Invocação-Virar"
+    },
+    "activate": "Elo de Corrente {link}",
+    "negated": "Negado!",
+    "attack": "Ataque!",
+    "direct": "Ataque direto!",
+    "set": "Carta baixada",
+    "skip": "Pular",
+    "you": "Você",
+    "opponent": "Opon."
   }
 }
