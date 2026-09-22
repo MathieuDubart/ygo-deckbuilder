@@ -331,9 +331,10 @@ function OpponentBoard({
   const room = (loc: DuelBoardCardInput['location']) =>
     ZONE_LIMIT[loc] === undefined || count(loc) < ZONE_LIMIT[loc]!;
 
-  const add = (card: { id: number; category: string; type: string }) => {
+  const add = (card: { id: number; category: string; race: string | null }) => {
+    // Magie Terrain : YGOPRODeck la range en race « Field »
     const preferred: DuelBoardCardInput['location'] =
-      card.category === 'MONSTER' ? 'MZONE' : /field/i.test(card.type) ? 'FZONE' : 'SZONE';
+      card.category === 'MONSTER' ? 'MZONE' : card.race === 'Field' ? 'FZONE' : 'SZONE';
     const location = room(preferred) ? preferred : 'HAND';
     onChange([
       ...board,
