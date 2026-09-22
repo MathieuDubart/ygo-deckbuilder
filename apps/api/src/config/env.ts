@@ -32,6 +32,24 @@ export const envSchema = z.object({
     .enum(['true', 'false'])
     .default('true')
     .transform((v) => v === 'true'),
+  /**
+   * IA optionnelle pour rédiger les guides de deck (sinon : guide calculé).
+   * openai = toute API compatible OpenAI (OpenAI, Mistral, LM Studio, Ollama…)
+   */
+  AI_PROVIDER: z.enum(['none', 'openai', 'anthropic']).default('none'),
+  AI_BASE_URL: z
+    .string()
+    .optional()
+    .transform((v) => v?.trim().replace(/\/+$/, '') || undefined),
+  AI_API_KEY: z
+    .string()
+    .optional()
+    .transform((v) => v?.trim() || undefined),
+  AI_MODEL: z
+    .string()
+    .optional()
+    .transform((v) => v?.trim() || undefined),
+  AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(300_000).default(90_000),
   ADMIN_EMAIL: z
     .string()
     .optional()
@@ -40,11 +58,18 @@ export const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+const aiRule = (env: Env) =>
+  env.AI_PROVIDER === 'none' ||
+  !!env.AI_MODEL ||
+  'AI_MODEL est obligatoire quand AI_PROVIDER est défini';
+
 export function validateEnv(raw: Record<string, unknown>): Env {
   const parsed = envSchema.safeParse(raw);
   if (!parsed.success) {
     const details = parsed.error.issues.map((i) => `  - ${i.path.join('.')}: ${i.message}`);
     throw new Error(`Configuration invalide :\n${details.join('\n')}`);
   }
+  const ai = aiRule(parsed.data);
+  if (ai !== true) throw new Error(`Configuration invalide :\n  - ${ai}`);
   return parsed.data;
 }

@@ -9,3 +9,4 @@ export * from './schemas/collection';
 export * from './schemas/decks';
 export * from './schemas/wishlist';
 export * from './schemas/suggestions';
+export * from './schemas/guide';

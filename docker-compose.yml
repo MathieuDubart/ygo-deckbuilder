@@ -36,6 +36,10 @@ services:
       CARD_SYNC_CRON: ${CARD_SYNC_CRON:-0 4 * * 1}
       META_SYNC_CRON: ${META_SYNC_CRON:-0 5 * * 1}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      AI_PROVIDER: ${AI_PROVIDER:-none}
+      AI_BASE_URL: ${AI_BASE_URL:-}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-}
     # Pas de port exposé : seul le front parle à l'API (réseau interne Docker)
 
   web:
