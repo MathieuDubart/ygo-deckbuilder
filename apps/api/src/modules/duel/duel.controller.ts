@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
 import {
   createDuelSchema,
   duelResponseSchema,
+  duelSettingsSchema,
   type CreateDuelInput,
   type DuelEngineStatusDto,
   type DuelResponseInput,
+  type DuelSettingsInput,
   type DuelStateDto,
 } from '@ygo/shared';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator';
@@ -45,6 +47,15 @@ export class DuelController {
     @Body(new ZodValidationPipe(duelResponseSchema)) body: DuelResponseInput,
   ): Promise<DuelStateDto> {
     return this.duels.respond(user.id, id, body);
+  }
+
+  @Patch(':id')
+  settings(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(duelSettingsSchema)) body: DuelSettingsInput,
+  ): Promise<DuelStateDto> {
+    return this.duels.settings(user.id, id, body);
   }
 
   @Delete(':id')

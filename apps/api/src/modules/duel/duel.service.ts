@@ -8,7 +8,13 @@ import {
 } from '@nestjs/common';
 import { Interval } from '@nestjs/schedule';
 import { OcgLocation, OcgPosition, OcgType } from 'ocgcore-wasm';
-import type { CardSummaryDto, CreateDuelInput, DuelResponseInput, DuelStateDto } from '@ygo/shared';
+import type {
+  CardSummaryDto,
+  CreateDuelInput,
+  DuelResponseInput,
+  DuelSettingsInput,
+  DuelStateDto,
+} from '@ygo/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import {
   cardSummarySelect,
@@ -85,8 +91,8 @@ export class DuelService implements OnModuleDestroy {
 
     const startingDraw: [number, number] = [0, 0];
     startingDraw[userTeam] = Math.max(0, 5 - opening.length);
-    // Avec un plateau imposé, sa main se limite aux cartes choisies
-    startingDraw[oppTeam] = input.opponent.board.length ? 0 : 5;
+    // Plateau de test imposé : l'adversaire ne pioche pas… sauf le bot, qui joue un vrai duel
+    startingDraw[oppTeam] = input.opponent.board.length && input.opponent.control !== 'BOT' ? 0 : 5;
 
     this.evict(userId);
     const core = await ocgCore();
@@ -96,6 +102,7 @@ export class DuelService implements OnModuleDestroy {
         userId,
         userTeam,
         opponentControl: input.opponent.control,
+        chainPrompts: input.chainPrompts,
         startingLP: input.startingLP,
         startingDraw,
         cards,
@@ -129,6 +136,13 @@ export class DuelService implements OnModuleDestroy {
   close(id: string): void {
     this.sessions.get(id)?.destroy();
     this.sessions.delete(id);
+  }
+
+  /** Réglages pendant le duel (fenêtres de chaîne). */
+  async settings(userId: string, id: string, input: DuelSettingsInput): Promise<DuelStateDto> {
+    const session = this.session(userId, id);
+    session.chainPrompts = input.chainPrompts;
+    return this.state(session);
   }
 
   remove(userId: string, id: string): void {
