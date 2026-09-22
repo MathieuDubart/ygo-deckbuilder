@@ -57,6 +57,7 @@ export function mapCard(c: YgoCard, fr?: { name: string; desc: string }) {
     banOcg: c.banlist_info?.ban_ocg ?? null,
     formats: misc?.formats ?? [],
     tcgDate: parseDate(misc?.tcg_date),
+    popularity: typeof misc?.views === 'number' ? misc.views : null,
     imageUrl: image?.image_url ?? null,
     imageUrlSmall: image?.image_url_small ?? null,
     priceCardmarket: parsePrice(prices?.cardmarket_price),

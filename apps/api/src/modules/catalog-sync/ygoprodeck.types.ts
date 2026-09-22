@@ -27,7 +27,7 @@ export interface YgoCard {
   card_images?: { id: number; image_url: string; image_url_small: string }[];
   card_prices?: { cardmarket_price?: string; tcgplayer_price?: string }[];
   banlist_info?: { ban_tcg?: string; ban_ocg?: string };
-  misc_info?: { formats?: string[]; tcg_date?: string }[];
+  misc_info?: { formats?: string[]; tcg_date?: string; views?: number }[];
 }
 
 export interface YgoSetInfo {

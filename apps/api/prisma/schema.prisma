@@ -55,6 +55,8 @@ model Card {
   banOcg String?
   formats String[]
   tcgDate DateTime? @db.Date
+  /// Vues de la fiche sur YGOPRODeck : proxy de popularité (départage les cartes génériques)
+  popularity Int?
 
   /// Texte de recherche normalisé (FR + EN + archétype, sans accents ni ponctuation).
   /// Calculé en SQL par ygo_normalize() — voir migration "search".
