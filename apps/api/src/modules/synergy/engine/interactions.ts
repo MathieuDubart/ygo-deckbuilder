@@ -1,4 +1,5 @@
 import { featuresOf } from './graph';
+import type { Translator } from '../../../common/i18n/translator';
 import type { CardFeatures, CardFilter, Location, SynCard, Verb } from './types';
 
 /**
@@ -116,45 +117,37 @@ export function nameKeys(card: SynCard, features: CardFeatures = featuresOf(card
   return [...keys];
 }
 
-// ─── Description en français d'un filtre ─────────────────────────────────────
+// ─── Description d'un filtre dans la langue ──────────────────────────────────
 
-const ATTR_FR: Record<string, string> = {
-  LIGHT: 'LUMIÈRE',
-  DARK: 'TÉNÈBRES',
-  EARTH: 'TERRE',
-  WATER: 'EAU',
-  FIRE: 'FEU',
-  WIND: 'VENT',
-  DIVINE: 'DIVIN',
-};
-
-/** « monstre « Blue-Eyes » », « Syntoniseur LUMIÈRE de niveau 1 », « Magie Rituelle »… */
-export function describeFilter(f: CardFilter): string {
-  const parts: string[] = [];
+/**
+ * « Syntoniseur LUMIÈRE de niveau 1 », « Level 1 LIGHT Tuner », « monstre « Blue-Eyes » »…
+ * L'ordre des morceaux dépend de la langue (clé interactions.pattern).
+ */
+export function describeFilter(f: CardFilter, tr: Translator): string {
+  const { t } = tr;
   const kind = f.kinds.length === 1 ? f.kinds[0] : f.kinds.length > 1 ? 'SPELL_TRAP' : null;
-  const noun = f.tuner
-    ? 'Syntoniseur'
-    : f.nonTuner
-      ? 'non-Syntoniseur'
-      : kind === 'SPELL'
-        ? 'Magie'
-        : kind === 'TRAP'
-          ? 'Piège'
-          : kind === 'SPELL_TRAP'
-            ? 'Magie/Piège'
-            : kind === 'MONSTER'
-              ? 'monstre'
-              : 'carte';
-  if (!(noun === 'carte' && f.quoted.length)) parts.push(noun);
-  const sub = f.subtypes.filter((s) => s !== 'Effect');
-  if (sub.length) parts.push(sub.join('/'));
-  if (f.races.length) parts.push(f.races.join('/'));
-  if (f.attributes.length) parts.push(f.attributes.map((a) => ATTR_FR[a] ?? a).join('/'));
-  if (f.levelEq !== undefined) parts.push(`de niveau ${f.levelEq}`);
-  if (f.levelMin !== undefined) parts.push(`de niveau ${f.levelMin} ou plus`);
-  if (f.levelMax !== undefined) parts.push(`de niveau ${f.levelMax} ou moins`);
-  if (f.quoted.length) parts.push(f.quoted.map((q) => `« ${q} »`).join(' ou '));
-  let s = parts.join(' ');
-  if (f.except.length) s += ` (sauf ${f.except.map((e) => `« ${e} »`).join(', ')})`;
-  return s;
+  const nounKey = f.tuner ? 'tuner' : f.nonTuner ? 'nonTuner' : (kind ?? 'card');
+  // Un nom cité sans type (« "Blue-Eyes White Dragon" ») se suffit à lui-même
+  const noun = nounKey === 'card' && f.quoted.length ? '' : t(`interactions.noun.${nounKey}`);
+  const level =
+    f.levelEq !== undefined
+      ? t('interactions.levelEq', { level: f.levelEq })
+      : f.levelMin !== undefined
+        ? t('interactions.levelMin', { level: f.levelMin })
+        : f.levelMax !== undefined
+          ? t('interactions.levelMax', { level: f.levelMax })
+          : '';
+  const text = t('interactions.pattern', {
+    noun,
+    subtypes: f.subtypes.filter((s) => s !== 'Effect').join('/'),
+    races: f.races.join('/'),
+    attributes: f.attributes.map((a) => t(`interactions.attributes.${a}`)).join('/'),
+    level,
+    names: f.quoted.map(tr.quote).join(` ${t('interactions.or')} `),
+  })
+    .replace(/\s+/g, ' ')
+    .trim();
+  return f.except.length
+    ? `${text} ${t('interactions.except', { names: f.except.map(tr.quote).join(', ') })}`
+    : text;
 }

@@ -9,6 +9,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
+import { t } from '../../common/i18n/locale-context';
 
 const itemInclude = {
   card: { select: cardSummarySelect },
@@ -133,7 +134,7 @@ export class CollectionService {
     if (!printId) return;
     const print = await this.prisma.cardPrint.findUnique({ where: { id: printId } });
     if (!print || print.cardId !== cardId) {
-      throw new BadRequestException('Cette édition ne correspond pas à la carte');
+      throw new BadRequestException(t('errors.printMismatch'));
     }
   }
 }

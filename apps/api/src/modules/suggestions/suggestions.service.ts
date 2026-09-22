@@ -9,6 +9,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import { OwnershipService } from '../collection/ownership.service';
 import { computeCoverage } from './coverage';
+import { t } from '../../common/i18n/locale-context';
 
 @Injectable()
 export class SuggestionsService {
@@ -107,7 +108,7 @@ export class SuggestionsService {
         },
       },
     });
-    if (!deck) throw new NotFoundException('Deck introuvable');
+    if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
 
     const inDeck = new Set(deck.cards.map((c) => c.cardId));
     const archetypes = [

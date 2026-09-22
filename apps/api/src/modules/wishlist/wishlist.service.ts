@@ -3,6 +3,7 @@ import type { AddWishlistItemInput, UpdateWishlistItemInput } from '@ygo/shared'
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import type { Prisma } from '../../generated/prisma/client';
+import { t } from '../../common/i18n/locale-context';
 
 const include = {
   card: { select: cardSummarySelect },
@@ -74,11 +75,11 @@ export class WishlistService {
   private async assertRefs(userId: string, cardId: number, printId?: string, deckId?: string) {
     if (printId) {
       const p = await this.prisma.cardPrint.findUnique({ where: { id: printId } });
-      if (!p || p.cardId !== cardId) throw new BadRequestException('Édition invalide');
+      if (!p || p.cardId !== cardId) throw new BadRequestException(t('errors.invalidPrint'));
     }
     if (deckId) {
       const d = await this.prisma.deck.findFirst({ where: { id: deckId, userId } });
-      if (!d) throw new BadRequestException('Deck invalide');
+      if (!d) throw new BadRequestException(t('errors.invalidDeck'));
     }
   }
 }

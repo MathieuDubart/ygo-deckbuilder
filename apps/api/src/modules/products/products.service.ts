@@ -15,6 +15,7 @@ import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
 import { ProductContentService } from './product-content.service';
 import { productCards, type ProductCard } from './quantities';
+import { t } from '../../common/i18n/locale-context';
 
 type SetRow = Omit<CardSetDto, 'tcgDate'> & { tcgDate: Date | null };
 /** Produit + « ses quantités officielles sont connues » */
@@ -55,11 +56,11 @@ export class ProductsService {
       where: { name: input.setName },
       select: { id: true, name: true },
     });
-    if (!set) throw new NotFoundException('Produit introuvable');
+    if (!set) throw new NotFoundException(t('errors.productNotFound'));
 
     const verified = await this.content.ensureQuickly(set.id);
     const cards = await this.cardsOf(set.id);
-    if (!cards.length) throw new NotFoundException('Ce produit ne contient aucune carte connue');
+    if (!cards.length) throw new NotFoundException(t('errors.productEmpty'));
 
     const identity = importIdentity(userId, input.language);
     const existing = await this.prisma.collectionItem.findMany({
@@ -134,7 +135,7 @@ export class ProductsService {
       this.cardsOf(product.setId),
     ]);
     const set = sets.get(product.setId);
-    if (!set) throw new NotFoundException('Produit introuvable');
+    if (!set) throw new NotFoundException(t('errors.productNotFound'));
 
     const ids = cards.map((c) => c.cardId);
     const [rows, owned] = await Promise.all([
@@ -209,7 +210,7 @@ export class ProductsService {
       where: { id, userId },
       select: { id: true, setId: true, copies: true, language: true, createdAt: true },
     });
-    if (!product) throw new NotFoundException('Produit introuvable dans ta collection');
+    if (!product) throw new NotFoundException(t('errors.productNotOwned'));
     return product;
   }
 

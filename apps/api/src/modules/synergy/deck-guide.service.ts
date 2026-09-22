@@ -5,7 +5,8 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { AiGuideService, type AiGuide, type AiResult } from './ai-guide.service';
 import { findCombos } from './engine/combos';
 import { analyzeDeck, type DeckEntry } from './engine/graph';
-import { buildRuleGuide, ROLE_LABELS, type RuleGuide } from './engine/guide';
+import { translator } from '../../common/i18n/locale-context';
+import { buildRuleGuide, type RuleGuide } from './engine/guide';
 import { SynergyCardsService } from './synergy-cards.service';
 
 /**
@@ -42,7 +43,8 @@ export class DeckGuideService {
     const analysis = analyzeDeck(entries);
     const combos = findCombos(entries, analysis, 3);
     const name = (id: number) => summary.get(id)?.name ?? byId.get(id)?.name ?? `#${id}`;
-    const rules = buildRuleGuide(entries, analysis, combos, name);
+    const tr = translator();
+    const rules = buildRuleGuide(entries, analysis, combos, name, tr);
 
     let result: AiResult = { status: 'OFF' };
     if (input.ai && this.ai.enabled) {
@@ -50,12 +52,12 @@ export class DeckGuideService {
         input.name,
         entries.map((e) => ({
           name: e.card.name,
-          nameFr: name(e.card.id),
+          localName: name(e.card.id),
           zone: e.zone,
           quantity: e.quantity,
           type: e.card.type,
           desc: e.card.desc,
-          roles: (analysis.roles.get(e.card.id) ?? []).map((r) => ROLE_LABELS[r]),
+          roles: (analysis.roles.get(e.card.id) ?? []).map((r) => tr.t(`roles.${r}`)),
         })),
         rules,
       );

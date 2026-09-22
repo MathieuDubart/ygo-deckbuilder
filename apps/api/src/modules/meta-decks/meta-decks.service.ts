@@ -3,6 +3,7 @@ import { parseYdk, type ImportMetaDeckInput } from '@ygo/shared';
 import { CardResolver } from '../../common/catalog/card-resolver.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
+import { t } from '../../common/i18n/locale-context';
 
 @Injectable()
 export class MetaDecksService {
@@ -56,7 +57,7 @@ export class MetaDecksService {
       merged.set(key, { cardId, zone: e.zone, quantity: (prev?.quantity ?? 0) + e.quantity });
     }
     const cards = [...merged.values()];
-    if (!cards.length) throw new BadRequestException('Aucune carte reconnue dans ce .ydk');
+    if (!cards.length) throw new BadRequestException(t('errors.ydkNoCards'));
 
     const meta = {
       archetype: input.archetype,

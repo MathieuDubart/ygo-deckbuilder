@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { findCombos } from './combos';
 import { BLUE_EYES_DECK, RANK7, SAGE } from './fixtures';
 import { analyzeDeck, type DeckEntry } from './graph';
+import { translator } from '../../../common/i18n/locale-context';
 import { buildRuleGuide, openingOdds } from './guide';
 
 const deck: DeckEntry[] = BLUE_EYES_DECK.map(({ card, qty }) => ({
@@ -11,7 +12,13 @@ const deck: DeckEntry[] = BLUE_EYES_DECK.map(({ card, qty }) => ({
 }));
 const names = new Map(deck.map((e) => [e.card.id, e.card.name]));
 const a = analyzeDeck(deck);
-const g = buildRuleGuide(deck, a, findCombos(deck, a), (id) => names.get(id) ?? '?');
+const g = buildRuleGuide(
+  deck,
+  a,
+  findCombos(deck, a),
+  (id) => names.get(id) ?? '?',
+  translator('fr'),
+);
 
 describe('probabilités d’ouverture', () => {
   it('calcule l’hypergéométrique', () => {
@@ -45,5 +52,20 @@ describe('guide de jeu (Blue-Eyes)', () => {
     const all = g.mistakes.join('\n');
     expect(all).toContain(RANK7.name); // Rank 7 impossible à invoquer
     expect(all).toMatch(/cimetière/);
+  });
+});
+
+describe('guide en anglais', () => {
+  it('même analyse, autre langue', () => {
+    const en = buildRuleGuide(
+      deck,
+      a,
+      findCombos(deck, a),
+      (id) => names.get(id) ?? '?',
+      translator('en'),
+    );
+    expect(en.summary).toMatch(/deck built around “Blue-Eyes”/);
+    expect(en.combos[0]?.steps[0]?.text).toMatch(/^Normal Summon|Special Summon/);
+    expect(en.mistakes.join(' ')).not.toMatch(/Invocation/);
   });
 });

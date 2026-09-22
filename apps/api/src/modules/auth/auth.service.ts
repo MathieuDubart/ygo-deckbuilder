@@ -4,6 +4,7 @@ import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PasswordService } from './password.service';
 import { TokenService, type IssuedTokens } from './token.service';
+import { t } from '../../common/i18n/locale-context';
 
 type UserRow = {
   id: string;
@@ -37,7 +38,7 @@ export class AuthService {
     });
     if (existing) {
       throw new ConflictException(
-        existing.email === input.email ? 'Email déjà utilisé' : "Nom d'utilisateur déjà pris",
+        existing.email === input.email ? t('errors.emailTaken') : t('errors.usernameTaken'),
       );
     }
 
@@ -56,14 +57,14 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email: input.email } });
     // Même message dans les deux cas : on ne révèle pas si l'email existe.
     if (!user || !(await this.passwords.verify(user.passwordHash, input.password))) {
-      throw new UnauthorizedException('Email ou mot de passe incorrect');
+      throw new UnauthorizedException(t('errors.badCredentials'));
     }
     return this.withTokens(user, userAgent);
   }
 
   async refresh(refreshToken: string, userAgent?: string) {
     const userId = await this.tokens.consume(refreshToken);
-    if (!userId) throw new UnauthorizedException('Session expirée');
+    if (!userId) throw new UnauthorizedException(t('errors.sessionExpired'));
     const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
     return this.withTokens(user, userAgent);
   }

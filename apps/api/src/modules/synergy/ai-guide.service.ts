@@ -3,10 +3,13 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { AppConfig } from '../../config/app-config.service';
+import type { AppLocale } from '@ygo/shared';
+import { translator } from '../../common/i18n/locale-context';
+import type { Translator } from '../../common/i18n/translator';
 import type { RuleGuide } from './engine/guide';
 
 /** Change quand le prompt évolue : invalide le cache. */
-const PROMPT_VERSION = 3;
+const PROMPT_VERSION = 4;
 const CACHE_TTL_DAYS = 30;
 
 /** Ce que l'IA a le droit de réécrire. Les combos et les stats restent calculés (fiables). */
@@ -36,7 +39,8 @@ interface Job {
 
 export interface AiDeckCard {
   name: string;
-  nameFr: string;
+  /** Nom dans la langue du guide (= name en anglais) */
+  localName: string;
   zone: 'MAIN' | 'EXTRA' | 'SIDE';
   quantity: number;
   type: string;
@@ -44,20 +48,23 @@ export interface AiDeckCard {
   roles: string[];
 }
 
-const SYSTEM = `Tu es un joueur compétitif de Yu-Gi-Oh! (TCG) qui coache un ami.
-Tu reçois une decklist avec le texte officiel des cartes, et une analyse calculée (rôles, combos, statistiques).
-Écris un guide de jeu en français, ton décontracté mais précis, tutoiement.
-Règles strictes :
-- Ne cite QUE des cartes présentes dans la decklist, avec leur nom français s'il est fourni (sinon anglais), entre « ».
-- Ne décris jamais un effet qui n'est pas dans le texte fourni. En cas de doute, reste général.
-- Les combos calculés sont indicatifs : tu peux t'en servir, les corriger ou les compléter s'ils sont faux.
-- Réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, de la forme :
-{"summary": string (3-5 phrases : identité du deck, comment il gagne),
- "gamePlan": string[] (étapes du plan de jeu),
- "keyCards": [{"name": nom exact de la carte tel que donné, "why": pourquoi elle compte}],
+/** Consignes (en anglais : les modèles les suivent mieux), réponse dans la langue demandée. */
+const system = (
+  language: string,
+) => `You are a competitive Yu-Gi-Oh! (TCG) player coaching a friend.
+You receive a decklist with the official card texts, and a computed analysis (roles, combos, statistics).
+Write a play guide in ${language}. Tone: friendly, casual but precise.
+Strict rules:
+- Only mention cards present in the decklist, using their localized name when one is given (otherwise the English name), in quotes.
+- Never describe an effect that is not in the provided text. When in doubt, stay general.
+- The computed combos are indicative: you may use, fix or extend them if they are wrong.
+- Answer ONLY with a valid JSON object, no text around it, shaped like:
+{"summary": string (3-5 sentences: deck identity, how it wins),
+ "gamePlan": string[] (game plan steps),
+ "keyCards": [{"name": exact card name as given, "why": why it matters}],
  "goingFirst": string[], "goingSecond": string[],
- "mistakes": string[] (erreurs concrètes à éviter : séquençage, 1 fois par tour, Invocation Normale, timing des hand traps…),
- "tips": string[] (astuces en plus)}`;
+ "mistakes": string[] (concrete mistakes to avoid: sequencing, once per turn, Normal Summon, hand trap timing…),
+ "tips": string[] (extra tips)}`;
 
 /**
  * Rédaction du guide par un modèle de langage (optionnel) : OpenAI-compatible (OpenAI,
@@ -97,7 +104,9 @@ export class AiGuideService {
   ): Promise<AiResult> {
     if (!this.enabled) return { status: 'OFF' };
     const model = this.model!;
-    const key = cacheKey(model, cards);
+    // La langue est figée ici : la rédaction se fait hors de la requête HTTP
+    const tr = translator();
+    const key = cacheKey(model, cards, tr.locale);
 
     const cached = await this.prisma.deckGuideCache.findUnique({ where: { key } });
     if (cached && Date.now() - cached.createdAt.getTime() < CACHE_TTL_DAYS * 86_400_000) {
@@ -116,7 +125,7 @@ export class AiGuideService {
     const entry: Job = {};
     this.jobs.set(key, entry);
     this.queue = this.queue.then(async () => {
-      const error = await this.write(key, model, deckName, cards, rules);
+      const error = await this.write(key, model, deckName, cards, rules, tr);
       if (error) entry.error = error;
       else this.jobs.delete(key);
     });
@@ -130,17 +139,25 @@ export class AiGuideService {
     deckName: string | undefined,
     cards: AiDeckCard[],
     rules: RuleGuide,
+    tr: Translator,
   ): Promise<string | null> {
     const started = Date.now();
     try {
-      const raw = await this.complete(SYSTEM, userPrompt(deckName, cards, rules));
+      const raw = await this.complete(
+        system(tr.t('ai.language')),
+        userPrompt(deckName, cards, rules, tr.locale),
+      );
       const parsed = aiGuideSchema.safeParse(extractJson(raw));
       if (!parsed.success) {
+        const issue = parsed.error.issues[0];
         const why = raw.trim()
-          ? `réponse inexploitable (${parsed.error.issues[0]?.path.join('.') || 'JSON'} : ${parsed.error.issues[0]?.message ?? 'illisible'})`
-          : 'réponse vide';
+          ? tr.t('ai.errors.unusable', {
+              path: issue?.path.join('.') || 'JSON',
+              message: issue?.message ?? '?',
+            })
+          : tr.t('ai.errors.empty');
         this.logger.warn(`Guide IA : ${why}`);
-        return `Le modèle a donné une ${why}.`;
+        return why;
       }
       await this.prisma.deckGuideCache.upsert({
         where: { key },
@@ -153,14 +170,16 @@ export class AiGuideService {
       const err = e as Error;
       const message =
         err.name === 'TimeoutError'
-          ? `pas de réponse en ${Math.round(this.config.get('AI_TIMEOUT_MS') / 1000)} s (augmente AI_TIMEOUT_MS pour un modèle local lent)`
+          ? tr.t('ai.errors.timeout', {
+              seconds: Math.round(this.config.get('AI_TIMEOUT_MS') / 1000),
+            })
           : /fetch failed|ECONNREFUSED/i.test(
                 err.message + String((err as { cause?: unknown }).cause),
               )
-            ? `serveur injoignable (${this.config.get('AI_BASE_URL') ?? 'URL par défaut'}) — le serveur du modèle est-il lancé ?`
+            ? tr.t('ai.errors.unreachable', { url: this.config.get('AI_BASE_URL') ?? 'default' })
             : err.message;
       this.logger.warn(`Guide IA indisponible : ${message}`);
-      return `IA indisponible : ${message}`;
+      return tr.t('ai.errors.unavailable', { message });
     }
   }
 
@@ -224,12 +243,12 @@ export class AiGuideService {
   }
 }
 
-function cacheKey(model: string, cards: AiDeckCard[]): string {
+function cacheKey(model: string, cards: AiDeckCard[], locale: AppLocale): string {
   const list = cards
     .map((c) => `${c.zone}:${c.name}:${c.quantity}`)
     .sort()
     .join('|');
-  return createHash('sha256').update(`${PROMPT_VERSION}|${model}|${list}`).digest('hex');
+  return createHash('sha256').update(`${PROMPT_VERSION}|${locale}|${model}|${list}`).digest('hex');
 }
 
 /**
@@ -248,28 +267,33 @@ export function extractJson(input: string): unknown {
   }
 }
 
-function userPrompt(deckName: string | undefined, cards: AiDeckCard[], rules: RuleGuide): string {
+function userPrompt(
+  deckName: string | undefined,
+  cards: AiDeckCard[],
+  rules: RuleGuide,
+  locale: AppLocale,
+): string {
   const zone = (z: AiDeckCard['zone'], title: string) => {
     const xs = cards.filter((c) => c.zone === z);
     if (!xs.length) return '';
     return `## ${title}\n${xs
       .map((c) => {
-        const fr = c.nameFr !== c.name ? ` / FR: ${c.nameFr}` : '';
+        const local = c.localName !== c.name ? ` / ${locale.toUpperCase()}: ${c.localName}` : '';
         const roles = c.roles.length ? ` [${c.roles.join(', ')}]` : '';
-        return `- ${c.quantity}x ${c.name}${fr} (${c.type})${roles}\n  ${c.desc.replace(/\s+/g, ' ').slice(0, 700)}`;
+        return `- ${c.quantity}x ${c.name}${local} (${c.type})${roles}\n  ${c.desc.replace(/\s+/g, ' ').slice(0, 700)}`;
       })
       .join('\n')}`;
   };
   return [
-    `# Deck : ${deckName ?? 'sans nom'}`,
+    `# Deck: ${deckName ?? 'untitled'}`,
     zone('MAIN', 'Main Deck'),
     zone('EXTRA', 'Extra Deck'),
     zone('SIDE', 'Side Deck'),
-    '# Analyse calculée',
-    `Résumé : ${rules.summary}`,
-    `Stats : ${rules.stats.map((s) => `${s.label} ${s.value}`).join(' · ')}`,
-    `Combos trouvés :\n${rules.combos.map((c) => `- ${c.title} : ${c.steps.map((s) => s.text).join(' → ')}`).join('\n') || '(aucun)'}`,
-    `Points d'attention :\n${rules.mistakes.map((m) => `- ${m}`).join('\n')}`,
+    '# Computed analysis',
+    `Summary: ${rules.summary}`,
+    `Stats: ${rules.stats.map((s) => `${s.label} ${s.value}`).join(' · ')}`,
+    `Combos found:\n${rules.combos.map((c) => `- ${c.title}: ${c.steps.map((s) => s.text).join(' → ')}`).join('\n') || '(none)'}`,
+    `Watch out for:\n${rules.mistakes.map((m) => `- ${m}`).join('\n')}`,
   ]
     .filter(Boolean)
     .join('\n\n');

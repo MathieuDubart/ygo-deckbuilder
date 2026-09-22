@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { translator } from '../../../common/i18n/locale-context';
 import { matches } from './parse';
 import { featuresOf } from './graph';
 import { describeFilter, nameKeys, precisionOf, targetsOfCard } from './interactions';
@@ -19,7 +20,11 @@ describe('cibles d’une carte', () => {
     const t = targetsOfCard(SAGE);
     const search = t.find((x) => x.verb === 'SEARCH')!;
     expect(search.precision).toBe(1);
-    expect(describeFilter(search.filter)).toBe('Syntoniseur LUMIÈRE de niveau 1');
+    expect(describeFilter(search.filter, translator('fr'))).toBe('Syntoniseur LUMIÈRE de niveau 1');
+    expect(describeFilter(search.filter, translator('en'))).toBe('Level 1 LIGHT Tuner');
+    const ss0 = t.find((x) => x.verb === 'SPECIAL_SUMMON')!;
+    expect(describeFilter(ss0.filter, translator('fr'))).toBe('monstre « Blue-Eyes »');
+    expect(describeFilter(ss0.filter, translator('en'))).toBe('“Blue-Eyes” monster');
     const ss = t.find((x) => x.verb === 'SPECIAL_SUMMON')!;
     expect(ss.precision).toBe(2);
     expect(ss.keys).toContain('blue-eyes');
