@@ -75,35 +75,45 @@ export class AiGuideService {
     deckName: string | undefined,
     cards: AiDeckCard[],
     rules: RuleGuide,
-  ): Promise<AiGuide | null> {
-    if (!this.enabled) return null;
+  ): Promise<{ guide: AiGuide | null; error: string | null }> {
+    if (!this.enabled) return { guide: null, error: null };
     const model = this.model!;
     const key = cacheKey(model, cards);
 
     const cached = await this.prisma.deckGuideCache.findUnique({ where: { key } });
     if (cached && Date.now() - cached.createdAt.getTime() < CACHE_TTL_DAYS * 86_400_000) {
       const parsed = aiGuideSchema.safeParse(cached.content);
-      if (parsed.success) return parsed.data;
+      if (parsed.success) return { guide: parsed.data, error: null };
     }
 
     try {
       const raw = await this.complete(SYSTEM, userPrompt(deckName, cards, rules));
       const parsed = aiGuideSchema.safeParse(extractJson(raw));
       if (!parsed.success) {
-        this.logger.warn(
-          `Réponse IA invalide : ${parsed.error.issues[0]?.message ?? 'JSON illisible'}`,
-        );
-        return null;
+        const why = raw.trim()
+          ? `réponse inexploitable (${parsed.error.issues[0]?.path.join('.') || 'JSON'} : ${parsed.error.issues[0]?.message ?? 'illisible'})`
+          : 'réponse vide';
+        this.logger.warn(`Guide IA : ${why}`);
+        return { guide: null, error: `Le modèle a donné une ${why}.` };
       }
       await this.prisma.deckGuideCache.upsert({
         where: { key },
         create: { key, model, content: parsed.data },
         update: { model, content: parsed.data, createdAt: new Date() },
       });
-      return parsed.data;
+      return { guide: parsed.data, error: null };
     } catch (e) {
-      this.logger.warn(`Guide IA indisponible : ${(e as Error).message}`);
-      return null;
+      const err = e as Error;
+      const message =
+        err.name === 'TimeoutError'
+          ? `pas de réponse en ${Math.round(this.config.get('AI_TIMEOUT_MS') / 1000)} s (augmente AI_TIMEOUT_MS pour un modèle local lent)`
+          : /fetch failed|ECONNREFUSED/i.test(
+                err.message + String((err as { cause?: unknown }).cause),
+              )
+            ? `serveur injoignable (${this.config.get('AI_BASE_URL') ?? 'URL par défaut'}) — le serveur du modèle est-il lancé ?`
+            : err.message;
+      this.logger.warn(`Guide IA indisponible : ${message}`);
+      return { guide: null, error: `IA indisponible : ${message}` };
     }
   }
 
@@ -175,8 +185,12 @@ function cacheKey(model: string, cards: AiDeckCard[]): string {
   return createHash('sha256').update(`${PROMPT_VERSION}|${model}|${list}`).digest('hex');
 }
 
-/** Tolère les réponses entourées de texte ou de ```json. */
-export function extractJson(raw: string): unknown {
+/**
+ * Tolère les réponses entourées de texte, de ```json, ou précédées d'un raisonnement
+ * <think>…</think> (Qwen 3, DeepSeek R1… en local).
+ */
+export function extractJson(input: string): unknown {
+  const raw = input.replace(/<think>[\s\S]*?(<\/think>|$)/gi, '');
   const start = raw.indexOf('{');
   const end = raw.lastIndexOf('}');
   if (start < 0 || end <= start) return null;

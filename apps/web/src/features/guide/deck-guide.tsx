@@ -11,6 +11,8 @@ import {
   BookOpen,
   ChevronDown,
   Lightbulb,
+  Loader2,
+  RotateCw,
   Route,
   Sparkles,
   Star,
@@ -63,8 +65,16 @@ export function DeckGuide({
   onInspect?: (cardId: number) => void;
   className?: string;
 }) {
-  const [ai, setAi] = useState(false);
-  const { data: guide, isLoading, isFetching, error } = useDeckGuide(cards, { name, ai });
+  // 1. Guide calculé (instantané) — 2. si le serveur a une IA, version rédigée en arrière-plan
+  const rules = useDeckGuide(cards, { name, ai: false });
+  const aiAvailable = !!rules.data?.aiAvailable;
+  const ai = useDeckGuide(cards, { name, ai: true, enabled: aiAvailable });
+  const [preferRules, setPreferRules] = useState(false);
+
+  const aiGuide = !ai.isPlaceholderData && ai.data?.source === 'AI' ? ai.data : null;
+  const aiError = !ai.isPlaceholderData ? (ai.error?.message ?? ai.data?.aiError ?? null) : null;
+  const writing = aiAvailable && ai.isFetching;
+  const guide = aiGuide && !preferRules ? aiGuide : rules.data;
 
   return (
     <section className={cn('space-y-4', className)} aria-labelledby="deck-guide-title">
@@ -79,29 +89,45 @@ export function DeckGuide({
               : 'Calculé à partir des effets'}
           </Badge>
         )}
-        {guide?.aiAvailable && (
+        {writing && (
+          <span className="flex items-center gap-1.5 text-xs text-fg-muted" aria-live="polite">
+            <Loader2 className="size-3.5 animate-spin" /> L’IA rédige le guide…
+          </span>
+        )}
+        {aiGuide && (
           <Button
             size="sm"
             variant="ghost"
             className="ml-auto"
-            loading={ai && isFetching}
-            onClick={() => setAi((v) => !v)}
+            onClick={() => setPreferRules((v) => !v)}
           >
-            <Sparkles className="size-4" /> {ai ? 'Version calculée' : 'Rédiger avec l’IA'}
+            <Sparkles className="size-4" /> {preferRules ? 'Version IA' : 'Version calculée'}
           </Button>
         )}
       </header>
 
-      {error ? (
-        <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">{error.message}</p>
-      ) : isLoading || !guide ? (
+      {aiError && !writing && (
+        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-warning/30 bg-warning/5 px-3 py-2 text-xs text-warning">
+          <AlertTriangle className="size-3.5 shrink-0" />
+          <span className="min-w-0 flex-1">{aiError} — guide calculé affiché à la place.</span>
+          <Button size="sm" variant="ghost" onClick={() => ai.refetch()}>
+            <RotateCw className="size-3.5" /> Réessayer
+          </Button>
+        </div>
+      )}
+
+      {rules.error ? (
+        <p className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+          {rules.error.message}
+        </p>
+      ) : !guide ? (
         <div className="space-y-2">
           <Skeleton className="h-16" />
           <Skeleton className="h-10" />
           <Skeleton className="h-32" />
         </div>
       ) : (
-        <GuideBody guide={guide} onInspect={onInspect} dimmed={isFetching} />
+        <GuideBody guide={guide} onInspect={onInspect} dimmed={rules.isFetching && !aiGuide} />
       )}
     </section>
   );
