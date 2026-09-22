@@ -14,6 +14,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
 import { ProductContentService } from './product-content.service';
+import { isDeckProduct } from './product-kind';
 import { productCards, type ProductCard } from './quantities';
 import { t } from '../../common/i18n/locale-context';
 
@@ -276,10 +277,4 @@ export class ProductsService {
       isDeck: isDeckProduct(set),
     };
   }
-}
-
-/** Produit jouable tel quel : structure deck, starter, ou « … Deck » (hors coffrets et tins). */
-export function isDeckProduct(set: Pick<CardSetDto, 'kind' | 'name'>): boolean {
-  if (set.kind === 'STRUCTURE' || set.kind === 'STARTER') return true;
-  return set.kind === 'OTHER' && /\bdeck\b/i.test(set.name) && !/booster|pack/i.test(set.name);
 }

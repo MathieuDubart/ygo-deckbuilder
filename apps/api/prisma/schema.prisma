@@ -79,6 +79,7 @@ model Card {
   metaDeckCards   MetaDeckCard[]
   effectTargets   CardEffectTarget[]
   translations    CardTranslation[]
+  productDecks    ProductDeckCard[]
 
   @@index([name])
   @@index([archetype])
@@ -117,6 +118,7 @@ model CardSet {
 
   prints        CardPrint[]
   ownedProducts OwnedProduct[]
+  decks         ProductDeck[]
 
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
 }
@@ -463,4 +465,31 @@ model CardTranslation {
 
   @@id([cardId, locale])
   @@index([locale])
+}
+
+/// Deck préconstruit d'un produit (structure deck, starter, deck d'un coffret comme
+/// « Legendary 5D's Decks » ou « 2-Player Starter Set »), d'après la liste officielle Yugipedia.
+model ProductDeck {
+  id       String  @id @default(cuid())
+  setId    String
+  /// Nom de la section (« Yusei Deck ») ; null = le produit est un seul deck
+  name     String?
+  position Int     @default(0)
+
+  set   CardSet           @relation(fields: [setId], references: [id], onDelete: Cascade)
+  cards ProductDeckCard[]
+
+  @@index([setId])
+}
+
+model ProductDeckCard {
+  deckId   String
+  cardId   Int
+  quantity Int
+
+  deck ProductDeck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  card Card        @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([deckId, cardId])
+  @@index([cardId])
 }

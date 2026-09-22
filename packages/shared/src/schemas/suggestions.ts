@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { CardSummaryDto } from './cards';
+import type { CardSetDto, CardSummaryDto } from './cards';
 import type { DeckZone } from '../domain/enums';
 
 export const metaSuggestionQuerySchema = z.object({
@@ -134,7 +134,9 @@ export interface GeneratedDeckDto {
 export interface PlayableDeckDto {
   /** Pour ouvrir l'aperçu : deck du meta (mode "avec mes cartes") ou archétype de la collection */
   target:
-    { kind: 'meta'; metaDeckId: string; name: string } | { kind: 'archetype'; archetype: string };
+    | { kind: 'meta'; metaDeckId: string; name: string }
+    | { kind: 'official'; productDeckId: string; name: string }
+    | { kind: 'archetype'; archetype: string };
   name: string;
   archetype: string | null;
   /** Tier du deck meta dont il s'inspire, s'il y en a un */
@@ -143,4 +145,35 @@ export interface PlayableDeckDto {
   counts: { MAIN: number; EXTRA: number; SIDE: number };
   /** Cartes phares du moteur (pour l'illustration) */
   highlights: CardSummaryDto[];
+}
+
+export const OFFICIAL_DECK_KINDS = ['STRUCTURE', 'STARTER', 'BOX'] as const;
+export type OfficialDeckKind = (typeof OFFICIAL_DECK_KINDS)[number];
+
+export const officialDeckQuerySchema = z.object({
+  /** Filtre par type de produit (coffrets = decks de coffrets comme Legendary Decks) */
+  kind: z.enum(OFFICIAL_DECK_KINDS).optional(),
+  minCoverage: z.coerce.number().min(0).max(1).default(0),
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+});
+export type OfficialDeckQuery = z.infer<typeof officialDeckQuerySchema>;
+
+/**
+ * Deck préconstruit officiel (structure deck, starter, deck d'un coffret) et ce que la
+ * collection en couvre.
+ */
+export interface OfficialDeckSuggestionDto {
+  productDeckId: string;
+  /** Nom du deck dans le produit (« Yusei Deck »), null = le produit est un seul deck */
+  deckName: string | null;
+  /** Catégorie pour le filtre (un produit à plusieurs decks = coffret) */
+  kind: OfficialDeckKind;
+  product: CardSetDto;
+  archetype: string | null;
+  coverage: number;
+  ownedCopies: number;
+  requiredCopies: number;
+  estimatedCostToComplete: number;
+  /** Le produit est dans la collection */
+  productOwned: boolean;
 }
