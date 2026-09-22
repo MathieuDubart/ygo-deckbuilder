@@ -3,6 +3,17 @@ import type { DeepPartialMessages } from './types';
 export const fr: DeepPartialMessages = {
   format: { quote: '« {text} »' },
 
+  duel: {
+    errors: {
+      disabled: 'Le simulateur de duel est désactivé sur ce serveur.',
+      notReady: 'Le simulateur télécharge les scripts des cartes, réessaie dans une minute.',
+      engine: 'Le moteur de duel s’est arrêté de façon inattendue.',
+      invalidResponse: 'Ce choix n’est pas possible maintenant.',
+      notFound: 'Duel introuvable ou expiré.',
+      emptyDeck: 'Ce deck n’a aucune carte de Main Deck connue du simulateur.',
+    },
+  },
+
   errors: {
     emailTaken: 'Email déjà utilisé',
     usernameTaken: "Nom d'utilisateur déjà pris",
