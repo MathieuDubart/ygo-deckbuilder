@@ -7,9 +7,16 @@ import type { CardSummaryDto } from './cards';
  * Vue toujours du point de vue de l'utilisateur : joueur 0 = toi, joueur 1 = l'adversaire.
  */
 
-/** Qui joue l'adversaire : personne (il ne fait rien), toi (tu choisis ses réponses), un bot (à venir). */
-export const DUEL_OPPONENT_CONTROLS = ['PASSIVE', 'ME'] as const;
+/** Qui joue l'adversaire : personne (il ne fait rien), toi (tu choisis ses réponses), le bot. */
+export const DUEL_OPPONENT_CONTROLS = ['PASSIVE', 'ME', 'BOT'] as const;
 export type DuelOpponentControl = (typeof DUEL_OPPONENT_CONTROLS)[number];
+
+/**
+ * Fenêtres de chaîne : SMART = on ne te demande que si l'adversaire vient d'agir (activation,
+ * Invocation, attaque) ou si c'est obligatoire ; ALWAYS = à chaque fenêtre, comme sur EDOPro.
+ */
+export const DUEL_CHAIN_PROMPTS = ['SMART', 'ALWAYS'] as const;
+export type DuelChainPrompts = (typeof DUEL_CHAIN_PROMPTS)[number];
 
 export const DUEL_SETUP_LOCATIONS = [
   'MZONE',
@@ -41,6 +48,7 @@ export const createDuelSchema = z.object({
   /** Cartes du deck imposées dans la main de départ (tester une main précise) */
   openingHand: z.array(z.number().int().positive()).max(6).default([]),
   startingLP: z.number().int().min(100).max(99_999).default(8000),
+  chainPrompts: z.enum(DUEL_CHAIN_PROMPTS).default('SMART'),
   opponent: z
     .object({
       control: z.enum(DUEL_OPPONENT_CONTROLS).default('PASSIVE'),
@@ -209,6 +217,10 @@ export const duelResponseSchema = z.object({
 });
 export type DuelResponseInput = z.infer<typeof duelResponseSchema>;
 
+/** Réglages modifiables pendant le duel. */
+export const duelSettingsSchema = z.object({ chainPrompts: z.enum(DUEL_CHAIN_PROMPTS) });
+export type DuelSettingsInput = z.infer<typeof duelSettingsSchema>;
+
 /** Événement du journal (textes composés côté client, dans sa langue). */
 export type DuelEventDto = { seq: number; turn: number } & (
   | { kind: 'TURN'; player: 0 | 1 }
@@ -247,6 +259,7 @@ export interface DuelStateDto {
   /** Cartes citées (passcode → résumé) : visuels et noms dans la langue de l'utilisateur */
   cards: Record<string, CardSummaryDto>;
   opponentControl: DuelOpponentControl;
+  chainPrompts: DuelChainPrompts;
   finished: { winner: 0 | 1 | null; reason: string | null } | null;
 }
 

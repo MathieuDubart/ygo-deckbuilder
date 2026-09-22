@@ -19,6 +19,8 @@ export interface DuelTracker {
   winner: { winner: 0 | 1 | null; reason: string | null } | null;
   /** Dernier texte d'invite envoyé par le moteur (HINT SELECTMSG) */
   hint: string | null;
+  /** …et sa valeur brute (HINTMSG_*), pour le bot */
+  hintCode: number | null;
 }
 
 export function newTracker(startingLP: number): DuelTracker {
@@ -30,6 +32,7 @@ export function newTracker(startingLP: number): DuelTracker {
     chain: [],
     winner: null,
     hint: null,
+    hintCode: null,
   };
 }
 
@@ -168,6 +171,7 @@ export function applyMessage(
     case OcgMessageType.HINT:
       if (msg.hint_type === HINT_SELECTMSG) {
         const value = BigInt(msg.hint);
+        state.hintCode = value < 2n ** 31n ? Number(value) : null;
         // Texte système ou d'effet, sinon le nom d'une carte (« où placer X »)
         state.hint = ctx.describe(value) ?? ctx.cardName(Number(value));
       }

@@ -13,6 +13,7 @@ import {
 } from 'ocgcore-wasm';
 import type {
   DuelCardDto,
+  DuelChainPrompts,
   DuelEventDto,
   DuelOpponentControl,
   DuelPlayerDto,
@@ -20,6 +21,7 @@ import type {
   DuelResponseInput,
   DuelStateDto,
 } from '@ygo/shared';
+import { DuelBot, type BotMonster, type BotWorld } from './engine/bot';
 import { applyMessage, newTracker, type DuelTracker } from './engine/events';
 import {
   autoResponse,
@@ -47,6 +49,7 @@ export interface DuelSetup {
   userId: string;
   userTeam: 0 | 1;
   opponentControl: DuelOpponentControl;
+  chainPrompts: DuelChainPrompts;
   startingLP: number;
   /** Cartes piochées au début par équipe */
   startingDraw: [number, number];
@@ -67,6 +70,8 @@ const QUERY_FLAGS = (OcgQueryFlags.CODE |
 /** Garde-fous contre une boucle infinie du moteur ou des réponses automatiques refusées. */
 const MAX_STEPS_PER_ADVANCE = 20_000;
 const MAX_AUTO_RETRIES = 3;
+/** Le bot tente sa réponse, puis la réponse passive, avant de laisser l'utilisateur débloquer */
+const MAX_BOT_ATTEMPTS = 4;
 
 type Location = DuelCardDto['location'];
 
@@ -79,6 +84,8 @@ export class DuelSession {
   readonly userId: string;
   readonly opponentControl: DuelOpponentControl;
   readonly view: DuelView;
+  /** Réglable pendant le duel */
+  chainPrompts: DuelChainPrompts;
   lastActive = Date.now();
 
   private readonly tracker: DuelTracker;
@@ -87,6 +94,12 @@ export class DuelSession {
   private promptId = 0;
   private prompt: DuelPromptDto | null = null;
   private autoRetries = 0;
+  /** Le moteur vient de refuser une réponse (RETRY) : la même question va revenir */
+  private retrying = false;
+  /** Chaque équipe du moteur a-t-elle agi depuis la dernière fenêtre de chaîne de l'autre ? */
+  private acted: [boolean, boolean] = [false, false];
+  /** Adversaire automatique (contrôle BOT) */
+  private readonly bot: DuelBot | null;
   private seq = 0;
   private outbox: DuelEventDto[] = [];
   private destroyed = false;
@@ -99,8 +112,10 @@ export class DuelSession {
   ) {
     this.userId = setup.userId;
     this.opponentControl = setup.opponentControl;
+    this.chainPrompts = setup.chainPrompts;
     this.view = new DuelView(setup.userTeam);
     this.tracker = newTracker(setup.startingLP);
+    this.bot = setup.opponentControl === 'BOT' ? new DuelBot() : null;
   }
 
   /** Crée le duel dans le moteur, place les cartes et joue jusqu'au premier choix de l'utilisateur. */
@@ -173,6 +188,7 @@ export class DuelSession {
     this.pendingForUser = false;
     this.prompt = null;
     this.tracker.hint = null;
+    this.tracker.hintCode = null;
     if (!fromUser) this.autoRetries += 1;
     this.core.duelSetResponse(this.handle, response);
   }
@@ -184,13 +200,17 @@ export class DuelSession {
       for (const msg of this.core.duelGetMessage(this.handle)) {
         if (msg.type === OcgMessageType.RETRY) {
           // Réponse refusée par le moteur : la même question reste posée
+          this.retrying = true;
           continue;
         }
         if (isSelectMessage(msg)) {
           this.pending = msg;
-          this.autoRetries = 0;
+          if (!this.retrying) this.autoRetries = 0;
+          this.retrying = false;
           continue;
         }
+        this.bot?.observe(msg, this.view.team(1));
+        this.noteAction(msg);
         this.record(msg);
       }
       if (status === OcgProcessResult.END || this.finished) {
@@ -203,8 +223,13 @@ export class DuelSession {
       const pending = this.pending;
       if (!pending) return;
       const player = this.view.player(pending.player);
+      if (player === 1 && this.bot && this.autoRetries < MAX_BOT_ATTEMPTS) {
+        this.send(this.bot.respond(pending, this.botWorld(), this.autoRetries), false);
+        continue;
+      }
       const userDecides = player === 0 || this.opponentControl === 'ME';
-      const promptable = userDecides && !isTrivial(pending);
+      const promptable = userDecides && !isTrivial(pending) && !this.quietChain(pending);
+      if (pending.type === OcgMessageType.SELECT_CHAIN) this.acted[1 - pending.player] = false;
       // Une réponse automatique refusée plusieurs fois : on laisse l'utilisateur trancher
       if (!promptable && this.autoRetries < MAX_AUTO_RETRIES) {
         this.send(autoResponse(pending), false);
@@ -227,6 +252,77 @@ export class DuelSession {
       return;
     }
     throw new Error('duel engine did not settle');
+  }
+
+  /** Qui vient d'agir : une fenêtre de chaîne sans action adverse est passée en mode SMART. */
+  private noteAction(msg: Parameters<typeof applyMessage>[0]): void {
+    switch (msg.type) {
+      case OcgMessageType.CHAINING:
+      case OcgMessageType.SUMMONING:
+      case OcgMessageType.SPSUMMONING:
+      case OcgMessageType.FLIPSUMMONING:
+        this.acted[msg.controller] = true;
+        break;
+      case OcgMessageType.ATTACK:
+        this.acted[msg.card.controller] = true;
+        break;
+      default:
+        break;
+    }
+  }
+
+  /** Fenêtre de chaîne sans enjeu (mode SMART) : l'adversaire de ce joueur n'a rien fait. */
+  private quietChain(msg: SelectMessage): boolean {
+    return (
+      this.chainPrompts === 'SMART' &&
+      msg.type === OcgMessageType.SELECT_CHAIN &&
+      !msg.forced &&
+      !this.acted[1 - msg.player]
+    );
+  }
+
+  /** Ce que le bot voit du duel (il ne lit pas tes cartes cachées). */
+  private botWorld(): BotWorld {
+    const team = this.view.team(1);
+    const user = this.view.team(0);
+    const query = (t: 0 | 1, location: number) =>
+      this.core.duelQueryLocation(this.handle, {
+        flags: (OcgQueryFlags.CODE |
+          OcgQueryFlags.POSITION |
+          OcgQueryFlags.ATTACK |
+          OcgQueryFlags.DEFENSE) as OcgQueryFlags,
+        controller: t,
+        location: location as OcgLocation,
+      });
+    return {
+      team,
+      turnPlayer: this.view.team(this.tracker.turnPlayer),
+      phase: this.tracker.phase,
+      hintCode: this.tracker.hintCode,
+      info: (code) => this.data.card(code),
+      monsters: (t) =>
+        query(t, OcgLocation.MZONE).flatMap((info, sequence): BotMonster[] => {
+          if (!info?.code) return [];
+          const faceDown = ((info.position ?? 0) & OcgPosition.FACEDOWN) !== 0;
+          return [
+            {
+              code: info.code,
+              sequence,
+              position: info.position ?? 0,
+              attack: info.attack ?? 0,
+              defense: info.defense ?? 0,
+              known: t === team || !faceDown,
+            },
+          ];
+        }),
+      knownOpponentCodes: () =>
+        [OcgLocation.MZONE, OcgLocation.SZONE, OcgLocation.GRAVE, OcgLocation.REMOVED].flatMap(
+          (location) =>
+            query(user, location)
+              .filter((i) => i?.code && !((i.position ?? 0) & OcgPosition.FACEDOWN))
+              .map((i) => i!.code!),
+        ),
+    };
   }
 
   private record(msg: Parameters<typeof applyMessage>[0]): void {
@@ -304,6 +400,7 @@ export class DuelSession {
       prompt,
       events,
       opponentControl: this.opponentControl,
+      chainPrompts: this.chainPrompts,
       finished: this.tracker.winner,
       codes,
     };
