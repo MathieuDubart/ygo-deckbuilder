@@ -49,7 +49,7 @@ export const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v?.trim() || undefined),
-  AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(300_000).default(90_000),
+  AI_TIMEOUT_MS: z.coerce.number().int().min(5_000).max(600_000).default(180_000),
   ADMIN_EMAIL: z
     .string()
     .optional()

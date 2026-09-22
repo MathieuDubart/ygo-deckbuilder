@@ -65,6 +65,8 @@ export interface DeckGuideDto {
   model: string | null;
   /** Une IA est configurée sur le serveur */
   aiAvailable: boolean;
+  /** Raison de l'échec quand l'IA était demandée mais n'a pas pu rédiger le guide */
+  aiError: string | null;
   /** false = effets des cartes illisibles : guide réduit (pas de combos ni de stats) */
   readable: boolean;
   summary: string;

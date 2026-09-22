@@ -45,8 +45,9 @@ export class DeckGuideService {
     const rules = buildRuleGuide(entries, analysis, combos, name);
 
     let ai: AiGuide | null = null;
+    let aiError: string | null = null;
     if (input.ai && this.ai.enabled) {
-      ai = await this.ai.write(
+      ({ guide: ai, error: aiError } = await this.ai.write(
         input.name,
         entries.map((e) => ({
           name: e.card.name,
@@ -58,7 +59,7 @@ export class DeckGuideService {
           roles: (analysis.roles.get(e.card.id) ?? []).map((r) => ROLE_LABELS[r]),
         })),
         rules,
-      );
+      ));
     }
 
     const guide = ai ? merge(rules, ai, entries, name) : { ...rules, tips: [] };
@@ -80,6 +81,7 @@ export class DeckGuideService {
       source: ai ? 'AI' : 'RULES',
       model: ai ? this.ai.model : null,
       aiAvailable: this.ai.enabled,
+      aiError,
       ...guide,
       keyCards: guide.keyCards.map((k) => ({ ...k, roles: k.roles as GuideRole[] })),
       cards,

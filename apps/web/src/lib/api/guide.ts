@@ -34,5 +34,7 @@ export const useDeckGuide = (
       }),
     enabled: (opts.enabled ?? true) && cards.length > 0,
     staleTime: Infinity,
+    // Une rédaction IA qui échoue ne doit pas être relancée en boucle (modèle local lent)
+    retry: opts.ai ? false : 1,
     placeholderData: keepPreviousData,
   });
