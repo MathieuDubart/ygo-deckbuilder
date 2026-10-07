@@ -18,6 +18,13 @@ export const en = {
   },
 
   errors: {
+    imageUnreadable: 'Unreadable image file',
+    userNotFound: 'No account with this username',
+    cannotFriendSelf: 'You cannot add yourself',
+    alreadyFriends: 'You are already friends',
+    requestNotFound: 'Friend request not found',
+    notFriends: 'You are not friends with this person',
+    printNotOwned: 'This print is not in your collection',
     emailTaken: 'Email already in use',
     usernameTaken: 'Username already taken',
     validation: 'Validation failed',

@@ -77,6 +77,11 @@ export const envSchema = z.object({
     .min(1)
     .max(24 * 60)
     .default(30),
+  /**
+   * Images de profil (avatar, bannière). Un dossier à sauvegarder et à monter en volume :
+   * c'est la seule donnée de l'app qui ne soit pas en base.
+   */
+  UPLOADS_DIR: z.string().default('data/uploads'),
   ADMIN_EMAIL: z
     .string()
     .optional()

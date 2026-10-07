@@ -15,6 +15,13 @@ export const it: DeepPartialMessages = {
   },
 
   errors: {
+    imageUnreadable: 'File immagine illeggibile',
+    userNotFound: 'Nessun account con questo nome utente',
+    cannotFriendSelf: 'Non puoi aggiungere te stesso',
+    alreadyFriends: 'Siete già amici',
+    requestNotFound: 'Richiesta di amicizia non trovata',
+    notFriends: 'Non sei amico di questa persona',
+    printNotOwned: 'Questa stampa non è nella tua collezione',
     emailTaken: 'Email già in uso',
     usernameTaken: 'Nome utente già preso',
     validation: 'Validazione fallita',

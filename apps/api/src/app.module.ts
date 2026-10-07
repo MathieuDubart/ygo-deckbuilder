@@ -17,6 +17,7 @@ import { HealthController } from './modules/health/health.controller';
 import { MetaDecksModule } from './modules/meta-decks/meta-decks.module';
 import { ProductsModule } from './modules/products/products.module';
 import { ReleasesModule } from './modules/releases/releases.module';
+import { SocialModule } from './modules/social/social.module';
 import { SuggestionsModule } from './modules/suggestions/suggestions.module';
 import { SynergyModule } from './modules/synergy/synergy.module';
 import { TagsModule } from './modules/tags/tags.module';
@@ -38,6 +39,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
     MetaDecksModule,
     ProductsModule,
     ReleasesModule,
+    SocialModule,
     SuggestionsModule,
     SynergyModule,
     TagsModule,
