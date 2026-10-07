@@ -9,7 +9,9 @@
     "catalog": "Katalog",
     "wishlist": "Wunschliste",
     "duel": "Duell",
-    "rules": "Regeln"
+    "rules": "Regeln",
+    "friends": "Freunde",
+    "profile": "Profil"
   },
   "logout": "Abmelden",
   "pages": {
@@ -22,6 +24,8 @@
     "wishlist": "Wunschliste",
     "deckNotFound": "Deck nicht gefunden.",
     "duel": "Duell-Simulator",
-    "rules": "Regeln"
+    "rules": "Regeln",
+    "friends": "Freunde",
+    "profile": "Profil"
   }
 }

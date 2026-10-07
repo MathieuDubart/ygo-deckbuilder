@@ -3,6 +3,7 @@ import {
   PRODUCT_KINDS,
   RELEASE_PROGRESS_FILTERS,
   RELEASE_STATUSES,
+  type FriendSetProgressDto,
   type ReleaseDto,
 } from '@ygo/shared';
 import { CalendarClock, PackageSearch, Sparkles } from 'lucide-react';
@@ -20,7 +21,9 @@ import {
   useReleaseSpotlight,
   type ReleaseParams,
 } from '@/lib/api/releases';
+import { useFriendsProgress } from '@/lib/api/social';
 import { useTags } from '@/lib/api/tags';
+import { FriendProgressStrip } from '@/features/social/friend-progress';
 import { useFormat } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
@@ -47,6 +50,10 @@ export function ReleasesTab() {
   const { data: facets } = useReleaseFacets();
   const { data: tags } = useTags();
   const spotlight = useReleaseSpotlight();
+  // Avancement des amis pour la page affichée : une requête, pas une par vignette
+  const { data: friendsProgress } = useFriendsProgress(
+    (data?.items ?? []).map((release) => release.set.id),
+  );
 
   const set = (patch: ReleaseParams) => setParams((p) => ({ ...p, ...patch, page: 1 }));
   const countOf = (values: { value: string; count: number }[] | undefined, value: string) =>
@@ -182,6 +189,7 @@ export function ReleasesTab() {
                   release={release}
                   anyEdition={anyEdition}
                   tagIds={release.tagIds}
+                  friends={friendsProgress?.[release.set.id]}
                   onOpen={() => setOpenId(release.set.id)}
                 />
               ))}
@@ -222,11 +230,13 @@ function ReleaseCard({
   release,
   anyEdition,
   tagIds,
+  friends,
   onOpen,
 }: {
   release: ReleaseDto;
   anyEdition: boolean;
   tagIds: string[];
+  friends: FriendSetProgressDto[] | undefined;
   onOpen: () => void;
 }) {
   const t = useTranslations('releases');
@@ -272,6 +282,7 @@ function ReleaseCard({
             <Meter value={owned} total={total} />
           </div>
         )}
+        <FriendProgressStrip friends={friends} anyEdition={anyEdition} />
         <TagList tagIds={tagIds} tags={tags} />
       </button>
     </li>
