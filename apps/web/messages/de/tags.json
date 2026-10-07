@@ -6,5 +6,16 @@
   "color": "Farbe",
   "clear": "Zurücksetzen",
   "manage": "Etiketten verwalten",
-  "done": "Fertig"
+  "done": "Fertig",
+  "confirmDelete": "Etikett „{name}“ löschen?",
+  "colors": {
+    "slate": "Grau",
+    "red": "Rot",
+    "amber": "Bernstein",
+    "green": "Grün",
+    "teal": "Türkis",
+    "blue": "Blau",
+    "violet": "Violett",
+    "pink": "Rosa"
+  }
 }

@@ -6,5 +6,16 @@
   "color": "Cor",
   "clear": "Limpar",
   "manage": "Gerir as etiquetas",
-  "done": "Concluído"
+  "done": "Concluído",
+  "confirmDelete": "Excluir a etiqueta “{name}”?",
+  "colors": {
+    "slate": "Cinza",
+    "red": "Vermelho",
+    "amber": "Âmbar",
+    "green": "Verde",
+    "teal": "Turquesa",
+    "blue": "Azul",
+    "violet": "Violeta",
+    "pink": "Rosa"
+  }
 }

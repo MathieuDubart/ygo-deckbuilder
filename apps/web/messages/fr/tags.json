@@ -6,5 +6,16 @@
   "color": "Couleur",
   "clear": "Effacer",
   "manage": "Gérer les étiquettes",
-  "done": "Terminé"
+  "done": "Terminé",
+  "confirmDelete": "Supprimer l’étiquette « {name} » ?",
+  "colors": {
+    "slate": "Gris",
+    "red": "Rouge",
+    "amber": "Ambre",
+    "green": "Vert",
+    "teal": "Turquoise",
+    "blue": "Bleu",
+    "violet": "Violet",
+    "pink": "Rose"
+  }
 }
