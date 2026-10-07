@@ -55,8 +55,12 @@ services:
       AI_BASE_URL: ${AI_BASE_URL:-}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-}
+      # Images de profil (avatars, bannières) : la seule donnée qui n'est pas en base
+      UPLOADS_DIR: /app/data/uploads
     volumes:
       - ygo-duel:/app/data/duel
+      # À SAUVEGARDER avec la base : les avatars et bannières ne se régénèrent pas
+      - ygo-uploads:/app/data/uploads
     healthcheck:
       test:
         [
@@ -104,3 +108,4 @@ volumes:
   ygo-db:
   ygo-duel:
   ygo-images:
+  ygo-uploads:
