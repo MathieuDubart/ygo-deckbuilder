@@ -14,7 +14,11 @@
     "clear": "Effacer",
     "links": "Ressources officielles",
     "linksHint": "Les règles complètes et les tutoriels vidéo publiés par Konami.",
-    "exampleCards": "Cartes citées"
+    "exampleCards": "Cartes citées",
+    "video": "Tuto vidéo",
+    "videoLoad": "Lancer la vidéo",
+    "videoConsent": "La vidéo n’est chargée depuis YouTube qu’au moment où vous cliquez.",
+    "videoOpen": "Ouvrir sur YouTube"
   },
   "groups": {
     "basics": "Les bases",
@@ -76,6 +80,11 @@
       "icon": "BookOpen",
       "title": "Les bases",
       "summary": "Deux joueurs, 8000 LP chacun : vous gagnez en réduisant ceux de l’adversaire à 0.",
+      "video": {
+        "id": "khEccOJj_rI",
+        "title": "COMMENT JOUER À YuGiOh ! - 1 - Les Bases",
+        "channel": "Le Labo"
+      },
       "paragraphs": [
         "Yu-Gi-Oh! est un duel entre deux joueurs. Chaque joueur commence avec 8000 Life Points (LP) et pioche 5 cartes. Votre objectif est de réduire les LP de votre adversaire à 0 à l’aide de monstres, de Magies et de Pièges.",
         "Avant le premier duel, déterminez au hasard (par exemple à pile ou face) quel joueur choisit de commencer ou non. Dans un Match, le perdant du duel précédent fait ce choix pour le duel suivant."
@@ -96,6 +105,11 @@
       "title": "Le Terrain",
       "summary": "5 Zones Monstre, 5 Zones Magie & Piège et 1 Zone Terrain par joueur ; les 2 Zones Monstre Extra sont partagées.",
       "diagram": "field",
+      "video": {
+        "id": "7EP8P7jnvjs",
+        "title": "YU-GI-OH! TUTO #0 : Master Rules & Terrain",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Votre côté du Terrain comporte 5 Zones Monstre Principales, 5 Zones Magie & Piège et 1 Zone Terrain. Les 2 Zones Monstre Extra se trouvent entre les deux joueurs et sont partagées.",
         "Vous ne pouvez utiliser qu’une seule Zone Monstre Extra à la fois, sauf si l’effet d’une carte vous permet d’utiliser l’autre. Lorsque votre monstre la quitte, vous pouvez à nouveau utiliser l’une ou l’autre.",
@@ -178,6 +192,11 @@
       "summary": "Les Matériels indiqués partent au Cimetière, le Monstre Fusion arrive de l’Extra Deck.",
       "diagram": "fusion",
       "cards": ["Polymerization", "Blue-Eyes White Dragon", "Blue-Eyes Ultimate Dragon"],
+      "video": {
+        "id": "H5RA9tNyDRs",
+        "title": "YU-GI-OH! TUTO #2 : Monstres Fusion",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Fusion se trouvent dans votre Extra Deck. Leur texte indique les Matériels de Fusion requis, par exemple deux monstres nommés ou « 1 monstre TÉNÈBRES + 1 monstre de Type Guerrier ».",
         "La plupart des Invocations Fusion utilisent une carte comme « Polymérisation » : envoyez au Cimetière les matériels indiqués depuis votre main ou votre Terrain, puis Invoquez Spécialement le Monstre Fusion depuis votre Extra Deck. La carte de Fusion précise d’où peuvent venir les matériels.",
@@ -198,6 +217,11 @@
       "summary": "Une Magie Rituelle, plus des Sacrifices dont le total de Niveaux correspond au monstre.",
       "diagram": "ritual",
       "cards": ["Black Luster Ritual", "Black Luster Soldier"],
+      "video": {
+        "id": "P04HC93bgI0",
+        "title": "YU-GI-OH! TUTO #1 : Monstres Rituel",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Rituels se trouvent dans votre Main Deck et sont généralement Invoqués depuis votre main. Il vous faut une Magie Rituelle capable de les Invoquer ; les deux cartes se nomment généralement l’une l’autre.",
         "Activez la Magie Rituelle, puis Sacrifiez depuis votre main et/ou votre Terrain des monstres dont le total des Niveaux respecte la condition écrite sur la Magie Rituelle, et Invoquez Spécialement le Monstre Rituel."
@@ -218,6 +242,11 @@
       "summary": "1 Syntoniseur et des non-Syntoniseurs dont la somme des Niveaux égale celui du Monstre Synchro.",
       "diagram": "synchro",
       "cards": ["Junk Synchron", "Stardust Dragon"],
+      "video": {
+        "id": "BJi-Xjyh5P8",
+        "title": "YU-GI-OH! TUTO #3 : Monstres Synchro",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Synchro se trouvent dans votre Extra Deck. Durant votre Main Phase, envoyez au Cimetière 1 Syntoniseur et 1 monstre non-Syntoniseur ou plus face recto que vous contrôlez. Le total de leurs Niveaux doit être exactement égal au Niveau du Monstre Synchro. Invoquez-le ensuite Spécialement.",
         "Le texte du Monstre Synchro indique ses matériels, par exemple « 1 Syntoniseur + 1+ monstre non-Syntoniseur ». Certains exigent un Syntoniseur ou un non-Syntoniseur précis, ou plus d’un Syntoniseur."
@@ -238,6 +267,11 @@
       "summary": "Deux monstres ou plus de même Niveau s’attachent sous un monstre de Rang égal.",
       "diagram": "xyz",
       "cards": ["Number 39: Utopia"],
+      "video": {
+        "id": "AL6Spzlx0oc",
+        "title": "YU-GI-OH! TUTO #4 : Monstres Xyz",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Xyz se trouvent dans votre Extra Deck. Durant votre Main Phase, empilez les monstres face recto que vous contrôlez requis par le Monstre Xyz (généralement 2 ou plus de même Niveau), puis placez le Monstre Xyz par-dessus. Les monstres en dessous deviennent des Matériels Xyz.",
         "Les Monstres Xyz ont un Rang, pas un Niveau. Les effets qui se réfèrent au Niveau ne s’appliquent pas à eux, et ils ne peuvent normalement pas servir pour une Invocation Synchro.",
@@ -258,6 +292,11 @@
       "summary": "Deux Échelles posées dans vos Zones Pendule ouvrent une Invocation multiple entre les deux valeurs.",
       "diagram": "pendulum",
       "cards": ["Performapal Hip Hippo"],
+      "video": {
+        "id": "VoKM-czB9t4",
+        "title": "YU-GI-OH! TUTO #5 : Monstres Pendule",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Pendule se trouvent dans votre Main Deck. En plus d’être Invoqués comme monstres, ils peuvent être activés comme Magies dans vos Zones Pendule (vos Zones Magie & Piège situées le plus à gauche et le plus à droite). Ils y sont des Cartes Magie et utilisent leur Échelle Pendule et leur Effet Pendule.",
         "Une fois par tour, durant votre Main Phase, si vous avez une carte dans chacune de vos Zones Pendule, vous pouvez Invoquer par Pendule : Invoquez Spécialement, en même temps, autant de monstres que vous voulez depuis votre main et/ou de Monstres Pendule face recto depuis votre Extra Deck, dont le Niveau est strictement compris entre les deux Échelles.",
@@ -277,6 +316,11 @@
       "summary": "Des Matériels envoyés au Cimetière, et des flèches qui ouvrent des zones à vos autres monstres.",
       "diagram": "link",
       "cards": ["Decode Talker"],
+      "video": {
+        "id": "TfxpJbvaR54",
+        "title": "YU-GI-OH! TUTO #6 : Monstres Lien",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Les Monstres Lien se trouvent dans votre Extra Deck. Durant votre Main Phase, envoyez au Cimetière comme Matériels de Lien des monstres face recto que vous contrôlez qui remplissent les conditions indiquées, puis Invoquez Spécialement le Monstre Lien.",
         "Le nombre de matériels doit être égal à la valeur Lien (LINK-1, LINK-2…). Un Monstre Lien utilisé comme matériel peut compter pour 1 matériel ou pour un nombre de matériels égal à sa valeur Lien.",
@@ -317,6 +361,11 @@
       "summary": "Un Jeton n’est pas une carte : il occupe une Zone Monstre et disparaît dès qu’il la quitte.",
       "diagram": "tokens",
       "cards": ["Scapegoat"],
+      "video": {
+        "id": "d3ZYwiU1rlE",
+        "title": "YU-GI-OH! TUTO #15 : Jetons",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Un Jeton est un monstre créé par l’effet d’une carte. Il n’existe pas dans votre Deck : son nom, son Type, son Attribut, son Niveau, son ATK et sa DEF sont donnés par l’effet qui le crée. Vous le représentez avec un marqueur reconnaissable : une carte Jeton officielle, une pièce, un dé.",
         "Sur le Terrain, un Jeton se comporte comme un monstre : il occupe une Zone Monstre, peut attaquer, être détruit au combat, changer de position de combat, être Sacrifié ou servir de Matériel. S’il n’y a aucune Zone Monstre libre, il ne peut pas être Invoqué.",
@@ -339,6 +388,11 @@
       "summary": "Les réponses s’empilent et se résolvent dans l’ordre inverse, selon la Vitesse de Sort.",
       "diagram": "chain",
       "cards": ["Mystical Space Typhoon", "Solemn Judgment"],
+      "video": {
+        "id": "nTAZwzrYgSs",
+        "title": "YU-GI-OH! TUTO #8 : TOUT sur les Chaînes",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Lorsqu’une carte ou un effet est activé, il devient le Maillon de Chaîne 1. Les joueurs peuvent répondre avec une Vitesse de Sort de 2 ou plus, égale ou supérieure à celle du dernier Maillon, en ajoutant des Maillons. Quand les deux joueurs passent, la Chaîne se résout dans l’ordre inverse : le dernier Maillon en premier.",
         "Les coûts (défausser, payer des LP, détacher, Sacrifier…) sont payés à l’activation et ne sont pas rendus si l’activation est annulée. Dans le texte d’une carte, ce qui précède les deux-points (:) est une condition, ce qui précède le point-virgule (;) est un coût ou une cible, et le reste est l’effet."
@@ -382,6 +436,11 @@
       "title": "Combat",
       "summary": "Les attaques se comparent à l’ATK, ou à la DEF si le défenseur est en Position de Défense.",
       "diagram": "battle",
+      "video": {
+        "id": "l1DdhUM-DKA",
+        "title": "YU-GI-OH! TUTO #9 : TOUT sur la Battle Phase",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "La Battle Phase comprend la Start Step, la Battle Step, la Damage Step et la End Step. Chaque monstre en Position d’Attaque face recto que vous contrôlez peut attaquer une fois par Battle Phase.",
         "Battle Step : choisissez un de vos monstres et déclarez une attaque contre un monstre adverse. Si votre adversaire ne contrôle aucun monstre, vous pouvez attaquer directement : il subit des dommages égaux à l’ATK de votre monstre. Si le nombre de monstres contrôlés par votre adversaire change avant la Damage Step, il y a « replay » : choisissez une nouvelle cible, attaquez directement s’il n’en a plus, ou arrêtez l’attaque.",
@@ -402,6 +461,11 @@
       "title": "Magies et Pièges",
       "summary": "Les Magies s’activent depuis la main, les Pièges doivent être Posés au moins un tour à l’avance.",
       "cards": ["Mirror Force"],
+      "video": {
+        "id": "bNMPkFnXqGs",
+        "title": "YU-GI-OH! TUTO #12 : Activations et Annulations",
+        "channel": "Joeri sama"
+      },
       "paragraphs": [
         "Activez les Magies depuis votre main durant votre Main Phase, ou Posez-les pour les activer plus tard. Les Pièges doivent d’abord être Posés et peuvent être activés à partir du tour suivant, pendant le tour de n’importe quel joueur. Les Magies Normales et Pièges Normaux vont au Cimetière après leur résolution ; les cartes Continues, Équipement et Terrain restent sur le Terrain.",
         "Les « hand traps » sont des monstres dont vous activez l’effet depuis votre main, souvent en les défaussant, généralement comme Effets Rapides pendant le tour de n’importe quel joueur."

@@ -14,7 +14,11 @@
     "clear": "Limpar",
     "links": "Recursos oficiais",
     "linksHint": "As regras completas e os tutoriais em vídeo publicados pela Konami.",
-    "exampleCards": "Cartas citadas"
+    "exampleCards": "Cartas citadas",
+    "video": "Tutorial em vídeo",
+    "videoLoad": "Reproduzir o vídeo",
+    "videoConsent": "O vídeo só é carregado do YouTube quando você clica.",
+    "videoOpen": "Abrir no YouTube"
   },
   "groups": {
     "basics": "Fundamentos",
