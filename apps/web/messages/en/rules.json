@@ -3,11 +3,79 @@
   "description": "The official Yu-Gi-Oh! TCG rules under the current Master Rule, from setting up a duel to resolving Chains.",
   "source": "This page summarizes the official rulebook (current Master Rule); when a card’s text or an official ruling says otherwise, the card and the ruling take precedence.",
   "tocLabel": "On this page",
+  "labels": {
+    "points": "Key points",
+    "example": "Example",
+    "openDuel": "Try it in the simulator",
+    "glossary": "Glossary",
+    "glossaryHint": "The words that keep coming back on cards.",
+    "search": "Search a rule, a keyword…",
+    "noResults": "No rule matches this search.",
+    "clear": "Clear",
+    "links": "Official resources",
+    "linksHint": "The full rules and video tutorials published by Konami.",
+    "exampleCards": "Cards mentioned"
+  },
+  "groups": {
+    "basics": "The basics",
+    "summons": "Summoning",
+    "playing": "Playing your cards",
+    "advanced": "Going further"
+  },
+  "diagrams": {
+    "activate": "Activation",
+    "attached": "attached beneath",
+    "between": "Levels you can Summon",
+    "chainLink": "Chain Link",
+    "counters": "counters",
+    "damage": "damage",
+    "deck": "Deck",
+    "destroyed": "destroyed",
+    "extraDeck": "Extra Deck",
+    "extraZones": "Extra Monster Zones",
+    "fieldZone": "Field Zone",
+    "fromHandDeck": "from the hand or Deck",
+    "fusion": "Fusion",
+    "grave": "Graveyard",
+    "hand": "Hand",
+    "level": "Level",
+    "link": "Link",
+    "linkRating": "LINK",
+    "materials": "Materials",
+    "monsterZones": "Monster Zones",
+    "noDamage": "no damage",
+    "noTribute": "no Tribute",
+    "nonTuner": "non-Tuner",
+    "notFirstTurn": "not on turn 1",
+    "opponentSide": "Opponent",
+    "optional": "optional",
+    "pointed": "zones pointed to",
+    "rank": "Rank",
+    "remove": "remove",
+    "removed": "removed from play",
+    "resolution": "Resolution",
+    "ritual": "Ritual",
+    "sameLevel": "same Level",
+    "scale": "Scale",
+    "shared": "shared",
+    "spell": "Spell",
+    "spellZones": "Spell and Trap Zones",
+    "sum": "total",
+    "synchro": "Synchro",
+    "token": "Token",
+    "tribute": "Tribute",
+    "tributes": "Tributes",
+    "tuner": "Tuner",
+    "xyz": "Xyz",
+    "youSide": "You"
+  },
   "sections": [
     {
       "id": "basics",
-      "title": "Basics",
+      "group": "basics",
       "icon": "BookOpen",
+      "title": "Basics",
+      "summary": "Two duelists, 8000 LP each: you win by bringing your opponent’s down to 0.",
       "paragraphs": [
         "Yu-Gi-Oh! is a duel between two players. Each player starts with 8000 Life Points (LP) and draws 5 cards. Your goal is to bring your opponent’s LP to 0 using monsters, Spells and Traps.",
         "Before the first duel, decide at random (for example with a coin toss) which player chooses to go first or second. In a Match, the loser of the previous duel makes that choice for the next one."
@@ -19,13 +87,15 @@
         "Main Deck: 40 to 60 cards. Extra Deck: 0 to 15 cards. Side Deck: 0 to 15 cards.",
         "You can have at most 3 copies of a card with the same name across your Main, Extra and Side Deck combined.",
         "The Forbidden & Limited List restricts some cards further: Forbidden (0 copies), Limited (1 copy), Semi-Limited (2 copies)."
-      ],
-      "example": ""
+      ]
     },
     {
       "id": "field",
-      "title": "The field",
+      "group": "basics",
       "icon": "LayoutGrid",
+      "title": "The field",
+      "summary": "5 Monster Zones, 5 Spell & Trap Zones and 1 Field Zone each; the 2 Extra Monster Zones are shared.",
+      "diagram": "field",
       "paragraphs": [
         "Your side of the field has 5 Main Monster Zones, 5 Spell & Trap Zones and 1 Field Zone. The 2 Extra Monster Zones sit between both players and are shared.",
         "You can use only one Extra Monster Zone at a time, unless a card effect lets you use the other one. When your monster leaves it, you can use either Extra Monster Zone again.",
@@ -37,13 +107,15 @@
         "Graveyard (GY): face-up pile of used and destroyed cards; both players can look at it at any time.",
         "Banished cards are removed from play, usually face-up, and are kept apart from the GY.",
         "Monsters are in Attack Position (vertical) or Defense Position (horizontal). A face-down monster is always in Defense Position, and you can look at your own face-down cards."
-      ],
-      "example": ""
+      ]
     },
     {
       "id": "turn",
-      "title": "Turn structure",
+      "group": "basics",
       "icon": "Clock",
+      "title": "Turn structure",
+      "summary": "Six phases in order, including the Battle Phase — optional, and skipped on the very first turn.",
+      "diagram": "turn",
       "paragraphs": [
         "Each turn goes through the phases below, in this order. The player whose turn it is is the “turn player”.",
         "The first turn of the duel has two restrictions: the player going first does not draw, and nobody can conduct a Battle Phase."
@@ -55,13 +127,16 @@
         "Battle Phase: optional. Attack with your monsters. It cannot be conducted on the first turn of the duel.",
         "Main Phase 2: only if you conducted a Battle Phase. You can do the same things as in Main Phase 1.",
         "End Phase: effects that happen “during the End Phase” are applied. If you have more than 6 cards in your hand, discard until you have 6."
-      ],
-      "example": ""
+      ]
     },
     {
       "id": "normal-summon",
-      "title": "Normal Summon and Set",
+      "group": "summons",
       "icon": "ArrowUp",
+      "title": "Normal Summon and Set",
+      "summary": "One Normal Summon or Set per turn, with Tributes from Level 5 upwards.",
+      "diagram": "tributes",
+      "cards": ["Summoned Skull"],
       "paragraphs": [
         "Once per turn, during your Main Phase, you can either Normal Summon a monster from your hand in face-up Attack Position or Set it in face-down Defense Position. Both actions use your single Normal Summon for the turn.",
         "Higher-Level monsters require Tributes: you send monsters you control to the GY. This is a Tribute Summon (or a Tribute Set), which is a kind of Normal Summon.",
@@ -78,8 +153,11 @@
     },
     {
       "id": "special-summon",
-      "title": "Special Summon",
+      "group": "summons",
       "icon": "Sparkles",
+      "title": "Special Summon",
+      "summary": "As many Special Summons as your cards allow, each following its own text.",
+      "cards": ["Monster Reborn", "Cyber Dragon"],
       "paragraphs": [
         "A Special Summon does not use your Normal Summon. You can perform as many as your cards allow, including during your opponent’s turn when an effect permits it.",
         "Some monsters have a built-in procedure, such as “Cannot be Normal Summoned/Set. Must first be Special Summoned…” or “You can Special Summon this card from your hand by…”. This procedure does not start a Chain, but cards that negate Summons can stop it.",
@@ -94,8 +172,12 @@
     },
     {
       "id": "fusion",
-      "title": "Fusion Summon",
+      "group": "summons",
       "icon": "Combine",
+      "title": "Fusion Summon",
+      "summary": "The listed Materials go to the Graveyard and the Fusion Monster arrives from the Extra Deck.",
+      "diagram": "fusion",
+      "cards": ["Polymerization", "Blue-Eyes White Dragon", "Blue-Eyes Ultimate Dragon"],
       "paragraphs": [
         "Fusion Monsters are in your Extra Deck. Their text lists the required Fusion Materials, for example two monsters by name or “1 DARK monster + 1 Warrior monster”.",
         "Most Fusion Summons use a card such as “Polymerization”: send the listed materials from your hand or field to the GY, then Special Summon the Fusion Monster from your Extra Deck. The Fusion card states where the materials can come from.",
@@ -110,8 +192,12 @@
     },
     {
       "id": "ritual",
-      "title": "Ritual Summon",
+      "group": "summons",
       "icon": "Flame",
+      "title": "Ritual Summon",
+      "summary": "A Ritual Spell plus Tributes whose Levels match the monster you are Summoning.",
+      "diagram": "ritual",
+      "cards": ["Black Luster Ritual", "Black Luster Soldier"],
       "paragraphs": [
         "Ritual Monsters are in your Main Deck and are usually Summoned from your hand. You need a Ritual Spell that can Summon them; the two cards usually name each other.",
         "Activate the Ritual Spell, then Tribute monsters from your hand and/or field whose total Levels meet the requirement written on the Ritual Spell, and Special Summon the Ritual Monster."
@@ -126,8 +212,12 @@
     },
     {
       "id": "synchro",
-      "title": "Synchro Summon",
+      "group": "summons",
       "icon": "Zap",
+      "title": "Synchro Summon",
+      "summary": "1 Tuner plus non-Tuners whose Levels add up exactly to the Synchro Monster’s Level.",
+      "diagram": "synchro",
+      "cards": ["Junk Synchron", "Stardust Dragon"],
       "paragraphs": [
         "Synchro Monsters are in your Extra Deck. During your Main Phase, send 1 Tuner and 1 or more non-Tuner monsters you control face-up to the GY. Their Levels must add up exactly to the Synchro Monster’s Level. Then Special Summon it.",
         "The Synchro Monster’s text lists its materials, for example “1 Tuner + 1+ non-Tuner monsters”. Some require a specific Tuner or non-Tuner, or more than one Tuner."
@@ -142,8 +232,12 @@
     },
     {
       "id": "xyz",
-      "title": "Xyz Summon",
+      "group": "summons",
       "icon": "Layers",
+      "title": "Xyz Summon",
+      "summary": "Two or more monsters of the same Level attach beneath a monster of equal Rank.",
+      "diagram": "xyz",
+      "cards": ["Number 39: Utopia"],
       "paragraphs": [
         "Xyz Monsters are in your Extra Deck. During your Main Phase, stack the face-up monsters you control that the Xyz Monster requires (usually 2 or more with the same Level), then place the Xyz Monster on top. The monsters underneath become Xyz Materials.",
         "Xyz Monsters have a Rank, not a Level. Effects that refer to Levels do not apply to them, and they normally cannot be used for a Synchro Summon.",
@@ -158,8 +252,12 @@
     },
     {
       "id": "pendulum",
-      "title": "Pendulum Summon",
+      "group": "summons",
       "icon": "Scale",
+      "title": "Pendulum Summon",
+      "summary": "Two Scales in your Pendulum Zones open a multi-monster Summon between those values.",
+      "diagram": "pendulum",
+      "cards": ["Performapal Hip Hippo"],
       "paragraphs": [
         "Pendulum Monsters are in your Main Deck. Besides being Summoned as monsters, they can be activated as Spells in your Pendulum Zones (your leftmost and rightmost Spell & Trap Zones). There they are Spell Cards and use their Pendulum Scale and Pendulum Effect.",
         "Once per turn, during your Main Phase, if you have a card in both Pendulum Zones, you can Pendulum Summon: Special Summon, at the same time, any number of monsters from your hand and/or face-up Pendulum Monsters from your Extra Deck whose Levels are strictly between the two Scales.",
@@ -169,13 +267,16 @@
         "With Scales 1 and 8, you can Pendulum Summon monsters from Level 2 to Level 7.",
         "Monsters from your hand go to Main Monster Zones. Face-up Pendulum Monsters from your Extra Deck go to an Extra Monster Zone or a Main Monster Zone a Link Monster points to.",
         "A Pendulum Summon does not start a Chain, but cards that negate Summons can stop it."
-      ],
-      "example": ""
+      ]
     },
     {
       "id": "link",
-      "title": "Link Summon",
+      "group": "summons",
       "icon": "Link",
+      "title": "Link Summon",
+      "summary": "Materials are sent to the Graveyard, and the arrows open zones for your other monsters.",
+      "diagram": "link",
+      "cards": ["Decode Talker"],
       "paragraphs": [
         "Link Monsters are in your Extra Deck. During your Main Phase, send face-up monsters you control that meet the listed requirements to the GY as Link Material, then Special Summon the Link Monster.",
         "The number of materials must equal the Link Rating (LINK-1, LINK-2…). A Link Monster used as material can count as 1 material or as a number of materials equal to its Link Rating.",
@@ -191,8 +292,11 @@
     },
     {
       "id": "extra-deck-zones",
-      "title": "Extra Deck and Extra Monster Zones",
+      "group": "summons",
       "icon": "LayoutDashboard",
+      "title": "Extra Deck and Extra Monster Zones",
+      "summary": "Link Monsters go through an Extra Monster Zone; the others can also use your main zones.",
+      "diagram": "emz",
       "paragraphs": [
         "Since the April 2020 Master Rule revision, the zone a monster Summoned from the Extra Deck can use depends on its card type.",
         "Fusion, Synchro and Xyz Monsters, including Pendulum Monsters of those types Summoned while face-down in the Extra Deck, can go to any of your free Main Monster Zones or to an Extra Monster Zone.",
@@ -206,9 +310,35 @@
       "example": "Your field is empty. You Synchro Summon into a Main Monster Zone, keeping the Extra Monster Zone free. Next, you Link Summon a LINK-2 Monster with bottom-left and bottom-right arrows into the Extra Monster Zone. Those arrows point to two of your Main Monster Zones, so your next Link Monster or face-up Pendulum Monsters from your Extra Deck can be placed there."
     },
     {
+      "id": "tokens",
+      "group": "summons",
+      "icon": "Shapes",
+      "title": "Tokens",
+      "summary": "A Token is not a card: it fills a Monster Zone and vanishes the moment it leaves the field.",
+      "diagram": "tokens",
+      "cards": ["Scapegoat"],
+      "paragraphs": [
+        "A Token is a monster created by a card effect. It does not exist in your Deck: its name, Type, Attribute, Level, ATK and DEF all come from the effect that creates it. You represent it with any recognizable marker — an official Token card, a coin, a die.",
+        "On the field, a Token behaves like a monster: it occupies a Monster Zone, can attack, be destroyed in battle, change battle position, be Tributed or be used as Material. If no Monster Zone is free, it cannot be Summoned at all.",
+        "The moment a Token leaves the field — destroyed, sent to the Graveyard, banished, returned to the hand — it is removed from play. It never actually reaches the Graveyard, so effects that trigger “when a card is sent to the Graveyard” do not see it."
+      ],
+      "points": [
+        "A Token is not a card: effects that refer to “cards” in the hand, Deck or Graveyard never count it.",
+        "It can be Tributed for a Tribute Summon, and used as Fusion, Synchro or Link Material.",
+        "It cannot be used as Xyz Material: Materials are attached beneath the monster, so the Token would leave the field and vanish at once.",
+        "Several Tokens can share the same name, and each one takes up its own Monster Zone.",
+        "A Token only appears if a card creates it: you can never Summon one on your own initiative."
+      ],
+      "example": "A card Special Summons 4 Sheep Tokens in face-up Defense Position. They fill 4 of your 5 Monster Zones: you can use them as Link Material, but only one zone is left to Summon anything else."
+    },
+    {
       "id": "chains",
-      "title": "Chains and Spell Speed",
+      "group": "playing",
       "icon": "ListOrdered",
+      "title": "Chains and Spell Speed",
+      "summary": "Responses stack up and resolve in reverse order, following Spell Speed.",
+      "diagram": "chain",
+      "cards": ["Mystical Space Typhoon", "Solemn Judgment"],
       "paragraphs": [
         "When a card or effect is activated, it becomes Chain Link 1. Players can respond with Spell Speed 2 or higher, equal to or higher than the last Chain Link, adding more links. When both players pass, the Chain resolves in reverse order: the last link first.",
         "Costs (discarding, paying LP, detaching, Tributing…) are paid on activation and are not returned if the activation is negated. In card text, what comes before a colon (:) is a condition, what comes before a semicolon (;) is a cost or a target, and the rest is the effect."
@@ -225,9 +355,33 @@
       "example": "You activate a Normal Spell (Chain Link 1). Your opponent responds with a Normal Trap (Chain Link 2). You respond with a Counter Trap that negates it (Chain Link 3). The Counter Trap resolves first and negates the Trap, then your Spell resolves."
     },
     {
+      "id": "counters",
+      "group": "playing",
+      "icon": "Hash",
+      "title": "Counters",
+      "summary": "A marker an effect places on a card, which disappears along with it.",
+      "diagram": "counters",
+      "cards": ["Royal Magical Library"],
+      "paragraphs": [
+        "Some cards place counters — Spell Counters, Bushido Counters and many others — on themselves or on other cards. A counter is not a card: it is a marker you put on the card concerned.",
+        "A counter can only be placed if a card’s text says so, and only on a card that can hold it. If that card leaves the field or is turned face-down, its counters are removed and do not come back with it.",
+        "Removing counters is usually a cost: you remove them when you activate the effect. If the effect is then negated, the counters stay spent."
+      ],
+      "points": [
+        "Every counter has a name: an effect that removes “Spell Counters” cannot remove a counter of another type.",
+        "Counters sit on the card, not on the zone: they follow the card if it moves to another zone on the field.",
+        "A card can hold several counters; some texts set a maximum.",
+        "Xyz Materials are not counters: they are real attached cards, and both players may look at them at any time."
+      ],
+      "example": "A monster gains 1 Spell Counter each time a Spell is activated, then you remove 3 of those counters to draw a card. The counters are gone as soon as you activate, even if the draw is then negated."
+    },
+    {
       "id": "battle",
-      "title": "Battle",
+      "group": "playing",
       "icon": "Swords",
+      "title": "Battle",
+      "summary": "Attacks compare ATK, or DEF when the defending monster is in Defense Position.",
+      "diagram": "battle",
       "paragraphs": [
         "The Battle Phase has a Start Step, Battle Step, Damage Step and End Step. Each face-up Attack Position monster you control can attack once per Battle Phase.",
         "Battle Step: choose one of your monsters and declare an attack on an opponent’s monster. If your opponent controls no monsters, you can attack directly and they take damage equal to your monster’s ATK. If the number of monsters your opponent controls changes before the Damage Step, a replay occurs: choose a new target, attack directly if they now have none, or stop the attack.",
@@ -243,8 +397,11 @@
     },
     {
       "id": "spells-traps",
-      "title": "Spells and Traps",
+      "group": "playing",
       "icon": "Wand",
+      "title": "Spells and Traps",
+      "summary": "Spells activate from your hand; Traps must be Set at least a turn in advance.",
+      "cards": ["Mirror Force"],
       "paragraphs": [
         "Activate Spells from your hand during your Main Phase, or Set them and activate them later. Traps must be Set first and can be activated from the next turn on, during either player’s turn. Normal Spells and Normal Traps go to the GY after resolving; Continuous, Equip and Field cards stay on the field.",
         "Hand traps are monsters whose effect you activate from your hand, often by discarding them, usually as Quick Effects during either player’s turn."
@@ -259,13 +416,117 @@
         "Normal Trap: one-time effect, Spell Speed 2.",
         "Continuous Trap: stays on the field, Spell Speed 2.",
         "Counter Trap: Spell Speed 3, usually negates an activation or a Summon."
+      ]
+    },
+    {
+      "id": "match",
+      "group": "advanced",
+      "icon": "Trophy",
+      "title": "Matches, Side Deck and Limited List",
+      "summary": "Tournaments are played as Matches: two duels won, a Side Deck between games, a Limited List.",
+      "paragraphs": [
+        "Tournaments are played as Matches: the first player to win two duels wins the Match. The player who lost a duel chooses who goes first in the next one.",
+        "Between two duels of the same Match you may swap cards between your Deck and your Side Deck (0 to 15 cards). Once you are done, your Main Deck must still hold 40 to 60 cards, your Extra Deck at most 15, and your Side Deck must be back to its original size.",
+        "The Forbidden & Limited List is updated regularly by Konami. It applies to your Main Deck, Extra Deck and Side Deck combined."
       ],
-      "example": ""
+      "points": [
+        "Forbidden: 0 copies. Limited: 1. Semi-Limited: 2. Otherwise 3 copies at most.",
+        "The TCG (Europe, Americas, Oceania) and the OCG (Japan, Asia) each have their own list.",
+        "Side Decking time between duels is limited, often to a few minutes.",
+        "If time runs out during a Match, an end-of-time procedure decides the winner, usually the player with the most LP."
+      ],
+      "example": "You lose the first duel to a Spell-heavy deck. Between duels you bring in 2 anti-Spell cards from your Side Deck and take out 2 cards that do little in this match-up."
     }
   ],
-  "labels": {
-    "points": "Key points",
-    "example": "Example",
-    "openDuel": "Try it in the simulator"
-  }
+  "glossary": [
+    {
+      "term": "Activation",
+      "definition": "The moment you announce a card or effect and pay its cost. A negated activation still costs you whatever you paid."
+    },
+    {
+      "term": "Negate",
+      "definition": "To stop an activation or an effect from applying. Negating is not destroying: a negated card can stay on the field."
+    },
+    {
+      "term": "Banish",
+      "definition": "To remove a card from play, apart from the Graveyard. Some cards banish face-down, and nobody may look at it then."
+    },
+    {
+      "term": "Chain",
+      "definition": "The stack of cards and effects activated in response to one another. The last one activated resolves first."
+    },
+    {
+      "term": "Target",
+      "definition": "To pick a specific card on activation. A card that “cannot be targeted” may not be chosen, even if the effect could affect it."
+    },
+    {
+      "term": "Counter",
+      "definition": "A marker an effect places on a card, which disappears along with it."
+    },
+    {
+      "term": "Cost",
+      "definition": "What you pay on activation: discarding, paying LP, Tributing, detaching a Material. A cost is never given back."
+    },
+    {
+      "term": "Continuous Effect",
+      "definition": "An effect that applies at all times while the card is on the field, with no activation and no Chain Link."
+    },
+    {
+      "term": "Trigger Effect",
+      "definition": "An effect that activates when a specific event happens, such as “When this card is Summoned”."
+    },
+    {
+      "term": "Ignition Effect",
+      "definition": "An effect you activate yourself, during your own Main Phase."
+    },
+    {
+      "term": "Quick Effect",
+      "definition": "A Spell Speed 2 effect, which you can activate during the opponent’s turn or in response to an activation."
+    },
+    {
+      "term": "FLIP Effect",
+      "definition": "An effect that activates when the monster is turned from face-down to face-up."
+    },
+    {
+      "term": "Hand trap",
+      "definition": "A monster whose effect activates from your hand, often by discarding it, to disrupt the opponent during their turn."
+    },
+    {
+      "term": "Token",
+      "definition": "A monster created by an effect, which is not a card and vanishes as soon as it leaves the field."
+    },
+    {
+      "term": "Material",
+      "definition": "The cards used for a Summon from the Extra Deck: Fusion, Synchro, Xyz or Link."
+    },
+    {
+      "term": "Tribute",
+      "definition": "To send a monster you control to the Graveyard in order to pay for a Summon or a cost."
+    },
+    {
+      "term": "Missed timing",
+      "definition": "An optional “When… you can” effect can no longer be activated if its event is not the last thing that happened."
+    },
+    {
+      "term": "Spell Speed",
+      "definition": "How an effect ranks inside a Chain: only an effect of equal or higher Spell Speed may respond."
+    }
+  ],
+  "links": [
+    {
+      "label": "Official rulebook (PDF)",
+      "description": "The complete rules published by Konami, Link Summoning included.",
+      "url": "https://img.yugioh-card.com/en/downloads/rulebook/SD_RuleBook_EN_10.pdf"
+    },
+    {
+      "label": "Video tutorials",
+      "description": "The official series: how a duel plays out, battle, Chains and every kind of Summon.",
+      "url": "https://www.yugioh-card.com/eu/videotutorials/"
+    },
+    {
+      "label": "Yu-Gi-Oh! for beginners",
+      "description": "The official beginners hub, with the same tutorials and starter advice.",
+      "url": "https://www.yugioh-card.com/eu/beginners/"
+    }
+  ]
 }
