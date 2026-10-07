@@ -144,6 +144,19 @@ To build on the server instead of pulling the images, point Coolify at this repo
 - The published images are amd64. For an arm64 server, add `platforms: linux/amd64,linux/arm64` to
   the build step of the workflow.
 
+### Backups
+
+Two things to keep: the Postgres database, and the `uploads` volume (`UPLOADS_DIR`, default
+`/app/data/uploads` in the images) which holds profile pictures and banners — the only data that
+is not in the database, and the only one that cannot be regenerated. The catalog, the meta and the
+duel engine's data all download themselves again, so their volumes are disposable.
+
+```bash
+docker compose exec -T db pg_dump -U ygo ygo | gzip > ygo-$(date +%F).sql.gz
+docker run --rm -v ygo-deckbuilder_uploads-data:/data -v "$PWD":/out alpine \
+  tar czf /out/ygo-uploads-$(date +%F).tar.gz -C /data .
+```
+
 ### Duel simulator
 
 The duel engine needs the card scripts and databases from Project Ignis (~60 MB). The API downloads

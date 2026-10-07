@@ -21,8 +21,9 @@ FROM base AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build --chown=node:node /out ./
-# Données du simulateur de duel (volume) : doit appartenir à l'utilisateur de l'API
-RUN mkdir -p /app/data/duel && chown -R node:node /app/data
+# Volumes montés plus tard par Docker : les créer et les donner à l'utilisateur de l'API,
+# sinon ils arrivent en root et l'API ne peut y écrire ni les scripts du duel ni les avatars.
+RUN mkdir -p /app/data/duel /app/data/uploads && chown -R node:node /app/data
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \

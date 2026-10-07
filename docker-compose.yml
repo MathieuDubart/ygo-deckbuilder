@@ -45,9 +45,13 @@ services:
       DUEL_DATA_CRON: ${DUEL_DATA_CRON:-0 3 * * 2}
       DUEL_MAX_SESSIONS: ${DUEL_MAX_SESSIONS:-20}
       DUEL_IDLE_MINUTES: ${DUEL_IDLE_MINUTES:-30}
+      # Images de profil (avatars, bannières) : la seule donnée qui n'est pas en base
+      UPLOADS_DIR: /app/data/uploads
     volumes:
       # Scripts des cartes et bases du moteur de duel (téléchargés une fois, mis à jour par cron)
       - duel-data:/app/data/duel
+      # À SAUVEGARDER avec la base : les avatars et bannières ne se régénèrent pas
+      - uploads-data:/app/data/uploads
     # Pas de port exposé : seul le front parle à l'API (réseau interne Docker)
 
   web:
@@ -69,3 +73,4 @@ volumes:
   db-data:
   image-cache:
   duel-data:
+  uploads-data:
