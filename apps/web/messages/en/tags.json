@@ -6,5 +6,16 @@
   "color": "Colour",
   "clear": "Clear",
   "manage": "Manage tags",
-  "done": "Done"
+  "done": "Done",
+  "confirmDelete": "Delete the tag “{name}”?",
+  "colors": {
+    "slate": "Grey",
+    "red": "Red",
+    "amber": "Amber",
+    "green": "Green",
+    "teal": "Teal",
+    "blue": "Blue",
+    "violet": "Violet",
+    "pink": "Pink"
+  }
 }

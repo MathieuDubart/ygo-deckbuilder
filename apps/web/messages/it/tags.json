@@ -6,5 +6,16 @@
   "color": "Colore",
   "clear": "Azzera",
   "manage": "Gestisci le etichette",
-  "done": "Fatto"
+  "done": "Fatto",
+  "confirmDelete": "Eliminare l’etichetta « {name} »?",
+  "colors": {
+    "slate": "Grigio",
+    "red": "Rosso",
+    "amber": "Ambra",
+    "green": "Verde",
+    "teal": "Turchese",
+    "blue": "Blu",
+    "violet": "Viola",
+    "pink": "Rosa"
+  }
 }
