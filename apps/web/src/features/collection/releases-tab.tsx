@@ -158,6 +158,8 @@ export function ReleasesTab() {
         counts={(id) => tags?.find((tag) => tag.id === id)?.setCount}
       />
 
+      {data && <p className="mt-3 text-sm text-fg-muted">{t('count', { count: data.total })}</p>}
+
       <div className="mt-4">
         {isLoading ? (
           <ReleaseGrid>

@@ -124,6 +124,7 @@ model CardSet {
   ownedProducts OwnedProduct[]
   decks         ProductDeck[]
   tags          SetTag[]
+  progress      SetProgress[]
 
   @@index([tcgDate])
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -183,6 +184,35 @@ model User {
   wishlistItems   WishlistItem[]
   ownedProducts   OwnedProduct[]
   tags            Tag[]
+  setProgress     SetProgress[]
+}
+
+/// Avancement d'un utilisateur sur une extension : ce qu'il en a sur ce qu'elle contient.
+/// Dénormalisation assumée — les mêmes chiffres se déduisent de CollectionItem × CardPrint,
+/// mais les rejouer à chaque affichage coûte cher et ils servent ailleurs que dans la liste.
+/// Tenue à jour par `SetProgressService` à chaque mouvement de collection, et reconstruite
+/// après une synchro du catalogue (de nouvelles impressions changent les totaux).
+/// Une ligne n'existe que si l'utilisateur possède au moins une carte de l'extension.
+model SetProgress {
+  userId String
+  setId  String
+
+  /// Impressions et cartes distinctes de l'extension, au moment du calcul
+  prints Int @default(0)
+  cards  Int @default(0)
+  /// Impressions de l'extension présentes dans la collection
+  ownedPrints Int @default(0)
+  /// Cartes de l'extension possédées, toutes éditions confondues
+  ownedCards Int @default(0)
+  /// Exemplaires rattachés à une impression de l'extension
+  copies    Int      @default(0)
+  updatedAt DateTime @default(now())
+
+  user User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  set  CardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@id([userId, setId])
+  @@index([setId])
 }
 
 /// Étiquette libre d'un utilisateur (« à vendre », « doublons », « deck Blue-Eyes »), posable

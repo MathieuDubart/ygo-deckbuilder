@@ -1,6 +1,7 @@
 {
   "title": "Espansione",
   "searchPlaceholder": "Trova un’espansione: nome, codice (BETB)…",
+  "count": "{count, plural, one {# espansione} other {# espansioni}}",
   "noDate": "Data sconosciuta",
   "today": "Esce oggi",
   "inDays": "{count, plural, one {tra # giorno} other {tra # giorni}}",

@@ -3,6 +3,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { SetProgressService } from '../collection/set-progress.service';
 import { mapCard, mapPrint, parseDate, setPrefixOf } from './ygoprodeck.mapper';
 import { InteractionIndexService } from '../synergy/interaction-index.service';
 import { ProductCoversService } from './product-covers.service';
@@ -32,6 +33,7 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
     private readonly config: AppConfig,
     private readonly scheduler: SchedulerRegistry,
     private readonly covers: ProductCoversService,
+    private readonly progress: SetProgressService,
     private readonly interactions: InteractionIndexService,
   ) {}
 
@@ -115,6 +117,11 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       await this.saveState({ ...result, status: 'OK' });
       // Nouveaux produits → visuels HD en arrière-plan (ne bloque pas la sync)
       if (this.config.get('PRODUCT_COVERS_ENABLED')) this.covers.refreshInBackground();
+      // De nouvelles impressions changent les totaux par extension : l'avancement stocké
+      // de chaque compte est reconstruit (un échec ici ne fait pas échouer la sync).
+      await this.progress
+        .rebuildAll()
+        .catch((e) => this.logger.warn(`Avancement par extension non reconstruit : ${e}`));
       this.logger.log(
         `Sync OK : ${result.cards} cartes, ${result.prints} impressions, ${result.sets} sets en ${Math.round(result.durationMs / 1000)}s`,
       );

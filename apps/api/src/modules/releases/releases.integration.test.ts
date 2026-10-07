@@ -14,7 +14,11 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { PrismaClient } from '../../generated/prisma/client';
 import { CollectionService } from '../collection/collection.service';
+import { OwnershipService } from '../collection/ownership.service';
+import { SetProgressService } from '../collection/set-progress.service';
+import { ProductsService } from '../products/products.service';
 import { TagsService } from '../tags/tags.service';
+import { WishlistService } from '../wishlist/wishlist.service';
 import { ReleasesService } from './releases.service';
 
 const URL = process.env.INTEGRATION_DATABASE_URL;
@@ -24,8 +28,85 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
   // Les services ne reçoivent qu'un PrismaClient : pas besoin du contexte Nest ici.
   const asService = prisma as unknown as ConstructorParameters<typeof ReleasesService>[0];
   const releases = new ReleasesService(asService);
-  const collection = new CollectionService(asService);
+  const progress = new SetProgressService(asService);
+  const collection = new CollectionService(asService, progress);
   const tags = new TagsService(asService);
+  const wishlist = new WishlistService(asService, progress);
+  // La lecture des listes officielles part sur le réseau : seule sa réponse compte ici.
+  const content = { ensureQuickly: async () => false } as unknown as ConstructorParameters<
+    typeof ProductsService
+  >[2];
+  const products = new ProductsService(
+    asService,
+    new OwnershipService(asService),
+    content,
+    progress,
+  );
+
+  /**
+   * Recalcul indépendant de l'avancement, en mémoire et sans SQL : c'est lui qui dit si la
+   * table stockée a dérivé. Volontairement écrit autrement que le service.
+   */
+  async function expectStoredProgressToMatchReality() {
+    const [prints, items, stored] = await Promise.all([
+      prisma.cardPrint.findMany({ select: { id: true, setId: true, cardId: true } }),
+      prisma.collectionItem.findMany({
+        where: { userId: USER },
+        select: { cardId: true, printId: true, quantity: true },
+      }),
+      prisma.setProgress.findMany({ where: { userId: USER } }),
+    ]);
+    const ownedCardIds = new Set(items.map((i) => i.cardId));
+    const copiesByPrint = new Map<string, number>();
+    for (const item of items) {
+      if (item.printId) {
+        copiesByPrint.set(item.printId, (copiesByPrint.get(item.printId) ?? 0) + item.quantity);
+      }
+    }
+
+    const expected = new Map<string, Record<string, number>>();
+    for (const print of prints) {
+      const row = expected.get(print.setId) ?? {
+        prints: 0,
+        cards: 0,
+        ownedPrints: 0,
+        ownedCards: 0,
+        copies: 0,
+      };
+      row.prints! += 1;
+      expected.set(print.setId, row);
+    }
+    for (const [setId, row] of expected) {
+      const own = prints.filter((p) => p.setId === setId);
+      row.cards = new Set(own.map((p) => p.cardId)).size;
+      row.ownedPrints = own.filter((p) => copiesByPrint.has(p.id)).length;
+      row.ownedCards = new Set(
+        own.filter((p) => ownedCardIds.has(p.cardId)).map((p) => p.cardId),
+      ).size;
+      row.copies = own.reduce((sum, p) => sum + (copiesByPrint.get(p.id) ?? 0), 0);
+    }
+
+    // Une ligne n'existe que si l'utilisateur possède au moins une carte de l'extension
+    const wanted = [...expected].filter(([, row]) => row.ownedCards! > 0);
+    expect(stored.map((r) => r.setId).sort()).toEqual(wanted.map(([setId]) => setId).sort());
+    for (const [setId, row] of wanted) {
+      expect({ setId, ...pick(stored.find((r) => r.setId === setId)!) }).toEqual({ setId, ...row });
+    }
+  }
+
+  const pick = (r: {
+    prints: number;
+    cards: number;
+    ownedPrints: number;
+    ownedCards: number;
+    copies: number;
+  }) => ({
+    prints: r.prints,
+    cards: r.cards,
+    ownedPrints: r.ownedPrints,
+    ownedCards: r.ownedCards,
+    copies: r.copies,
+  });
 
   const USER = 'user-test';
   const soon = new Date(Date.now() + 20 * 86_400_000);
@@ -51,6 +132,9 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
     const other = await prisma.cardSet.create({
       data: { name: 'Old Reprint Tin', code: 'OTIN', tcgDate: new Date('2015-01-01') },
     });
+    // Extension dont on ne connaît aucune carte et qui n'est pas annoncée : elle doit
+    // quand même être listée — le but de l'onglet est de les avoir toutes sous les yeux.
+    await prisma.cardSet.create({ data: { name: 'Mystery Vault', code: 'MYVA' } });
 
     for (const [id, name] of [
       [1, 'Blue-Eyes White Dragon'],
@@ -109,12 +193,14 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
     await prisma.$executeRawUnsafe(
       `UPDATE "CardSet" SET "searchText" = ygo_normalize(concat_ws(' ', name, code))`,
     );
+    // La fixture écrit la collection directement : on part du même état qu'après une synchro
+    await progress.rebuild(USER);
   });
 
   describe('SQL du suivi par extension', () => {
     it('liste les extensions avec leur avancement', async () => {
       const page = await releases.list(USER, { page: 1, pageSize: 24 });
-      expect(page.total).toBe(3);
+      expect(page.total).toBe(4);
       const betb = page.items.find((r) => r.set.code === 'BETB');
       expect(betb).toBeDefined();
       // 3 impressions, 2 cartes ; 1 impression possédée, et 2 cartes si on compte l'autre édition
@@ -152,8 +238,16 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
 
     it('trie sans casser', async () => {
       for (const sort of ['date', 'progress', 'name', 'cards'] as const) {
-        expect((await releases.list(USER, { page: 1, pageSize: 24, sort })).items).toHaveLength(3);
+        expect((await releases.list(USER, { page: 1, pageSize: 24, sort })).items).toHaveLength(4);
       }
+    });
+
+    it('liste aussi une extension sans carte connue ni annonce', async () => {
+      const page = await releases.list(USER, { page: 1, pageSize: 24, q: 'mystery' });
+      expect(page.items.map((r) => r.set.code)).toEqual(['MYVA']);
+      expect(page.items[0]!.progress).toMatchObject({ prints: 0, cards: 0, ownedPrints: 0 });
+      // Sans date, elle est rangée avec les sorties et non avec les annonces
+      expect(page.items[0]!.status).toBe('RELEASED');
     });
 
     it('met en avant les sorties', async () => {
@@ -236,6 +330,116 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       const tagged = await releases.list(USER, { page: 1, pageSize: 24, tagIds: [sell.id] });
       expect(tagged.items.map((r) => r.set.code)).toEqual(['BETB']);
       expect(tagged.items[0]!.tagIds).toEqual([sell.id]);
+    });
+  });
+
+  describe('avancement stocké', () => {
+    it('colle à la réalité après chaque mouvement de collection', async () => {
+      await expectStoredProgressToMatchReality();
+
+      // Ajout d'une impression jamais possédée
+      const secret = await prisma.cardPrint.findFirstOrThrow({ where: { rarity: 'Secret Rare' } });
+      const added = await collection.add(USER, {
+        cardId: secret.cardId,
+        printId: secret.id,
+        quantity: 3,
+        condition: 'NEAR_MINT',
+        language: 'FR',
+        firstEdition: false,
+      });
+      await expectStoredProgressToMatchReality();
+
+      // Changement de quantité
+      await collection.update(USER, added.id, { quantity: 1 });
+      await expectStoredProgressToMatchReality();
+
+      // Retrait complet : la ligne de l'extension doit suivre
+      await collection.update(USER, added.id, { quantity: 0 });
+      await expectStoredProgressToMatchReality();
+    });
+
+    it('suit la dernière carte retirée d_une extension', async () => {
+      const print = await prisma.cardPrint.findFirstOrThrow({ where: { printCode: 'OTIN-EN050' } });
+      const item = await prisma.collectionItem.findFirstOrThrow({
+        where: { userId: USER, printId: print.id },
+      });
+      await collection.remove(USER, item.id);
+      await expectStoredProgressToMatchReality();
+
+      // Plus aucune carte de cette extension → plus de ligne du tout
+      const row = await prisma.setProgress.findUnique({
+        where: { userId_setId: { userId: USER, setId: print.setId } },
+      });
+      expect(row).toBeNull();
+
+      // On la remet pour la suite
+      await collection.add(USER, {
+        cardId: print.cardId,
+        printId: print.id,
+        quantity: 1,
+        condition: 'NEAR_MINT',
+        language: 'FR',
+        firstEdition: false,
+      });
+      await expectStoredProgressToMatchReality();
+    });
+
+    it('colle à la réalité après un import de produit, puis son retrait', async () => {
+      await products.importSet(USER, { setName: 'Beyond the Brave', copies: 1, language: 'EN' });
+      await expectStoredProgressToMatchReality();
+
+      const owned = await prisma.ownedProduct.findFirstOrThrow({
+        where: { userId: USER, set: { code: 'BETB' } },
+      });
+      await products.remove(USER, owned.id, true);
+      await expectStoredProgressToMatchReality();
+    });
+
+    it('colle à la réalité après « je l_ai eue » depuis la wishlist', async () => {
+      const print = await prisma.cardPrint.findFirstOrThrow({ where: { rarity: 'Secret Rare' } });
+      const item = await prisma.wishlistItem.create({
+        data: { userId: USER, cardId: print.cardId, printId: print.id, quantity: 2 },
+      });
+      await wishlist.markAcquired(USER, item.id);
+      await expectStoredProgressToMatchReality();
+    });
+
+    it('se reconstruit à l_identique', async () => {
+      const before = await prisma.setProgress.findMany({
+        where: { userId: USER },
+        orderBy: { setId: 'asc' },
+      });
+      await progress.rebuild(USER);
+      const after = await prisma.setProgress.findMany({
+        where: { userId: USER },
+        orderBy: { setId: 'asc' },
+      });
+      expect(after.map(pick)).toEqual(before.map(pick));
+      expect(after.map((r) => r.setId)).toEqual(before.map((r) => r.setId));
+    });
+
+    it('nettoie une ligne devenue fausse', async () => {
+      const row = await prisma.setProgress.findFirstOrThrow({ where: { userId: USER } });
+      await prisma.setProgress.update({
+        where: { userId_setId: { userId: USER, setId: row.setId } },
+        data: { ownedPrints: 999, ownedCards: 999 },
+      });
+      await progress.rebuild(USER);
+      await expectStoredProgressToMatchReality();
+    });
+
+    it('oublie une extension où l_utilisateur n_a plus rien', async () => {
+      await prisma.setProgress.create({
+        data: {
+          userId: USER,
+          setId: (await prisma.cardSet.findFirstOrThrow({ where: { code: 'GLVI' } })).id,
+          prints: 1,
+          cards: 1,
+          ownedCards: 1,
+        },
+      });
+      await progress.rebuild(USER);
+      await expectStoredProgressToMatchReality();
     });
   });
 });

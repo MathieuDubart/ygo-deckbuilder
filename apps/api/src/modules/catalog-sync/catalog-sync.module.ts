@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { CollectionModule } from '../collection/collection.module';
 import { SynergyModule } from '../synergy/synergy.module';
 import { CatalogSyncController } from './catalog-sync.controller';
 import { CatalogSyncService } from './catalog-sync.service';
@@ -8,7 +9,7 @@ import { YgoprodeckClient } from './ygoprodeck.client';
 import { YugipediaClient } from './yugipedia.client';
 
 @Module({
-  imports: [SynergyModule],
+  imports: [SynergyModule, CollectionModule],
   controllers: [CatalogSyncController],
   providers: [
     CatalogSyncService,

@@ -1,6 +1,7 @@
 {
   "title": "Set",
   "searchPlaceholder": "Find a set: name, code (BETB)…",
+  "count": "{count, plural, one {# set} other {# sets}}",
   "noDate": "Date unknown",
   "today": "Out today",
   "inDays": "{count, plural, one {in # day} other {in # days}}",

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type { AddWishlistItemInput, UpdateWishlistItemInput } from '@ygo/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { SetProgressService } from '../collection/set-progress.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import type { Prisma } from '../../generated/prisma/client';
 import { t } from '../../common/i18n/locale-context';
@@ -15,7 +16,10 @@ type Row = Prisma.WishlistItemGetPayload<{ include: typeof include }>;
 
 @Injectable()
 export class WishlistService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly progress: SetProgressService,
+  ) {}
 
   async list(userId: string) {
     const rows = await this.prisma.wishlistItem.findMany({
@@ -64,6 +68,7 @@ export class WishlistService {
       }),
       this.prisma.wishlistItem.delete({ where: { id } }),
     ]);
+    await this.progress.afterCards(userId, [item.cardId]);
   }
 
   private async findOwned(userId: string, id: string) {
