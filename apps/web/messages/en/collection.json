@@ -12,7 +12,8 @@
     "tabs": {
       "label": "Collection view",
       "cards": "Cards",
-      "products": "Products"
+      "products": "Products",
+      "releases": "Sets"
     },
     "filterPlaceholder": "Filter my collection…",
     "empty": {
@@ -41,11 +42,12 @@
     "kindsLabel": "Product type",
     "kinds": {
       "ALL": "All",
+      "BOOSTER": "Boosters",
       "STRUCTURE": "Structure Decks",
       "TIN": "Tins",
       "STARTER": "Starter Decks",
       "BOX": "Box sets",
-      "OTHER": "Boosters & more"
+      "OTHER": "Other products"
     },
     "noResults": "No products found. Try another type, a keyword or the code printed on your cards.",
     "cardCount": "{count, plural, one {# card} other {# cards}}",
@@ -57,6 +59,30 @@
       "add": "Add this product",
       "toast": "{count, plural, one {# card} other {# cards}} added from “{set}”",
       "toastVerified": "{count, plural, one {# card} other {# cards}} added from “{set}” (official quantities)"
+    }
+  },
+  "filters": {
+    "category": "Category",
+    "allCategories": "Any category",
+    "archetype": "Archetype",
+    "allArchetypes": "Any archetype",
+    "rarity": "Rarity",
+    "allRarities": "Any rarity",
+    "language": "Language",
+    "allLanguages": "Any language",
+    "condition": "Condition",
+    "allConditions": "Any condition",
+    "set": "Set",
+    "allSets": "Any set",
+    "sort": "Sort",
+    "sortOption": "Sort: {label}",
+    "firstEdition": "1st edition",
+    "sorts": {
+      "name": "Name",
+      "quantity": "Copies",
+      "value": "Value",
+      "rarity": "Rarity",
+      "newest": "Recently added"
     }
   }
 }

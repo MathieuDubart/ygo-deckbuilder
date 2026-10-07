@@ -17,5 +17,7 @@ export const NAMESPACES = [
   'guide',
   'duel',
   'rules',
+  'releases',
+  'tags',
 ] as const;
 export type Namespace = (typeof NAMESPACES)[number];

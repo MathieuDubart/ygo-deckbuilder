@@ -10,7 +10,9 @@ import type guide from '../../messages/en/guide.json';
 import type layout from '../../messages/en/layout.json';
 import type rules from '../../messages/en/rules.json';
 import type products from '../../messages/en/products.json';
+import type releases from '../../messages/en/releases.json';
 import type suggestions from '../../messages/en/suggestions.json';
+import type tags from '../../messages/en/tags.json';
 import type wishlist from '../../messages/en/wishlist.json';
 
 /** Forme des messages (référence : l'anglais) → clés vérifiées par TypeScript. */
@@ -29,4 +31,6 @@ export interface Messages {
   guide: typeof guide;
   duel: typeof duel;
   rules: typeof rules;
+  releases: typeof releases;
+  tags: typeof tags;
 }

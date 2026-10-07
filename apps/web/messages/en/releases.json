@@ -1,0 +1,68 @@
+{
+  "title": "Set",
+  "searchPlaceholder": "Find a set: name, code (BETB)…",
+  "noDate": "Date unknown",
+  "today": "Out today",
+  "inDays": "{count, plural, one {in # day} other {in # days}}",
+  "sealed": "Sealed",
+  "unrevealed": "Card list not revealed yet",
+  "unrevealedHint": "This set is announced; its cards will show up here as soon as they are known.",
+  "elsewhere": "Owned",
+  "elsewhereHint": "You own this card from another set",
+  "noCardsShown": "Nothing matches these filters",
+  "anyEdition": "Any edition",
+  "anyEditionHint": "Count a card as pulled even when you own it from another set",
+  "spotlight": {
+    "upcoming": "Coming up",
+    "upcomingEmpty": "No announced release yet.",
+    "recent": "Just released",
+    "recentEmpty": "Nothing released in the last two months."
+  },
+  "status": {
+    "UPCOMING": "Upcoming",
+    "RECENT": "New",
+    "RELEASED": "Released"
+  },
+  "progress": {
+    "NONE": "Not started",
+    "STARTED": "In progress",
+    "COMPLETE": "Complete",
+    "labelPrints": "Prints pulled",
+    "labelCards": "Cards owned"
+  },
+  "shown": {
+    "all": "All",
+    "owned": "Pulled",
+    "missing": "To pull"
+  },
+  "stats": {
+    "copies": "Copies",
+    "ownedValue": "Value owned",
+    "missingValue": "Left to buy"
+  },
+  "filters": {
+    "status": "Status",
+    "allStatuses": "Any status",
+    "kind": "Type",
+    "allKinds": "Any type",
+    "year": "Year",
+    "allYears": "Any year",
+    "progress": "Progress",
+    "allProgress": "Any progress",
+    "rarity": "Rarity",
+    "allRarities": "Any rarity",
+    "sort": "Sort",
+    "ownedProduct": "Sealed owned"
+  },
+  "sort": {
+    "option": "Sort: {label}",
+    "date": "Release date",
+    "progress": "Progress",
+    "name": "Name",
+    "cards": "Card count"
+  },
+  "empty": {
+    "title": "No set found",
+    "description": "Change the filters, or try another name or code."
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "title": "Edição",
+  "searchPlaceholder": "Encontrar uma edição: nome, código (BETB)…",
+  "noDate": "Data desconhecida",
+  "today": "Sai hoje",
+  "inDays": "{count, plural, one {em # dia} other {em # dias}}",
+  "sealed": "Lacrado",
+  "unrevealed": "Lista de cartas ainda não revelada",
+  "unrevealedHint": "Esta edição foi anunciada; as cartas aparecerão aqui assim que forem conhecidas.",
+  "elsewhere": "Já tem",
+  "elsewhereHint": "Você tem esta carta, mas de outra edição",
+  "noCardsShown": "Nada corresponde a estes filtros",
+  "anyEdition": "Todas as edições",
+  "anyEditionHint": "Contar uma carta como obtida mesmo que você a tenha de outra edição",
+  "spotlight": {
+    "upcoming": "Em breve",
+    "upcomingEmpty": "Nenhum lançamento anunciado por enquanto.",
+    "recent": "Acabou de sair",
+    "recentEmpty": "Nada saiu nos últimos dois meses."
+  },
+  "status": {
+    "UPCOMING": "Em breve",
+    "RECENT": "Novo",
+    "RELEASED": "Lançado"
+  },
+  "progress": {
+    "NONE": "Não iniciada",
+    "STARTED": "Em andamento",
+    "COMPLETE": "Completa",
+    "labelPrints": "Impressões obtidas",
+    "labelCards": "Cartas possuídas"
+  },
+  "shown": {
+    "all": "Tudo",
+    "owned": "Obtidas",
+    "missing": "A obter"
+  },
+  "stats": {
+    "copies": "Cópias",
+    "ownedValue": "Valor possuído",
+    "missingValue": "Falta comprar"
+  },
+  "filters": {
+    "status": "Estado",
+    "allStatuses": "Todos os estados",
+    "kind": "Tipo",
+    "allKinds": "Todos os tipos",
+    "year": "Ano",
+    "allYears": "Todos os anos",
+    "progress": "Progresso",
+    "allProgress": "Todos os progressos",
+    "rarity": "Raridade",
+    "allRarities": "Todas as raridades",
+    "sort": "Ordenar",
+    "ownedProduct": "Lacrado possuído"
+  },
+  "sort": {
+    "option": "Ordenar: {label}",
+    "date": "Data de lançamento",
+    "progress": "Progresso",
+    "name": "Nome",
+    "cards": "Número de cartas"
+  },
+  "empty": {
+    "title": "Nenhuma edição encontrada",
+    "description": "Mude os filtros, ou tente outro nome ou código."
+  }
+}
