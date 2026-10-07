@@ -146,6 +146,7 @@ model CardPrint {
   set             CardSet          @relation(fields: [setId], references: [id], onDelete: Cascade)
   collectionItems CollectionItem[]
   wishlistItems   WishlistItem[]
+  profileCards    ProfileCard[]
 
   @@unique([cardId, printCode, rarity])
   @@index([setId])
@@ -175,8 +176,11 @@ model User {
   username     String   @unique
   passwordHash String
   role         UserRole @default(USER)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  /// Chemins relatifs dans UPLOADS_DIR, jamais une URL : l'hôte peut changer
+  avatarPath String?
+  bannerPath String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   refreshTokens   RefreshToken[]
   collectionItems CollectionItem[]
@@ -185,6 +189,49 @@ model User {
   ownedProducts   OwnedProduct[]
   tags            Tag[]
   setProgress     SetProgress[]
+  friendshipsSent     Friendship[] @relation("FriendshipsSent")
+  friendshipsReceived Friendship[] @relation("FriendshipsReceived")
+  profileCards        ProfileCard[]
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+/// Une seule ligne par relation, orientée par celui qui a demandé. Les deux sens sont donc
+/// à interroger : un ami peut être le demandeur comme le destinataire. Un index unique sur
+/// la paire non ordonnée (posé par la migration) empêche les demandes croisées en double.
+model Friendship {
+  id          String           @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  requester User @relation("FriendshipsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipsReceived", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+/// Cartes mises en avant sur le profil. Une impression, pas une carte : on montre l'édition
+/// qu'on possède. La possession est vérifiée à l'écriture ET à la lecture — une carte vendue
+/// entre-temps ne doit pas rester exposée.
+model ProfileCard {
+  userId   String
+  printId  String
+  position Int
+  addedAt  DateTime @default(now())
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  print CardPrint @relation(fields: [printId], references: [id], onDelete: Cascade)
+
+  @@id([userId, printId])
+  @@index([userId, position])
 }
 
 /// Avancement d'un utilisateur sur une extension : ce qu'il en a sur ce qu'elle contient.

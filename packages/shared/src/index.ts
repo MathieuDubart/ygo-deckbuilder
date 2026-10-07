@@ -17,3 +17,4 @@ export * from './schemas/duel';
 export * from './schemas/tags';
 export * from './schemas/facets';
 export * from './schemas/releases';
+export * from './schemas/social';
