@@ -122,14 +122,17 @@ docker compose up -d --build
 
 `.github/workflows/docker.yml` publishes two public images to GHCR on every push to `main` and on
 every `v*` tag: `ghcr.io/mathieudubart/ygo-deckbuilder-api` and `…-web` (tags `latest`, the version,
-and the short commit sha). After the first run, switch both packages to **Public** in the
+and the short commit sha), for **amd64 and arm64** — each architecture built on a runner of its own
+architecture rather than under QEMU. After the first run, switch both packages to **Public** in the
 repository's *Packages* tab.
 
 In Coolify: **+ New → Docker Compose**, paste [`docker-compose.coolify.yml`](docker-compose.coolify.yml),
 deploy. Coolify generates the domain (service `web`, port 3000), the Postgres password and the JWT
 secret; the only variable worth setting is `ADMIN_EMAIL` (that account becomes admin when it signs up).
-Nothing is exposed but the web service: the API and the database stay on the internal network. The
-catalog syncs itself on first start, and the duel engine downloads its data into the `ygo-duel` volume.
+Only the web service is reachable: the API and the database stay on the internal network. It is also
+published on host port 3089 (`WEB_PORT` to change it) for hosts that front it with their own reverse
+proxy. The catalog syncs itself on first start, and the duel engine downloads its data into the
+`ygo-duel` volume.
 
 To build on the server instead of pulling the images, point Coolify at this repository with
 `docker-compose.yml`.
