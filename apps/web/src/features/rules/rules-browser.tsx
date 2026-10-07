@@ -29,6 +29,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { RuleCards } from './rule-cards';
 import { RuleDiagram, type DiagramLabels } from './rule-diagram';
+import { RuleVideo, type RuleVideo as RuleVideoData } from './rule-video';
 
 export interface RuleSection {
   id: string;
@@ -38,6 +39,7 @@ export interface RuleSection {
   summary: string;
   diagram?: string;
   cards?: string[];
+  video?: RuleVideoData;
   paragraphs: string[];
   points: string[];
   example?: string | null;
@@ -61,6 +63,10 @@ export interface RulesLabels {
   linksHint: string;
   search: string;
   noResults: string;
+  video: string;
+  videoLoad: string;
+  videoConsent: string;
+  videoOpen: string;
   clear: string;
   toc: string;
   source: string;
@@ -288,6 +294,18 @@ export function RulesBrowser({
 
                 {s.cards && s.cards.length > 0 && (
                   <RuleCards names={s.cards} label={labels.exampleCards} onOpen={setInspect} />
+                )}
+
+                {s.video && (
+                  <RuleVideo
+                    video={s.video}
+                    labels={{
+                      video: labels.video,
+                      load: labels.videoLoad,
+                      consent: labels.videoConsent,
+                      open: labels.videoOpen,
+                    }}
+                  />
                 )}
               </section>
             );
