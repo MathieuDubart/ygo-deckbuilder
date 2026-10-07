@@ -64,8 +64,6 @@ export interface RulesLabels {
   search: string;
   noResults: string;
   video: string;
-  videoLoad: string;
-  videoConsent: string;
   videoOpen: string;
   clear: string;
   toc: string;
@@ -299,12 +297,7 @@ export function RulesBrowser({
                 {s.video && (
                   <RuleVideo
                     video={s.video}
-                    labels={{
-                      video: labels.video,
-                      load: labels.videoLoad,
-                      consent: labels.videoConsent,
-                      open: labels.videoOpen,
-                    }}
+                    labels={{ video: labels.video, open: labels.videoOpen }}
                   />
                 )}
               </section>

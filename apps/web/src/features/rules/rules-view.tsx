@@ -56,8 +56,6 @@ export async function RulesView() {
           search: t('labels.search'),
           noResults: t('labels.noResults'),
           video: t('labels.video'),
-          videoLoad: t('labels.videoLoad'),
-          videoConsent: t('labels.videoConsent'),
           videoOpen: t('labels.videoOpen'),
           clear: t('labels.clear'),
           toc: t('tocLabel'),
