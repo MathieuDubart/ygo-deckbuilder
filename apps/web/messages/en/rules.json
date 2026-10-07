@@ -14,7 +14,11 @@
     "clear": "Clear",
     "links": "Official resources",
     "linksHint": "The full rules and video tutorials published by Konami.",
-    "exampleCards": "Cards mentioned"
+    "exampleCards": "Cards mentioned",
+    "video": "Video tutorial",
+    "videoLoad": "Play the video",
+    "videoConsent": "The video is only loaded from YouTube once you click.",
+    "videoOpen": "Open on YouTube"
   },
   "groups": {
     "basics": "The basics",

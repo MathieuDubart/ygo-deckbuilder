@@ -14,7 +14,11 @@
     "clear": "Löschen",
     "links": "Offizielle Ressourcen",
     "linksHint": "Die vollständigen Regeln und die Video-Tutorials von Konami.",
-    "exampleCards": "Genannte Karten"
+    "exampleCards": "Genannte Karten",
+    "video": "Video-Tutorial",
+    "videoLoad": "Video abspielen",
+    "videoConsent": "Das Video wird erst beim Klicken von YouTube geladen.",
+    "videoOpen": "Auf YouTube öffnen"
   },
   "groups": {
     "basics": "Grundlagen",
