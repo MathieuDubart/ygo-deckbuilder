@@ -75,6 +75,11 @@ services:
     environment:
       # Coolify génère le domaine et route le port 3000 dessus
       - SERVICE_FQDN_WEB_3000
+    # Port publié sur la machine, en plus du domaine servi par le proxy Coolify.
+    # Pour ne l'ouvrir qu'à un reverse proxy installé sur la même machine, préférer
+    # '127.0.0.1:${WEB_PORT:-3089}:3000' : le port n'est alors pas joignable de l'extérieur.
+    ports:
+      - '${WEB_PORT:-3089}:3000'
     volumes:
       # Cache des images optimisées (visuels de cartes)
       - ygo-images:/app/apps/web/.next/cache
