@@ -160,14 +160,14 @@ function Banner({ profile }: { profile: ProfileDto }) {
 }
 
 function Showcase({ cards }: { cards: ProfileCardDto[] }) {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<ProfileCardDto | null>(null);
   return (
     <>
       <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-6">
         {cards.map((card) => (
           <li key={card.printId}>
             <button
-              onClick={() => setOpen(card.card.id)}
+              onClick={() => setOpen(card)}
               className="group block w-full text-left"
               title={`${card.card.name} · ${card.printCode}`}
             >
@@ -182,7 +182,12 @@ function Showcase({ cards }: { cards: ProfileCardDto[] }) {
           </li>
         ))}
       </ul>
-      <CardDetailDialog cardId={open} onClose={() => setOpen(null)} />
+      {/* L'impression exacte, pas seulement la carte : c'est celle-là qu'il possède */}
+      <CardDetailDialog
+        cardId={open?.card.id ?? null}
+        printCodeHint={open?.printCode}
+        onClose={() => setOpen(null)}
+      />
     </>
   );
 }
