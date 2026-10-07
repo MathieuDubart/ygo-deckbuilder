@@ -33,8 +33,9 @@ services:
       NODE_ENV: production
       DATABASE_URL: postgresql://${SERVICE_USER_POSTGRES}:${SERVICE_PASSWORD_POSTGRES}@db:5432/ygo?schema=public
       JWT_ACCESS_SECRET: ${SERVICE_PASSWORD_JWT}
-      # Domaine généré par Coolify pour le service web
-      WEB_ORIGIN: ${SERVICE_FQDN_WEB}
+      # Domaine généré par Coolify pour le service web. SERVICE_URL_ porte le schéma, pas
+      # SERVICE_FQDN_ : une origine CORS sans https:// ne vaut rien.
+      WEB_ORIGIN: ${SERVICE_URL_WEB}
       # Les cookies de session sont marqués `secure`, donc refusés par le navigateur sur une
       # page en http:// . À ne passer à 'false' que pour un accès direct en clair sur un
       # réseau de confiance : le jeton de session circule alors en clair.
