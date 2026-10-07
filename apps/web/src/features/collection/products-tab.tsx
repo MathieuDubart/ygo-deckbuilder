@@ -1,21 +1,79 @@
 'use client';
-import type { OwnedProductDto } from '@ygo/shared';
+import { PRODUCT_KINDS, type OwnedProductDto, type TagDto } from '@ygo/shared';
 import { Layers, PackageOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { ProductCover } from '@/components/products/product-cover';
+import { TagFilter } from '@/components/tags/tag-filter';
+import { TagList } from '@/components/tags/tag-picker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState, Skeleton } from '@/components/ui/feedback';
-import { useOwnedProducts } from '@/lib/api/collection';
+import { EmptyState, Meter, Skeleton } from '@/components/ui/feedback';
+import { Select } from '@/components/ui/input';
+import { useOwnedProducts, type OwnedProductsParams } from '@/lib/api/collection';
+import { useTags } from '@/lib/api/tags';
+import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
+import { FacetBar, FilterToggle } from './facet-bar';
 import { ProductDialog } from './product-dialog';
+
+const SORTS = ['added', 'name', 'date', 'completeness'] as const;
 
 /** Les produits ajoutés à la collection, pour retrouver et reconstituer leur contenu. */
 export function ProductsTab({ onImport }: { onImport: () => void }) {
   const t = useTranslations('products.tab');
-  const { data, isLoading } = useOwnedProducts();
+  const tf = useTranslations('products.filters');
+  const tk = useTranslations('products.kinds');
+  const [params, setParams] = useState<OwnedProductsParams>({});
+  const [q, setQ] = useState('');
+  const { data, isLoading } = useOwnedProducts({ ...params, q: useDebounced(q) || undefined });
+  const { data: tags } = useTags();
   const [openId, setOpenId] = useState<string | null>(null);
+  const set = (patch: OwnedProductsParams) => setParams((p) => ({ ...p, ...patch }));
+  const filtering = !!(q || params.kind || params.complete || params.tagIds?.length);
+
+  const filters = (
+    <>
+      <FacetBar
+        className="mb-3"
+        search={{ value: q, placeholder: tf('searchPlaceholder'), onChange: setQ }}
+        facets={[
+          {
+            key: 'kind',
+            label: tf('kind'),
+            allLabel: tf('allKinds'),
+            value: params.kind,
+            options: PRODUCT_KINDS.map((value) => ({ value, label: tk(value) })),
+            onChange: (value) => set({ kind: value as OwnedProductsParams['kind'] }),
+          },
+        ]}
+      >
+        <Select
+          aria-label={tf('sort')}
+          value={params.sort ?? 'added'}
+          onChange={(e) => set({ sort: e.target.value as OwnedProductsParams['sort'] })}
+          className="w-auto"
+        >
+          {SORTS.map((value) => (
+            <option key={value} value={value}>
+              {tf('sortOption', { label: tf(`sorts.${value}`) })}
+            </option>
+          ))}
+        </Select>
+        <FilterToggle
+          checked={!!params.complete}
+          onChange={(checked) => set({ complete: checked || undefined })}
+        >
+          {tf('complete')}
+        </FilterToggle>
+      </FacetBar>
+      <TagFilter
+        value={params.tagIds ?? []}
+        onChange={(tagIds) => set({ tagIds: tagIds.length ? tagIds : undefined })}
+        counts={(id) => tags?.find((tag) => tag.id === id)?.setCount}
+      />
+    </>
+  );
 
   if (isLoading) {
     return (
@@ -29,25 +87,31 @@ export function ProductsTab({ onImport }: { onImport: () => void }) {
 
   if (!data?.length) {
     return (
-      <EmptyState
-        icon={PackageOpen}
-        title={t('empty.title')}
-        description={t('empty.description')}
-        action={
-          <Button variant="secondary" onClick={onImport}>
-            <PackageOpen className="size-4" /> {t('addProduct')}
-          </Button>
-        }
-      />
+      <>
+        {filtering && filters}
+        <EmptyState
+          icon={PackageOpen}
+          title={filtering ? t('empty.noMatch') : t('empty.title')}
+          description={filtering ? undefined : t('empty.description')}
+          action={
+            !filtering && (
+              <Button variant="secondary" onClick={onImport}>
+                <PackageOpen className="size-4" /> {t('addProduct')}
+              </Button>
+            )
+          }
+        />
+      </>
     );
   }
 
   return (
     <>
-      <ul className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-4">
+      {filters}
+      <ul className="mt-4 grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-4">
         {data.map((p) => (
           <li key={p.id}>
-            <ProductTile product={p} onOpen={() => setOpenId(p.id)} />
+            <ProductTile product={p} tags={tags} onOpen={() => setOpenId(p.id)} />
           </li>
         ))}
       </ul>
@@ -56,7 +120,15 @@ export function ProductsTab({ onImport }: { onImport: () => void }) {
   );
 }
 
-function ProductTile({ product: p, onOpen }: { product: OwnedProductDto; onOpen: () => void }) {
+function ProductTile({
+  product: p,
+  tags,
+  onOpen,
+}: {
+  product: OwnedProductDto;
+  tags?: TagDto[];
+  onOpen: () => void;
+}) {
   const t = useTranslations('products');
   const complete = p.completeness >= 1;
   return (
@@ -86,15 +158,12 @@ function ProductTile({ product: p, onOpen }: { product: OwnedProductDto; onOpen:
         <p className="font-mono text-[11px] text-fg-subtle">
           {t(`kinds.${p.set.kind}`)} · {t('tab.cardCount', { count: p.totalCards })}
         </p>
-        <div
-          className="h-1.5 overflow-hidden rounded-full bg-bg-sunken"
+        <Meter
+          value={Math.round(p.completeness * 100)}
+          total={100}
           title={complete ? t('tab.complete') : t('tab.missing', { count: p.missingCopies })}
-        >
-          <div
-            className={cn('h-full rounded-full', complete ? 'bg-success' : 'bg-warning')}
-            style={{ width: `${Math.round(p.completeness * 100)}%` }}
-          />
-        </div>
+        />
+        <TagList tagIds={p.tagIds} tags={tags} />
       </div>
     </button>
   );

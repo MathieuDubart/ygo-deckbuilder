@@ -12,7 +12,8 @@
     "tabs": {
       "label": "Vue de la collection",
       "cards": "Cartes",
-      "products": "Produits"
+      "products": "Produits",
+      "releases": "Extensions"
     },
     "filterPlaceholder": "Filtrer ma collection…",
     "empty": {
@@ -41,11 +42,12 @@
     "kindsLabel": "Type de produit",
     "kinds": {
       "ALL": "Tout",
+      "BOOSTER": "Boosters",
       "STRUCTURE": "Decks de structure",
       "TIN": "Boîtes (tins)",
       "STARTER": "Decks de démarrage",
       "BOX": "Coffrets",
-      "OTHER": "Boosters & autres"
+      "OTHER": "Autres produits"
     },
     "noResults": "Aucun produit trouvé. Essaie un autre type, un mot-clé ou le code imprimé sur tes cartes.",
     "cardCount": "{count, plural, one {# carte} other {# cartes}}",
@@ -57,6 +59,30 @@
       "add": "Ajouter ce produit",
       "toast": "{count, plural, one {# carte ajoutée} other {# cartes ajoutées}} depuis « {set} »",
       "toastVerified": "{count, plural, one {# carte ajoutée} other {# cartes ajoutées}} depuis « {set} » (quantités officielles)"
+    }
+  },
+  "filters": {
+    "category": "Catégorie",
+    "allCategories": "Toutes les catégories",
+    "archetype": "Archétype",
+    "allArchetypes": "Tous les archétypes",
+    "rarity": "Rareté",
+    "allRarities": "Toutes les raretés",
+    "language": "Langue",
+    "allLanguages": "Toutes les langues",
+    "condition": "État",
+    "allConditions": "Tous les états",
+    "set": "Extension",
+    "allSets": "Toutes les extensions",
+    "sort": "Tri",
+    "sortOption": "Tri : {label}",
+    "firstEdition": "1re édition",
+    "sorts": {
+      "name": "Nom",
+      "quantity": "Exemplaires",
+      "value": "Valeur",
+      "rarity": "Rareté",
+      "newest": "Ajout récent"
     }
   }
 }

@@ -1,0 +1,68 @@
+{
+  "title": "Espansione",
+  "searchPlaceholder": "Trova un’espansione: nome, codice (BETB)…",
+  "noDate": "Data sconosciuta",
+  "today": "Esce oggi",
+  "inDays": "{count, plural, one {tra # giorno} other {tra # giorni}}",
+  "sealed": "Sigillato",
+  "unrevealed": "Lista delle carte non ancora svelata",
+  "unrevealedHint": "Questa espansione è annunciata; le sue carte compariranno qui appena saranno note.",
+  "elsewhere": "Già presente",
+  "elsewhereHint": "Hai questa carta, ma in un’altra espansione",
+  "noCardsShown": "Niente corrisponde a questi filtri",
+  "anyEdition": "Tutte le edizioni",
+  "anyEditionHint": "Conta una carta come ottenuta anche se la possiedi in un’altra espansione",
+  "spotlight": {
+    "upcoming": "In arrivo",
+    "upcomingEmpty": "Nessuna uscita annunciata per ora.",
+    "recent": "Appena uscito",
+    "recentEmpty": "Niente è uscito negli ultimi due mesi."
+  },
+  "status": {
+    "UPCOMING": "In arrivo",
+    "RECENT": "Nuovo",
+    "RELEASED": "Uscito"
+  },
+  "progress": {
+    "NONE": "Non iniziata",
+    "STARTED": "In corso",
+    "COMPLETE": "Completa",
+    "labelPrints": "Stampe ottenute",
+    "labelCards": "Carte possedute"
+  },
+  "shown": {
+    "all": "Tutto",
+    "owned": "Ottenute",
+    "missing": "Da ottenere"
+  },
+  "stats": {
+    "copies": "Copie",
+    "ownedValue": "Valore posseduto",
+    "missingValue": "Ancora da comprare"
+  },
+  "filters": {
+    "status": "Stato",
+    "allStatuses": "Tutti gli stati",
+    "kind": "Tipo",
+    "allKinds": "Tutti i tipi",
+    "year": "Anno",
+    "allYears": "Tutti gli anni",
+    "progress": "Avanzamento",
+    "allProgress": "Tutti gli avanzamenti",
+    "rarity": "Rarità",
+    "allRarities": "Tutte le rarità",
+    "sort": "Ordina",
+    "ownedProduct": "Sigillato posseduto"
+  },
+  "sort": {
+    "option": "Ordina: {label}",
+    "date": "Data di uscita",
+    "progress": "Avanzamento",
+    "name": "Nome",
+    "cards": "Numero di carte"
+  },
+  "empty": {
+    "title": "Nessuna espansione trovata",
+    "description": "Cambia i filtri, o prova un altro nome o codice."
+  }
+}

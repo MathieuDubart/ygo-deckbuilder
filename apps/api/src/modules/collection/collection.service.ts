@@ -3,6 +3,7 @@ import type {
   AddCollectionItemInput,
   CollectionFacetsDto,
   CollectionQueryInput,
+  FacetValueDto,
   Paginated,
   UpdateCollectionItemInput,
 } from '@ygo/shared';
@@ -73,7 +74,9 @@ export class CollectionService {
    * restent stables pendant qu'on affine, au lieu de disparaître sous le doigt.
    */
   async facets(userId: string): Promise<CollectionFacetsDto> {
-    const rows = await this.prisma.$queryRaw<{ facet: string; value: string; count: number }[]>`
+    const rows = await this.prisma.$queryRaw<
+      { facet: string; value: string; count: number; label: string | null }[]
+    >`
       WITH mine AS (
         SELECT ci.*, c.category, c.archetype, c.attribute, c.race, p.rarity
         FROM "CollectionItem" ci
@@ -81,28 +84,35 @@ export class CollectionService {
         LEFT JOIN "CardPrint" p ON p.id = ci."printId"
         WHERE ci."userId" = ${userId}
       )
-      SELECT 'categories' AS facet, category::text AS value, COUNT(*)::int AS count
+      SELECT 'categories' AS facet, category::text AS value, COUNT(*)::int AS count,
+             NULL::text AS label
         FROM mine GROUP BY 2
       UNION ALL
-      SELECT 'archetypes', archetype, COUNT(*)::int FROM mine WHERE archetype IS NOT NULL GROUP BY 2
+      SELECT 'archetypes', archetype, COUNT(*)::int, NULL
+        FROM mine WHERE archetype IS NOT NULL GROUP BY 2
       UNION ALL
-      SELECT 'attributes', attribute, COUNT(*)::int FROM mine WHERE attribute IS NOT NULL GROUP BY 2
+      SELECT 'attributes', attribute, COUNT(*)::int, NULL
+        FROM mine WHERE attribute IS NOT NULL GROUP BY 2
       UNION ALL
-      SELECT 'races', race, COUNT(*)::int FROM mine WHERE race IS NOT NULL GROUP BY 2
+      SELECT 'races', race, COUNT(*)::int, NULL FROM mine WHERE race IS NOT NULL GROUP BY 2
       UNION ALL
-      SELECT 'rarities', rarity, COUNT(*)::int FROM mine WHERE rarity IS NOT NULL GROUP BY 2
+      SELECT 'rarities', rarity, COUNT(*)::int, NULL FROM mine WHERE rarity IS NOT NULL GROUP BY 2
       UNION ALL
-      SELECT 'languages', language::text, COUNT(*)::int FROM mine GROUP BY 2
+      SELECT 'languages', language::text, COUNT(*)::int, NULL FROM mine GROUP BY 2
       UNION ALL
-      SELECT 'conditions', condition::text, COUNT(*)::int FROM mine GROUP BY 2
+      SELECT 'conditions', condition::text, COUNT(*)::int, NULL FROM mine GROUP BY 2
       UNION ALL
-      SELECT 'sets', p."setId", COUNT(*)::int
-        FROM mine m JOIN "CardPrint" p ON p.id = m."printId" GROUP BY 2`;
+      -- L'identifiant d'extension n'est pas lisible : on remonte son nom comme libellé
+      SELECT 'sets', s.id, COUNT(*)::int, s.name
+        FROM mine m
+        JOIN "CardPrint" p ON p.id = m."printId"
+        JOIN "CardSet" s ON s.id = p."setId"
+        GROUP BY 2, 4`;
 
-    const group = (facet: string) =>
+    const group = (facet: string): FacetValueDto[] =>
       rows
         .filter((r) => r.facet === facet)
-        .map(({ value, count }) => ({ value, count }))
+        .map(({ value, count, label }) => ({ value, count, ...(label && { label }) }))
         .sort((a, b) => b.count - a.count || a.value.localeCompare(b.value));
 
     return {

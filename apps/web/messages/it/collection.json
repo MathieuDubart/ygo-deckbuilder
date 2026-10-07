@@ -12,7 +12,8 @@
     "tabs": {
       "label": "Vista collezione",
       "cards": "Carte",
-      "products": "Prodotti"
+      "products": "Prodotti",
+      "releases": "Espansioni"
     },
     "filterPlaceholder": "Filtra la collezione…",
     "empty": {
@@ -41,11 +42,12 @@
     "kindsLabel": "Tipo di prodotto",
     "kinds": {
       "ALL": "Tutti",
+      "BOOSTER": "Booster",
       "STRUCTURE": "Structure Deck",
       "TIN": "Tin",
       "STARTER": "Starter Deck",
       "BOX": "Box set",
-      "OTHER": "Buste e altro"
+      "OTHER": "Altri prodotti"
     },
     "noResults": "Nessun prodotto trovato. Prova un altro tipo, una parola chiave o il codice stampato sulle tue carte.",
     "cardCount": "{count, plural, one {# carta} other {# carte}}",
@@ -57,6 +59,30 @@
       "add": "Aggiungi questo prodotto",
       "toast": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}»",
       "toastVerified": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}» (quantità ufficiali)"
+    }
+  },
+  "filters": {
+    "category": "Categoria",
+    "allCategories": "Tutte le categorie",
+    "archetype": "Archetipo",
+    "allArchetypes": "Tutti gli archetipi",
+    "rarity": "Rarità",
+    "allRarities": "Tutte le rarità",
+    "language": "Lingua",
+    "allLanguages": "Tutte le lingue",
+    "condition": "Condizione",
+    "allConditions": "Tutte le condizioni",
+    "set": "Espansione",
+    "allSets": "Tutte le espansioni",
+    "sort": "Ordina",
+    "sortOption": "Ordina: {label}",
+    "firstEdition": "1ª edizione",
+    "sorts": {
+      "name": "Nome",
+      "quantity": "Copie",
+      "value": "Valore",
+      "rarity": "Rarità",
+      "newest": "Aggiunte di recente"
     }
   }
 }

@@ -1,5 +1,6 @@
 {
   "kinds": {
+    "BOOSTER": "Booster",
     "STRUCTURE": "Deck de structure",
     "STARTER": "Deck de démarrage",
     "TIN": "Tin",
@@ -9,7 +10,8 @@
   "tab": {
     "empty": {
       "title": "Aucun produit pour l’instant",
-      "description": "Ajoute un Structure Deck, un tin ou un coffret : il apparaîtra ici avec tout son contenu, et un guide de jeu pour les decks."
+      "description": "Ajoute un Structure Deck, un tin ou un coffret : il apparaîtra ici avec tout son contenu, et un guide de jeu pour les decks.",
+      "noMatch": "Aucun résultat"
     },
     "addProduct": "Ajouter un produit",
     "deck": "Deck",
@@ -56,6 +58,20 @@
     "guideIntro": "Guide du deck tel qu’il sort de la boîte. Pour l’améliorer avec le reste de ta collection, crée un deck avec et ouvre ses suggestions.",
     "text": {
       "header": "{name} — {count, plural, one {# produit} other {# produits}}"
+    }
+  },
+  "filters": {
+    "searchPlaceholder": "Filtrer mes produits…",
+    "kind": "Type",
+    "allKinds": "Tous les types",
+    "sort": "Tri",
+    "sortOption": "Tri : {label}",
+    "complete": "Complets seulement",
+    "sorts": {
+      "added": "Ajout récent",
+      "name": "Nom",
+      "date": "Date de sortie",
+      "completeness": "Les plus entamés"
     }
   }
 }

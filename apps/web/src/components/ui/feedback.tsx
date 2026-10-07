@@ -59,6 +59,40 @@ export function Stat({ label, value }: { label: string; value: React.ReactNode }
   );
 }
 
+/**
+ * Jauge d'avancement. Le ton suit l'état plutôt que la valeur : complet en vert, entamé en
+ * couleur d'accent, rien en gris — on lit l'état d'un coup d'œil sans lire le chiffre.
+ */
+export function Meter({
+  value,
+  total,
+  title,
+  className,
+}: {
+  value: number;
+  total: number;
+  title?: string;
+  className?: string;
+}) {
+  const ratio = total > 0 ? Math.min(1, value / total) : 0;
+  const tone = ratio >= 1 ? 'bg-success' : ratio > 0 ? 'bg-accent' : 'bg-border-strong';
+  return (
+    <div
+      className={cn('h-1.5 overflow-hidden rounded-full bg-bg-sunken', className)}
+      title={title}
+      role="progressbar"
+      aria-valuenow={value}
+      aria-valuemin={0}
+      aria-valuemax={total}
+    >
+      <div
+        className={cn('h-full rounded-full transition-[width]', tone)}
+        style={{ width: `${ratio * 100}%` }}
+      />
+    </div>
+  );
+}
+
 export function Pagination({
   page,
   totalPages,

@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
 import { ProductCover } from '@/components/products/product-cover';
+import { TagPicker } from '@/components/tags/tag-picker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
@@ -14,6 +15,7 @@ import { Skeleton } from '@/components/ui/feedback';
 import { DeckGuide } from '@/features/guide/deck-guide';
 import { useOwnedProduct, useRemoveProduct } from '@/lib/api/collection';
 import { useCreateDeck } from '@/lib/api/decks';
+import { useTagSet } from '@/lib/api/tags';
 import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -124,6 +126,7 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
   const router = useRouter();
   const createDeck = useCreateDeck();
   const remove = useRemoveProduct();
+  const tagSet = useTagSet();
   const [copied, setCopied] = useState(false);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const [removeCards, setRemoveCards] = useState(false);
@@ -182,6 +185,10 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
             )}
           </div>
           <p className="text-fg-subtle">{td('header.addedOn', { date: date(p.addedAt) })}</p>
+          <TagPicker
+            attached={p.tagIds}
+            onToggle={(tagId, on) => tagSet.mutate({ tagId, setId: p.set.id, on })}
+          />
           <div className="space-y-1">
             <div className="h-2 overflow-hidden rounded-full bg-bg-sunken">
               <div

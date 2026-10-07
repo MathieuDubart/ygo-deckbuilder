@@ -1,0 +1,68 @@
+{
+  "title": "Edition",
+  "searchPlaceholder": "Edition finden: Name, Code (BETB)…",
+  "noDate": "Datum unbekannt",
+  "today": "Erscheint heute",
+  "inDays": "{count, plural, one {in # Tag} other {in # Tagen}}",
+  "sealed": "Versiegelt",
+  "unrevealed": "Kartenliste noch nicht bekannt",
+  "unrevealedHint": "Diese Edition ist angekündigt; ihre Karten erscheinen hier, sobald sie bekannt sind.",
+  "elsewhere": "Vorhanden",
+  "elsewhereHint": "Du besitzt diese Karte aus einer anderen Edition",
+  "noCardsShown": "Nichts passt zu diesen Filtern",
+  "anyEdition": "Alle Ausgaben",
+  "anyEditionHint": "Eine Karte auch dann als gezogen zählen, wenn du sie aus einer anderen Edition besitzt",
+  "spotlight": {
+    "upcoming": "Kommt bald",
+    "upcomingEmpty": "Noch keine angekündigte Veröffentlichung.",
+    "recent": "Gerade erschienen",
+    "recentEmpty": "In den letzten zwei Monaten ist nichts erschienen."
+  },
+  "status": {
+    "UPCOMING": "Kommt",
+    "RECENT": "Neu",
+    "RELEASED": "Erschienen"
+  },
+  "progress": {
+    "NONE": "Nicht begonnen",
+    "STARTED": "Angefangen",
+    "COMPLETE": "Vollständig",
+    "labelPrints": "Gezogene Drucke",
+    "labelCards": "Besessene Karten"
+  },
+  "shown": {
+    "all": "Alle",
+    "owned": "Gezogen",
+    "missing": "Fehlt"
+  },
+  "stats": {
+    "copies": "Exemplare",
+    "ownedValue": "Besitzwert",
+    "missingValue": "Noch zu kaufen"
+  },
+  "filters": {
+    "status": "Status",
+    "allStatuses": "Alle Status",
+    "kind": "Typ",
+    "allKinds": "Alle Typen",
+    "year": "Jahr",
+    "allYears": "Alle Jahre",
+    "progress": "Fortschritt",
+    "allProgress": "Jeder Fortschritt",
+    "rarity": "Seltenheit",
+    "allRarities": "Alle Seltenheiten",
+    "sort": "Sortierung",
+    "ownedProduct": "Versiegelt vorhanden"
+  },
+  "sort": {
+    "option": "Sortierung: {label}",
+    "date": "Erscheinungsdatum",
+    "progress": "Fortschritt",
+    "name": "Name",
+    "cards": "Kartenanzahl"
+  },
+  "empty": {
+    "title": "Keine Edition gefunden",
+    "description": "Ändere die Filter oder versuche einen anderen Namen oder Code."
+  }
+}

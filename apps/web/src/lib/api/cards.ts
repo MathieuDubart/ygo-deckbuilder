@@ -12,12 +12,16 @@ import type {
 import { api } from './client';
 import { qk } from './keys';
 
-export type CardSearchParams = Partial<CardSearchInput>;
+export type CardSearchParams = Partial<Omit<CardSearchInput, 'tagIds'>> & { tagIds?: string[] };
 
 export const useCardSearch = (params: CardSearchParams, enabled = true) =>
   useQuery({
     queryKey: qk.cards(params),
-    queryFn: () => api<Paginated<CardSummaryDto>>('/cards', { query: params }),
+    queryFn: () =>
+      api<Paginated<CardSummaryDto>>('/cards', {
+        // Les étiquettes voyagent en liste séparée par des virgules
+        query: { ...params, tagIds: params.tagIds?.length ? params.tagIds.join(',') : undefined },
+      }),
     placeholderData: keepPreviousData,
     enabled,
   });

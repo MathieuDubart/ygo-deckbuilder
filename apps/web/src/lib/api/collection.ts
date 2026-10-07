@@ -3,11 +3,13 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import type {
   AddCollectionItemInput,
   CardSummaryDto,
+  CollectionFacetsDto,
   CollectionQueryInput,
   ImportSetInput,
   ImportSetResultDto,
   OwnedProductDetailDto,
   OwnedProductDto,
+  OwnedProductsQueryInput,
   Paginated,
   UpdateCollectionItemInput,
 } from '@ygo/shared';
@@ -37,11 +39,28 @@ export interface CollectionStats {
   estimatedValue: number;
 }
 
-export const useCollection = (params: Partial<CollectionQueryInput>) =>
+export type CollectionParams = Partial<Omit<CollectionQueryInput, 'tagIds'>> & {
+  tagIds?: string[];
+};
+
+/** Les étiquettes voyagent en liste séparée par des virgules. */
+const withTagIds = <T extends { tagIds?: string[] }>(params: T) => ({
+  ...params,
+  tagIds: params.tagIds?.length ? params.tagIds.join(',') : undefined,
+});
+
+export const useCollection = (params: CollectionParams) =>
   useQuery({
     queryKey: qk.collection(params),
-    queryFn: () => api<Paginated<CollectionItemDto>>('/collection', { query: params }),
+    queryFn: () => api<Paginated<CollectionItemDto>>('/collection', { query: withTagIds(params) }),
     placeholderData: keepPreviousData,
+  });
+
+/** Valeurs de filtre présentes dans la collection, avec leur effectif. */
+export const useCollectionFacets = () =>
+  useQuery({
+    queryKey: qk.collectionFacets,
+    queryFn: () => api<CollectionFacetsDto>('/collection/facets'),
   });
 
 export const useCollectionStats = () =>
@@ -50,7 +69,10 @@ export const useCollectionStats = () =>
     queryFn: () => api<CollectionStats>('/collection/stats'),
   });
 
-/** Toute modif de collection impacte : quantités affichées, stats, decks, suggestions. */
+/**
+ * Toute modif de collection impacte : quantités affichées, stats, avancement par extension,
+ * produits, decks, suggestions. C'est ce qui rend le suivi des extensions instantané.
+ */
 function useInvalidateOwnership() {
   const qc = useQueryClient();
   return () =>
@@ -58,7 +80,9 @@ function useInvalidateOwnership() {
       [
         qk.collectionAll,
         qk.collectionStats,
-        qk.products,
+        qk.collectionFacets,
+        qk.productsAll,
+        qk.releasesAll,
         ['cards'],
         ['card'],
         ['deck'],
@@ -119,11 +143,16 @@ export function useRemoveProduct() {
   });
 }
 
+export type OwnedProductsParams = Partial<Omit<OwnedProductsQueryInput, 'tagIds'>> & {
+  tagIds?: string[];
+};
+
 /** Produits ajoutés à la collection (structure decks, tins…). */
-export const useOwnedProducts = () =>
+export const useOwnedProducts = (params: OwnedProductsParams = {}) =>
   useQuery({
-    queryKey: qk.products,
-    queryFn: () => api<OwnedProductDto[]>('/collection/products'),
+    queryKey: qk.products(params),
+    queryFn: () => api<OwnedProductDto[]>('/collection/products', { query: withTagIds(params) }),
+    placeholderData: keepPreviousData,
   });
 
 export const useOwnedProduct = (id: string | null) =>

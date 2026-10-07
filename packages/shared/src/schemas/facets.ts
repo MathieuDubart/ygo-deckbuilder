@@ -4,8 +4,11 @@
  * propose jamais un filtre qui ne renverrait rien.
  */
 export interface FacetValueDto {
+  /** Valeur à envoyer en filtre (un identifiant pour les extensions). */
   value: string;
   count: number;
+  /** Libellé lisible quand la valeur n'en est pas un (nom de l'extension). */
+  label?: string;
 }
 
 /** Facettes de l'onglet Cartes (calculées sur la collection, pas sur tout le catalogue). */

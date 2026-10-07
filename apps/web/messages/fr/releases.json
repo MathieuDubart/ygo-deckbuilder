@@ -1,0 +1,68 @@
+{
+  "title": "Extension",
+  "searchPlaceholder": "Trouver une extension : nom, code (BETB)…",
+  "noDate": "Date inconnue",
+  "today": "Sort aujourd’hui",
+  "inDays": "{count, plural, one {dans # jour} other {dans # jours}}",
+  "sealed": "Scellé",
+  "unrevealed": "Liste pas encore révélée",
+  "unrevealedHint": "Cette extension est annoncée ; ses cartes apparaîtront ici dès qu’elles seront connues.",
+  "elsewhere": "Déjà",
+  "elsewhereHint": "Tu as cette carte, mais dans une autre extension",
+  "noCardsShown": "Rien ne correspond à ces filtres",
+  "anyEdition": "Toutes éditions",
+  "anyEditionHint": "Compter une carte comme tirée même si tu la possèdes dans une autre extension",
+  "spotlight": {
+    "upcoming": "Ça arrive",
+    "upcomingEmpty": "Aucune sortie annoncée pour l’instant.",
+    "recent": "Tout juste sorti",
+    "recentEmpty": "Rien n’est sorti ces deux derniers mois."
+  },
+  "status": {
+    "UPCOMING": "À venir",
+    "RECENT": "Nouveau",
+    "RELEASED": "Sorti"
+  },
+  "progress": {
+    "NONE": "Pas commencée",
+    "STARTED": "En cours",
+    "COMPLETE": "Complète",
+    "labelPrints": "Impressions tirées",
+    "labelCards": "Cartes possédées"
+  },
+  "shown": {
+    "all": "Tout",
+    "owned": "Tirées",
+    "missing": "À tirer"
+  },
+  "stats": {
+    "copies": "Exemplaires",
+    "ownedValue": "Valeur possédée",
+    "missingValue": "Reste à acheter"
+  },
+  "filters": {
+    "status": "Statut",
+    "allStatuses": "Tous les statuts",
+    "kind": "Type",
+    "allKinds": "Tous les types",
+    "year": "Année",
+    "allYears": "Toutes les années",
+    "progress": "Avancement",
+    "allProgress": "Tous les avancements",
+    "rarity": "Rareté",
+    "allRarities": "Toutes les raretés",
+    "sort": "Tri",
+    "ownedProduct": "Scellé possédé"
+  },
+  "sort": {
+    "option": "Tri : {label}",
+    "date": "Date de sortie",
+    "progress": "Avancement",
+    "name": "Nom",
+    "cards": "Nombre de cartes"
+  },
+  "empty": {
+    "title": "Aucune extension trouvée",
+    "description": "Change les filtres, ou essaie un autre nom ou code."
+  }
+}
