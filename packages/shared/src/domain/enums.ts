@@ -30,5 +30,33 @@ export const WISHLIST_PRIORITIES = ['LOW', 'MEDIUM', 'HIGH'] as const;
 export type WishlistPriority = (typeof WISHLIST_PRIORITIES)[number];
 
 /** Type de produit, déduit du nom (YGOPRODeck ne le fournit pas). */
-export const PRODUCT_KINDS = ['STRUCTURE', 'TIN', 'STARTER', 'BOX', 'OTHER'] as const;
+export const PRODUCT_KINDS = ['BOOSTER', 'STRUCTURE', 'TIN', 'STARTER', 'BOX', 'OTHER'] as const;
 export type ProductKind = (typeof PRODUCT_KINDS)[number];
+
+/** Couleurs des pastilles d'étiquettes : des slugs résolus par le front, pas des valeurs CSS. */
+export const TAG_COLORS = [
+  'slate',
+  'red',
+  'amber',
+  'green',
+  'teal',
+  'blue',
+  'violet',
+  'pink',
+] as const;
+export type TagColor = (typeof TAG_COLORS)[number];
+
+/**
+ * Où en est une extension par rapport à aujourd'hui. `RECENT` couvre les sorties des
+ * {@link RECENT_RELEASE_DAYS} derniers jours : c'est ce qu'on met en avant avec les sorties
+ * à venir, parce que c'est là qu'on ouvre des boosters.
+ */
+export const RELEASE_STATUSES = ['UPCOMING', 'RECENT', 'RELEASED'] as const;
+export type ReleaseStatus = (typeof RELEASE_STATUSES)[number];
+
+/** Une sortie reste « récente » pendant ce nombre de jours. */
+export const RECENT_RELEASE_DAYS = 60;
+
+/** Filtre d'avancement d'une extension : rien, commencée, complète. */
+export const RELEASE_PROGRESS_FILTERS = ['NONE', 'STARTED', 'COMPLETE'] as const;
+export type ReleaseProgressFilter = (typeof RELEASE_PROGRESS_FILTERS)[number];

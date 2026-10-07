@@ -1,8 +1,10 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@nestjs/common';
 import {
   importSetSchema,
+  ownedProductsQuerySchema,
   removeProductSchema,
   type ImportSetInput,
+  type OwnedProductsQueryInput,
   type RemoveProductInput,
 } from '@ygo/shared';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator';
@@ -24,8 +26,11 @@ export class ProductsController {
   }
 
   @Get('products')
-  list(@CurrentUser() user: AuthUser) {
-    return this.products.list(user.id);
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(ownedProductsQuerySchema)) q: OwnedProductsQueryInput,
+  ) {
+    return this.products.list(user.id, q);
   }
 
   @Get('products/:id')

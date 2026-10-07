@@ -28,6 +28,8 @@ export const it: DeepPartialMessages = {
     productNotOwned: 'Prodotto non trovato nella tua collezione',
     productEmpty: 'Questo prodotto non contiene nessuna carta conosciuta',
     printMismatch: 'Questa stampa non corrisponde alla carta',
+    tagNotFound: 'Etichetta non trovata',
+    tagExists: "Hai già un'etichetta con questo nome",
     invalidPrint: 'Stampa non valida',
     invalidDeck: 'Deck non valido',
     ydkEmpty: 'File .ydk vuoto o non valido',

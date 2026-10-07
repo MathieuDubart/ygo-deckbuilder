@@ -6,6 +6,7 @@ import {
   type ProductKind,
 } from '../domain/enums';
 import { paginationSchema } from './pagination';
+import { tagIdsSchema } from './tags';
 
 export const cardSearchSchema = paginationSchema.extend({
   q: z.string().trim().max(100).optional(),
@@ -18,6 +19,8 @@ export const cardSearchSchema = paginationSchema.extend({
   setName: z.string().trim().max(200).optional(),
   /** Ne renvoyer que les cartes possédées par l'utilisateur connecté. */
   owned: z.coerce.boolean().optional(),
+  /** Étiquettes personnelles : une carte doit porter TOUTES celles demandées. */
+  tagIds: tagIdsSchema.optional(),
   /** Par défaut : pertinence si `q` est renseigné, sinon nom. */
   sort: z.enum(['relevance', 'name', 'atk', 'def', 'level', 'newest']).optional(),
 });
@@ -52,6 +55,8 @@ export interface CardSummaryDto {
   banTcg: string | null;
   priceCardmarket: number | null;
   ownedQuantity?: number;
+  /** Étiquettes personnelles posées sur cette carte (absent hors contexte utilisateur). */
+  tagIds?: string[];
 }
 
 export interface CardDetailDto extends CardSummaryDto {

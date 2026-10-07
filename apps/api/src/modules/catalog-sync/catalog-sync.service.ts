@@ -161,11 +161,16 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
     const all = [...byName.values()];
     for (let i = 0; i < all.length; i += BATCH) {
       await this.prisma.$transaction(
-        all
-          .slice(i, i + BATCH)
-          .map((s) =>
-            this.prisma.cardSet.upsert({ where: { name: s.name }, create: s, update: s }),
-          ),
+        all.slice(i, i + BATCH).map((s) =>
+          this.prisma.cardSet.upsert({
+            where: { name: s.name },
+            create: s,
+            // Mettre à jour ne doit jamais effacer ce qu'on sait déjà : un set connu
+            // seulement par les cartes arrive sans date ni visuel, et il écraserait sinon
+            // la date relevée parmi les sorties annoncées (Yugipedia).
+            update: withoutNulls(s),
+          }),
+        ),
       );
     }
     const rows = await this.prisma.cardSet.findMany({ select: { id: true, name: true } });
@@ -298,4 +303,14 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
       update: data,
     });
   }
+}
+
+/**
+ * Les champs à null ne sont pas « vide » mais « pas su par cette source » : on les retire
+ * d'une mise à jour pour ne pas effacer ce qu'une autre source a renseigné.
+ */
+function withoutNulls<T extends object>(value: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, v]) => v !== null && v !== undefined),
+  ) as Partial<T>;
 }

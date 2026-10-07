@@ -28,6 +28,12 @@ export class CollectionController {
     return this.collection.stats(user.id);
   }
 
+  /** Valeurs de filtre présentes dans la collection, avec leur effectif. */
+  @Get('facets')
+  facets(@CurrentUser() user: AuthUser) {
+    return this.collection.facets(user.id);
+  }
+
   @Post()
   add(
     @CurrentUser() user: AuthUser,
