@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
 import { Field, Input } from '@/components/ui/input';
-import { useCollection } from '@/lib/api/collection';
+import { useCollection, type CollectionItemDto } from '@/lib/api/collection';
 import {
   imageUrl,
   useRemoveProfileImage,
@@ -140,6 +140,22 @@ function ImageField({
 }
 
 /**
+ * Impressions proposables : celles qu'on possède, une seule fois chacune. La collection peut
+ * porter plusieurs lignes pour la même impression (langue, état), qui donneraient des
+ * vignettes identiques dont la sélection de l'une ferait réagir l'autre.
+ */
+function pickable(items: CollectionItemDto[] | undefined): CollectionItemDto[] {
+  const seen = new Set<string>();
+  return (items ?? []).filter((item) => {
+    // Sans impression, la ligne ne peut pas être mise en avant : le profil montre une
+    // édition précise, pas « la carte, quelque part ».
+    if (!item.print || seen.has(item.print.id)) return false;
+    seen.add(item.print.id);
+    return true;
+  });
+}
+
+/**
  * Choix des cartes mises en avant, dans sa propre collection. On envoie la liste entière à
  * chaque validation : réordonner est alors la même opération qu'ajouter, et l'ordre affiché
  * est exactement celui qu'on a cliqué.
@@ -195,14 +211,11 @@ export function ShowcasePicker({
             <p className="py-10 text-center text-sm text-fg-muted">{t('noResults')}</p>
           ) : (
             <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4">
-              {collection.data?.items.map((item) => {
-                // Une ligne de collection sans impression ne peut pas être mise en avant :
-                // le profil montre une édition précise, pas « la carte, quelque part ».
-                if (!item.print) return null;
-                const printId = item.print.id;
+              {pickable(collection.data?.items).map((item) => {
+                const printId = item.print!.id;
                 const index = picked.indexOf(printId);
                 return (
-                  <li key={item.id}>
+                  <li key={printId}>
                     <button
                       onClick={() => toggle(printId)}
                       className="group relative block w-full text-left"
@@ -222,8 +235,11 @@ export function ShowcasePicker({
                         </span>
                       )}
                       <p className="mt-1 truncate font-mono text-[10px] text-fg-subtle">
-                        {item.print.printCode}
+                        {item.print!.printCode}
                       </p>
+                      {/* La rareté, toujours : c'est elle qui distingue deux impressions
+                          de la même carte, donc elle qu'on choisit ici. */}
+                      <p className="truncate text-[11px] text-fg-muted">{item.print!.rarity}</p>
                     </button>
                   </li>
                 );
