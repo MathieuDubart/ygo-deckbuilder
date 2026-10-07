@@ -14,3 +14,6 @@ export * from './schemas/guide';
 export * from './schemas/interactions';
 export * from './schemas/products';
 export * from './schemas/duel';
+export * from './schemas/tags';
+export * from './schemas/facets';
+export * from './schemas/releases';

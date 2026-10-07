@@ -80,6 +80,7 @@ model Card {
   effectTargets   CardEffectTarget[]
   translations    CardTranslation[]
   productDecks    ProductDeckCard[]
+  tags            CardTag[]
 
   @@index([name])
   @@index([archetype])
@@ -115,11 +116,16 @@ model CardSet {
   /// Dernière lecture de la liste officielle (quantités) ; contentSource = d'où elle vient
   contentCheckedAt DateTime?
   contentSource    String?
+  /// Relevée parmi les sorties annoncées (Yugipedia) : la date est fiable même si aucune
+  /// impression n'est encore connue. Null = extension vue uniquement par le catalogue.
+  announcedAt      DateTime?
 
   prints        CardPrint[]
   ownedProducts OwnedProduct[]
   decks         ProductDeck[]
+  tags          SetTag[]
 
+  @@index([tcgDate])
   @@index([searchText(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
@@ -176,6 +182,50 @@ model User {
   decks           Deck[]
   wishlistItems   WishlistItem[]
   ownedProducts   OwnedProduct[]
+  tags            Tag[]
+}
+
+/// Étiquette libre d'un utilisateur (« à vendre », « doublons », « deck Blue-Eyes »), posable
+/// sur une carte ou sur une extension. Les facettes de tri (archétype, rareté, année…) sont
+/// calculées depuis le catalogue et n'ont rien à voir avec ces étiquettes.
+model Tag {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  /// Couleur de la pastille : un slug du jeu de couleurs du front, pas une valeur CSS
+  color     String   @default("slate")
+  createdAt DateTime @default(now())
+
+  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cards CardTag[]
+  sets  SetTag[]
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+/// Étiquette posée sur une carte, toutes impressions confondues.
+model CardTag {
+  tagId  String
+  cardId Int
+
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@id([tagId, cardId])
+  @@index([cardId])
+}
+
+/// Étiquette posée sur une extension (qu'on la possède ou non).
+model SetTag {
+  tagId String
+  setId String
+
+  tag Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  set CardSet @relation(fields: [setId], references: [id], onDelete: Cascade)
+
+  @@id([tagId, setId])
+  @@index([setId])
 }
 
 /// Refresh tokens stockés hashés (rotation à chaque refresh, révocables).
@@ -235,6 +285,7 @@ model CollectionItem {
   print CardPrint? @relation(fields: [printId], references: [id], onDelete: SetNull)
 
   @@index([userId, cardId])
+  @@index([userId, printId])
 }
 
 // ═══════════════════════════════ Decks ═══════════════════════════════════════

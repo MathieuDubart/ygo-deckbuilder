@@ -8,23 +8,15 @@ import type {
   SetSearchInput,
 } from '@ygo/shared';
 import { PRODUCT_KIND, SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
+import { allTagsOn, CARD_TAGS } from '../../common/catalog/tag-sql';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { cardSummarySelect, toCardDetail, toCardSummary } from '../../common/mappers/card.mapper';
 import { normalizeProductQuery, parsePrintCode } from '../../common/search/normalize';
+import { displayName } from '../../common/search/display-name';
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
-import { currentLocale, t } from '../../common/i18n/locale-context';
-
-/** Nom affiché dans la langue de la requête ; on trie sur sa forme normalisée (É = E). */
-function displayName(): Prisma.Sql {
-  const locale = currentLocale();
-  if (locale === 'en') return Prisma.sql`ygo_normalize(c."name")`;
-  if (locale === 'fr') return Prisma.sql`ygo_normalize(coalesce(c."nameFr", c."name"))`;
-  return Prisma.sql`ygo_normalize(coalesce(
-    (SELECT tr.name FROM "CardTranslation" tr WHERE tr."cardId" = c.id AND tr.locale = ${locale}),
-    c."name"))`;
-}
+import { t } from '../../common/i18n/locale-context';
 
 @Injectable()
 export class CardsService {
@@ -155,6 +147,9 @@ export class CardsService {
     if (i.owned && userId) {
       f.push(Prisma.sql`EXISTS (
         SELECT 1 FROM "CollectionItem" ci WHERE ci."cardId" = c.id AND ci."userId" = ${userId})`);
+    }
+    if (i.tagIds?.length && userId) {
+      f.push(allTagsOn(Prisma.sql`c.id`, CARD_TAGS, userId, i.tagIds));
     }
     return f;
   }

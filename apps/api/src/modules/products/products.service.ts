@@ -7,10 +7,12 @@ import type {
   OwnedProductCardDto,
   OwnedProductDetailDto,
   OwnedProductDto,
+  OwnedProductsQueryInput,
 } from '@ygo/shared';
 import { SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { normalize } from '../../common/search/normalize';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
 import { ProductContentService } from './product-content.service';
@@ -109,22 +111,37 @@ export class ProductsService {
 
   // ─── Consultation ──────────────────────────────────────────────────────────
 
-  async list(userId: string): Promise<OwnedProductDto[]> {
+  /**
+   * Les produits possédés, filtrés et triés. On en a au plus quelques dizaines : le tri se
+   * fait en mémoire, sur des valeurs déjà calculées (avancement, nom localisé), plutôt qu'en
+   * SQL où l'avancement n'existe pas encore.
+   */
+  async list(userId: string, query: OwnedProductsQueryInput = {}): Promise<OwnedProductDto[]> {
     const products = await this.prisma.ownedProduct.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       select: { id: true, setId: true, copies: true, language: true, createdAt: true },
     });
     if (!products.length) return [];
-    const sets = await this.sets(products.map((p) => p.setId));
-    const contents = await this.contents(products.map((p) => p.setId));
-    const owned = await this.ownership.quantities(userId, [
-      ...new Set([...contents.values()].flatMap((cs) => cs.map((c) => c.cardId))),
+    const setIds = products.map((p) => p.setId);
+    const sets = await this.sets(setIds);
+    const contents = await this.contents(setIds);
+    const [owned, tags] = await Promise.all([
+      this.ownership.quantities(userId, [
+        ...new Set([...contents.values()].flatMap((cs) => cs.map((c) => c.cardId))),
+      ]),
+      this.tagsBySet(userId, setIds),
     ]);
-    return products.flatMap((p) => {
+    const all = products.flatMap((p) => {
       const set = sets.get(p.setId);
-      return set ? [this.summary(p, set, contents.get(p.setId) ?? [], owned)] : [];
+      return set
+        ? [this.summary(p, set, contents.get(p.setId) ?? [], owned, tags.get(p.setId) ?? [])]
+        : [];
     });
+    return sortProducts(
+      all.filter((product) => matches(product, query)),
+      query.sort ?? 'added',
+    );
   }
 
   async detail(userId: string, id: string): Promise<OwnedProductDetailDto> {
@@ -251,11 +268,23 @@ export class ProductsService {
     );
   }
 
+  /** Étiquettes posées sur les extensions de ces produits. */
+  private async tagsBySet(userId: string, setIds: string[]): Promise<Map<string, string[]>> {
+    const rows = await this.prisma.setTag.findMany({
+      where: { setId: { in: [...new Set(setIds)] }, tag: { userId } },
+      select: { setId: true, tagId: true },
+    });
+    const bySet = new Map<string, string[]>();
+    for (const row of rows) bySet.set(row.setId, [...(bySet.get(row.setId) ?? []), row.tagId]);
+    return bySet;
+  }
+
   private summary(
     p: ProductRow,
     set: VerifiedSet,
     cards: ProductCard[],
     owned: Map<number, number>,
+    tagIds: string[] = [],
   ): OwnedProductDto {
     const needed = cards.reduce((s, c) => s + c.quantity * p.copies, 0);
     const have = cards.reduce(
@@ -275,6 +304,42 @@ export class ProductsService {
       completeness: needed ? Math.round((have / needed) * 100) / 100 : 1,
       missingCopies: needed - have,
       isDeck: isDeckProduct(set),
+      tagIds,
     };
+  }
+}
+
+function matches(product: OwnedProductDto, query: OwnedProductsQueryInput): boolean {
+  if (query.kind && product.set.kind !== query.kind) return false;
+  if (query.complete && product.completeness < 1) return false;
+  if (query.q?.trim()) {
+    const needle = normalize(query.q);
+    const haystack = normalize(`${product.set.name} ${product.set.code ?? ''}`);
+    if (needle && !haystack.includes(needle)) return false;
+  }
+  // Cumuler des étiquettes restreint : le produit doit porter toutes celles demandées
+  if (query.tagIds?.length && !query.tagIds.every((id) => product.tagIds.includes(id))) {
+    return false;
+  }
+  return true;
+}
+
+function sortProducts(
+  products: OwnedProductDto[],
+  sort: NonNullable<OwnedProductsQueryInput['sort']>,
+): OwnedProductDto[] {
+  const byName = (a: OwnedProductDto, b: OwnedProductDto) => a.set.name.localeCompare(b.set.name);
+  switch (sort) {
+    case 'name':
+      return [...products].sort(byName);
+    case 'date':
+      return [...products].sort(
+        (a, b) => (b.set.tcgDate ?? '').localeCompare(a.set.tcgDate ?? '') || byName(a, b),
+      );
+    // Les produits les plus entamés d'abord : c'est ce qu'il reste à reconstituer
+    case 'completeness':
+      return [...products].sort((a, b) => a.completeness - b.completeness || byName(a, b));
+    default:
+      return [...products].sort((a, b) => b.addedAt.localeCompare(a.addedAt) || byName(a, b));
   }
 }

@@ -28,6 +28,8 @@ export const fr: DeepPartialMessages = {
     productNotOwned: 'Produit introuvable dans ta collection',
     productEmpty: 'Ce produit ne contient aucune carte connue',
     printMismatch: 'Cette édition ne correspond pas à la carte',
+    tagNotFound: 'Étiquette introuvable',
+    tagExists: 'Tu as déjà une étiquette de ce nom',
     invalidPrint: 'Édition invalide',
     invalidDeck: 'Deck invalide',
     ydkEmpty: 'Fichier .ydk vide ou invalide',

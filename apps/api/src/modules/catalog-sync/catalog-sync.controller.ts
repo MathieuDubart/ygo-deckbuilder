@@ -3,6 +3,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { CatalogSyncService } from './catalog-sync.service';
 import { ProductCoversService } from './product-covers.service';
+import { UpcomingSetsService } from './upcoming-sets.service';
 import { t } from '../../common/i18n/locale-context';
 
 @Controller('catalog')
@@ -10,6 +11,7 @@ export class CatalogSyncController {
   constructor(
     private readonly sync: CatalogSyncService,
     private readonly covers: ProductCoversService,
+    private readonly upcoming: UpcomingSetsService,
   ) {}
 
   @Public()
@@ -34,5 +36,12 @@ export class CatalogSyncController {
   @Post('covers')
   refreshCovers() {
     return this.covers.refresh();
+  }
+
+  /** Relit les sorties annoncées sur Yugipedia (admin). */
+  @Roles('ADMIN')
+  @Post('upcoming')
+  refreshUpcoming() {
+    return this.upcoming.refresh();
   }
 }

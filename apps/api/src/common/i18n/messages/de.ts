@@ -29,6 +29,8 @@ export const de: DeepPartialMessages = {
     productNotOwned: 'Produkt nicht in deiner Sammlung gefunden',
     productEmpty: 'Dieses Produkt enthält keine bekannte Karte',
     printMismatch: 'Dieser Druck passt nicht zur Karte',
+    tagNotFound: 'Etikett nicht gefunden',
+    tagExists: 'Du hast bereits ein Etikett mit diesem Namen',
     invalidPrint: 'Ungültiger Druck',
     invalidDeck: 'Ungültiges Deck',
     ydkEmpty: 'Leere oder ungültige .ydk-Datei',

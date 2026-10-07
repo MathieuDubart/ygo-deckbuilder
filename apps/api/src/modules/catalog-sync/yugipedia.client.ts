@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfig } from '../../config/app-config.service';
+import type { AskResponse } from './upcoming-sets.parser';
 import { COVER_WIDTH, mapPageImages, type PageImagesResponse } from './yugipedia.parser';
 
 /**
@@ -58,6 +59,15 @@ export class YugipediaClient {
       if (text) return { title: t, text };
     }
     return null;
+  }
+
+  /**
+   * Requête sémantique (Semantic MediaWiki). Yugipedia expose les dates de sortie et les
+   * préfixes des extensions comme propriétés : c'est la seule façon d'obtenir les sorties
+   * annoncées sans analyser du wikitexte.
+   */
+  async ask(query: string): Promise<AskResponse> {
+    return (await this.get({ action: 'ask', query })) as AskResponse;
   }
 
   /** Titre canonique d'une page (redirections suivies), ou null si elle n'existe pas. */

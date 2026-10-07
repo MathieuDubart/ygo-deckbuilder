@@ -1,0 +1,357 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import type {
+  CardSetDto,
+  Paginated,
+  ReleaseCardDto,
+  ReleaseDetailDto,
+  ReleaseDto,
+  ReleaseFacetsDto,
+  ReleaseQueryInput,
+  ReleaseRarityDto,
+  ReleaseSpotlightDto,
+} from '@ygo/shared';
+import { RECENT_RELEASE_DAYS } from '@ygo/shared';
+import { PRODUCT_KIND, SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
+import { allTagsOn, SET_TAGS, tagIdsOf } from '../../common/catalog/tag-sql';
+import { t } from '../../common/i18n/locale-context';
+import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
+import { PrismaService } from '../../common/prisma/prisma.service';
+import { normalizeProductQuery } from '../../common/search/normalize';
+import { textQuery } from '../../common/search/text-search';
+import { Prisma } from '../../generated/prisma/client';
+import { daysUntilRelease, releaseStatus, sortRarities } from './release-progress';
+
+/** Ligne brute d'une extension : le DTO du produit, plus l'avancement de l'utilisateur. */
+type ReleaseRow = Omit<CardSetDto, 'tcgDate'> & {
+  tcgDate: Date | null;
+  prints: number;
+  cards: number;
+  ownedPrints: number;
+  ownedCards: number;
+  copies: number;
+  ownedValue: number;
+  missingValue: number;
+  ownedProduct: boolean;
+  tagIds: string[];
+  total: number;
+};
+
+/**
+ * Les mêmes grandeurs s'expriment différemment selon qu'on est dans la sous-requête qui
+ * sélectionne la page (les agrégats y sont encore des jointures) ou dans la requête qui
+ * l'habille (ils y sont des colonnes). D'où ces deux jeux d'expressions.
+ */
+const SELECTING = {
+  prints: Prisma.sql`COALESCE(sp.prints, 0)`,
+  cards: Prisma.sql`COALESCE(sp.cards, 0)`,
+  ownedPrints: Prisma.sql`COALESCE(o."ownedPrints", 0)`,
+};
+const DRESSING = {
+  prints: Prisma.sql`g.prints`,
+  cards: Prisma.sql`g.cards`,
+  ownedPrints: Prisma.sql`g."ownedPrints"`,
+};
+type Metrics = typeof SELECTING;
+
+/** Littéral SQL : `CURRENT_DATE - $n` laisserait le type du paramètre ambigu pour Postgres. */
+const RECENT_WINDOW = Prisma.raw(String(RECENT_RELEASE_DAYS));
+
+/**
+ * Suivi par extension : ce qu'on peut tirer d'un booster ou d'une sortie, ce qu'on en a déjà,
+ * et ce qui arrive en boutique. Tout est calculé à la demande depuis la collection — rien
+ * n'est stocké, donc l'avancement est juste par construction dès qu'une carte est ajoutée.
+ */
+@Injectable()
+export class ReleasesService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async list(userId: string, input: ReleaseQueryInput): Promise<Paginated<ReleaseDto>> {
+    const rows = await this.rows(userId, {
+      conditions: this.conditions(userId, input),
+      sort: input.sort ?? 'date',
+      limit: input.pageSize,
+      offset: (input.page - 1) * input.pageSize,
+    });
+    const total = rows[0]?.total ?? 0;
+    return {
+      items: rows.map(toReleaseDto),
+      page: input.page,
+      pageSize: input.pageSize,
+      total,
+      totalPages: Math.ceil(total / input.pageSize),
+    };
+  }
+
+  /** Ce qui arrive, et ce qui vient de sortir : de quoi ne rien manquer sans chercher. */
+  async spotlight(userId: string): Promise<ReleaseSpotlightDto> {
+    const [upcoming, recent] = await Promise.all([
+      this.rows(userId, {
+        // Les plus proches d'abord : c'est la prochaine sortie qui intéresse
+        conditions: [this.statusCondition('UPCOMING')],
+        sort: 'soonest',
+        limit: 8,
+        offset: 0,
+      }),
+      this.rows(userId, {
+        conditions: [this.statusCondition('RECENT')],
+        sort: 'date',
+        limit: 8,
+        offset: 0,
+      }),
+    ]);
+    return { upcoming: upcoming.map(toReleaseDto), recent: recent.map(toReleaseDto) };
+  }
+
+  /** Valeurs de filtre réellement présentes, avec leur effectif. */
+  async facets(): Promise<ReleaseFacetsDto> {
+    const known = Prisma.sql`(sp.prints > 0 OR s."announcedAt" IS NOT NULL)`;
+    const [kinds, years] = await Promise.all([
+      this.prisma.$queryRaw<{ value: string; count: number }[]>`
+        WITH sp AS (${this.setPrints})
+        SELECT ${PRODUCT_KIND} AS value, COUNT(*)::int AS count
+        FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
+        WHERE ${known}
+        GROUP BY 1 ORDER BY count DESC`,
+      this.prisma.$queryRaw<{ value: string; count: number }[]>`
+        WITH sp AS (${this.setPrints})
+        SELECT EXTRACT(YEAR FROM s."tcgDate")::text AS value, COUNT(*)::int AS count
+        FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
+        WHERE ${known} AND s."tcgDate" IS NOT NULL
+        GROUP BY 1 ORDER BY value DESC`,
+    ]);
+    const statuses = await this.prisma.$queryRaw<{ value: string; count: number }[]>`
+      WITH sp AS (${this.setPrints})
+      SELECT CASE
+               WHEN s."tcgDate" > CURRENT_DATE THEN 'UPCOMING'
+               WHEN s."tcgDate" > CURRENT_DATE - ${RECENT_WINDOW} THEN 'RECENT'
+               ELSE 'RELEASED'
+             END AS value,
+             COUNT(*)::int AS count
+      FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
+      WHERE ${known}
+      GROUP BY 1`;
+    return { kinds, statuses, years };
+  }
+
+  /** Une extension carte par carte : ce qu'il y a dedans, et ce qu'on en a déjà tiré. */
+  async detail(userId: string, setId: string): Promise<ReleaseDetailDto> {
+    const [header] = await this.rows(userId, {
+      conditions: [Prisma.sql`s.id = ${setId}`],
+      sort: 'date',
+      limit: 1,
+      offset: 0,
+    });
+    if (!header) throw new NotFoundException(t('errors.productNotFound'));
+
+    const prints = await this.prisma.cardPrint.findMany({
+      where: { setId },
+      select: {
+        id: true,
+        printCode: true,
+        rarity: true,
+        rarityCode: true,
+        price: true,
+        cardId: true,
+        card: { select: cardSummarySelect },
+      },
+      orderBy: [{ printCode: 'asc' }, { rarity: 'asc' }],
+    });
+    const items = prints.length
+      ? await this.prisma.collectionItem.findMany({
+          where: { userId, cardId: { in: [...new Set(prints.map((p) => p.cardId))] } },
+          select: { cardId: true, printId: true, quantity: true },
+        })
+      : [];
+
+    const byPrint = new Map<string, number>();
+    const byCard = new Map<number, number>();
+    for (const item of items) {
+      byCard.set(item.cardId, (byCard.get(item.cardId) ?? 0) + item.quantity);
+      if (item.printId) byPrint.set(item.printId, (byPrint.get(item.printId) ?? 0) + item.quantity);
+    }
+
+    const cards: ReleaseCardDto[] = prints.map((print) => {
+      const owned = byPrint.get(print.id) ?? 0;
+      return {
+        card: toCardSummary(print.card),
+        printId: print.id,
+        printCode: print.printCode,
+        rarity: print.rarity,
+        rarityCode: print.rarityCode,
+        price: toNumber(print.price),
+        owned,
+        // Exemplaires de la même carte venus d'ailleurs : une autre impression, ou une pile
+        // saisie sans impression précise.
+        ownedElsewhere: Math.max(0, (byCard.get(print.cardId) ?? 0) - owned),
+      };
+    });
+
+    const byRarity = new Map<string, ReleaseRarityDto>();
+    for (const card of cards) {
+      const row = byRarity.get(card.rarity) ?? { rarity: card.rarity, prints: 0, ownedPrints: 0 };
+      row.prints += 1;
+      if (card.owned > 0) row.ownedPrints += 1;
+      byRarity.set(card.rarity, row);
+    }
+
+    return { ...toReleaseDto(header), cards, rarities: sortRarities([...byRarity.values()]) };
+  }
+
+  // ─── Requête commune ───────────────────────────────────────────────────────
+
+  /** Impressions et cartes distinctes par extension : une seule passe, réutilisée partout. */
+  private readonly setPrints = Prisma.sql`
+    SELECT "setId", COUNT(*)::int AS prints, COUNT(DISTINCT "cardId")::int AS cards
+    FROM "CardPrint" GROUP BY "setId"`;
+
+  private async rows(
+    userId: string,
+    opts: { conditions: Prisma.Sql[]; sort: SortKey; limit: number; offset: number },
+  ): Promise<ReleaseRow[]> {
+    // Une extension compte dès qu'on connaît au moins une de ses impressions, ou qu'elle a
+    // été relevée parmi les sorties annoncées (sa liste n'est alors pas encore révélée).
+    const conditions = [
+      Prisma.sql`(${SELECTING.prints} > 0 OR s."announcedAt" IS NOT NULL)`,
+      ...opts.conditions,
+    ];
+    return this.prisma.$queryRaw<ReleaseRow[]>`
+      WITH sp AS (${this.setPrints}),
+      owned AS (
+        SELECT p."setId",
+               COUNT(DISTINCT p.id)::int AS "ownedPrints",
+               SUM(ci.quantity)::int AS copies,
+               COALESCE(SUM(ci.quantity * COALESCE(p.price, c."priceCardmarket")), 0)::float
+                 AS "ownedValue"
+        FROM "CollectionItem" ci
+        JOIN "CardPrint" p ON p.id = ci."printId"
+        JOIN "Card" c ON c.id = ci."cardId"
+        WHERE ci."userId" = ${userId}
+        GROUP BY p."setId"
+      ),
+      owned_any AS (
+        SELECT p."setId", COUNT(DISTINCT p."cardId")::int AS "ownedCards"
+        FROM "CardPrint" p
+        JOIN (SELECT DISTINCT "cardId" FROM "CollectionItem" WHERE "userId" = ${userId}) mine
+          ON mine."cardId" = p."cardId"
+        GROUP BY p."setId"
+      ),
+      g AS (
+        SELECT s.id,
+               ${SELECTING.prints} AS prints,
+               ${SELECTING.cards} AS cards,
+               ${SELECTING.ownedPrints} AS "ownedPrints",
+               COALESCE(a."ownedCards", 0) AS "ownedCards",
+               COALESCE(o.copies, 0) AS copies,
+               COALESCE(o."ownedValue", 0) AS "ownedValue",
+               (COUNT(*) OVER ())::int AS total
+        FROM "CardSet" s
+        LEFT JOIN sp ON sp."setId" = s.id
+        LEFT JOIN owned o ON o."setId" = s.id
+        LEFT JOIN owned_any a ON a."setId" = s.id
+        WHERE ${Prisma.join(conditions, ' AND ')}
+        ORDER BY ${orderBy(opts.sort, SELECTING)}
+        LIMIT ${opts.limit} OFFSET ${opts.offset}
+      )
+      SELECT ${SET_DTO_COLUMNS},
+             g.prints, g.cards, g."ownedPrints", g."ownedCards", g.copies, g."ownedValue",
+             g.total,
+             (SELECT COALESCE(SUM(COALESCE(p.price, c."priceCardmarket")), 0)::float
+              FROM "CardPrint" p JOIN "Card" c ON c.id = p."cardId"
+              WHERE p."setId" = s.id
+                AND NOT EXISTS (SELECT 1 FROM "CollectionItem" ci
+                                WHERE ci."userId" = ${userId} AND ci."printId" = p.id)
+             ) AS "missingValue",
+             EXISTS (SELECT 1 FROM "OwnedProduct" op
+                     WHERE op."setId" = s.id AND op."userId" = ${userId}) AS "ownedProduct",
+             ${tagIdsOf(Prisma.sql`s.id`, SET_TAGS, userId)} AS "tagIds"
+      FROM g JOIN "CardSet" s ON s.id = g.id
+      ORDER BY ${orderBy(opts.sort, DRESSING)}`;
+  }
+
+  private conditions(userId: string, input: ReleaseQueryInput): Prisma.Sql[] {
+    const conditions: Prisma.Sql[] = [];
+    if (input.q?.trim()) {
+      const text = textQuery(input.q, Prisma.sql`s."searchText"`, normalizeProductQuery(input.q));
+      if (text) conditions.push(text.strict);
+    }
+    if (input.kind) conditions.push(Prisma.sql`${PRODUCT_KIND} = ${input.kind}`);
+    if (input.status) conditions.push(this.statusCondition(input.status));
+    if (input.year) {
+      conditions.push(Prisma.sql`EXTRACT(YEAR FROM s."tcgDate") = ${input.year}`);
+    }
+    if (input.ownedProduct) {
+      conditions.push(Prisma.sql`EXISTS (SELECT 1 FROM "OwnedProduct" op
+        WHERE op."setId" = s.id AND op."userId" = ${userId})`);
+    }
+    if (input.progress) {
+      const owned = SELECTING.ownedPrints;
+      const prints = SELECTING.prints;
+      if (input.progress === 'NONE') conditions.push(Prisma.sql`${owned} = 0`);
+      if (input.progress === 'STARTED') {
+        conditions.push(Prisma.sql`${owned} > 0 AND ${owned} < ${prints}`);
+      }
+      if (input.progress === 'COMPLETE') {
+        conditions.push(Prisma.sql`${prints} > 0 AND ${owned} >= ${prints}`);
+      }
+    }
+    if (input.tagIds?.length) {
+      conditions.push(allTagsOn(Prisma.sql`s.id`, SET_TAGS, userId, input.tagIds));
+    }
+    return conditions;
+  }
+
+  /** Même découpage que `releaseStatus`, mais évalué par Postgres. */
+  private statusCondition(status: 'UPCOMING' | 'RECENT' | 'RELEASED'): Prisma.Sql {
+    switch (status) {
+      case 'UPCOMING':
+        return Prisma.sql`s."tcgDate" > CURRENT_DATE`;
+      case 'RECENT':
+        return Prisma.sql`s."tcgDate" <= CURRENT_DATE
+          AND s."tcgDate" > CURRENT_DATE - ${RECENT_WINDOW}`;
+      default:
+        return Prisma.sql`(s."tcgDate" IS NULL OR s."tcgDate" <= CURRENT_DATE - ${RECENT_WINDOW})`;
+    }
+  }
+}
+
+type SortKey = NonNullable<ReleaseQueryInput['sort']> | 'soonest';
+
+function orderBy(sort: SortKey, m: Metrics): Prisma.Sql {
+  switch (sort) {
+    case 'soonest':
+      return Prisma.sql`s."tcgDate" ASC, s.name`;
+    case 'name':
+      return Prisma.sql`s.name`;
+    case 'cards':
+      return Prisma.sql`${m.cards} DESC, s.name`;
+    case 'progress':
+      return Prisma.sql`${m.ownedPrints}::float / NULLIF(${m.prints}, 0) DESC NULLS LAST,
+        ${m.ownedPrints} DESC, s.name`;
+    default:
+      return Prisma.sql`s."tcgDate" DESC NULLS LAST, s.name`;
+  }
+}
+
+function toReleaseDto(row: ReleaseRow): ReleaseDto {
+  const today = new Date();
+  const { prints, cards, ownedPrints, ownedCards, copies } = row;
+  return {
+    set: {
+      id: row.id,
+      name: row.name,
+      code: row.code,
+      tcgDate: row.tcgDate?.toISOString().slice(0, 10) ?? null,
+      kind: row.kind,
+      imageUrl: row.imageUrl,
+      fallbackImageUrl: row.fallbackImageUrl,
+      cardCount: row.cardCount,
+    },
+    status: releaseStatus(row.tcgDate, today),
+    daysUntil: daysUntilRelease(row.tcgDate, today),
+    progress: { prints, cards, ownedPrints, ownedCards, copies },
+    ownedProduct: row.ownedProduct,
+    ownedValue: row.ownedValue,
+    missingValue: row.missingValue,
+    tagIds: row.tagIds,
+  };
+}

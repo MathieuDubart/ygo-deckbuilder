@@ -31,6 +31,8 @@ export const en = {
     productNotOwned: 'Product not found in your collection',
     productEmpty: 'This product contains no known card',
     printMismatch: 'This print does not match the card',
+    tagNotFound: 'Tag not found',
+    tagExists: 'You already have a tag with this name',
     invalidPrint: 'Invalid print',
     invalidDeck: 'Invalid deck',
     ydkEmpty: 'Empty or invalid .ydk file',
