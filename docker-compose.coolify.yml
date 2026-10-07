@@ -35,7 +35,10 @@ services:
       JWT_ACCESS_SECRET: ${SERVICE_PASSWORD_JWT}
       # Domaine généré par Coolify pour le service web
       WEB_ORIGIN: ${SERVICE_FQDN_WEB}
-      COOKIE_SECURE: 'true'
+      # Les cookies de session sont marqués `secure`, donc refusés par le navigateur sur une
+      # page en http:// . À ne passer à 'false' que pour un accès direct en clair sur un
+      # réseau de confiance : le jeton de session circule alors en clair.
+      COOKIE_SECURE: '${COOKIE_SECURE:-true}'
       # Ce compte devient ADMIN à l'inscription
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       # Catalogue YGOPRODeck et meta : synchronisés par cron (vide = jamais)
