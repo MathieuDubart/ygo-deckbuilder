@@ -26,6 +26,8 @@ export interface PublicUser {
   username: string;
   role: 'USER' | 'ADMIN';
   createdAt: string;
+  /** Photo de profil, servie par l'API. Null tant qu'on n'en a pas envoyé. */
+  avatarUrl: string | null;
 }
 
 /**

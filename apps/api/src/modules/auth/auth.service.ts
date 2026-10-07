@@ -12,6 +12,7 @@ type UserRow = {
   username: string;
   role: 'USER' | 'ADMIN';
   createdAt: Date;
+  avatarPath?: string | null;
 };
 
 export const toPublicUser = (u: UserRow): PublicUser => ({
@@ -20,6 +21,7 @@ export const toPublicUser = (u: UserRow): PublicUser => ({
   username: u.username,
   role: u.role,
   createdAt: u.createdAt.toISOString(),
+  avatarUrl: u.avatarPath ? `/uploads/${u.avatarPath}` : null,
 });
 
 @Injectable()
@@ -32,8 +34,12 @@ export class AuthService {
   ) {}
 
   async register(input: RegisterInput, userAgent?: string) {
+    // Le pseudo est unique sans distinction de casse (index sur `lower(username)`) : le
+    // vérifier à l'identique laisserait la base lever une erreur brute à l'insertion.
     const existing = await this.prisma.user.findFirst({
-      where: { OR: [{ email: input.email }, { username: input.username }] },
+      where: {
+        OR: [{ email: input.email }, { username: { equals: input.username, mode: 'insensitive' } }],
+      },
       select: { email: true },
     });
     if (existing) {

@@ -11,6 +11,7 @@ import type layout from '../../messages/en/layout.json';
 import type rules from '../../messages/en/rules.json';
 import type products from '../../messages/en/products.json';
 import type releases from '../../messages/en/releases.json';
+import type social from '../../messages/en/social.json';
 import type suggestions from '../../messages/en/suggestions.json';
 import type tags from '../../messages/en/tags.json';
 import type wishlist from '../../messages/en/wishlist.json';
@@ -33,4 +34,5 @@ export interface Messages {
   rules: typeof rules;
   releases: typeof releases;
   tags: typeof tags;
+  social: typeof social;
 }

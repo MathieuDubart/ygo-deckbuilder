@@ -9,7 +9,9 @@
     "catalog": "Catálogo",
     "wishlist": "Wishlist",
     "duel": "Duelo",
-    "rules": "Regras"
+    "rules": "Regras",
+    "friends": "Amigos",
+    "profile": "Perfil"
   },
   "logout": "Sair",
   "pages": {
@@ -22,6 +24,8 @@
     "wishlist": "Wishlist",
     "deckNotFound": "Deck não encontrado.",
     "duel": "Simulador de duelo",
-    "rules": "Regras"
+    "rules": "Regras",
+    "friends": "Amigos",
+    "profile": "Perfil"
   }
 }

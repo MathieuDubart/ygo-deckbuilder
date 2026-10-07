@@ -1,5 +1,5 @@
 'use client';
-import type { ReleaseCardDto } from '@ygo/shared';
+import type { PublicUserDto, ReleaseCardDto } from '@ygo/shared';
 import { CircleSlash, PackageSearch } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
@@ -12,7 +12,9 @@ import { Dialog } from '@/components/ui/dialog';
 import { EmptyState, Meter, Skeleton, Stat } from '@/components/ui/feedback';
 import { Select } from '@/components/ui/input';
 import { useRelease } from '@/lib/api/releases';
+import { useSetFriends } from '@/lib/api/social';
 import { useTagSet } from '@/lib/api/tags';
+import { FriendProgressPanel, PrintOwners } from '@/features/social/friend-progress';
 import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { FilterToggle } from './facet-bar';
@@ -39,6 +41,12 @@ export function ReleaseDialog({
   const { data, isLoading } = useRelease(setId);
   const { date, number, percent, price } = useFormat();
   const tagSet = useTagSet();
+  const { data: friends } = useSetFriends(setId);
+  // Index des amis : les grilles de cartes ne portent que des identifiants
+  const friendsById = useMemo(
+    () => new Map((friends?.friends ?? []).map((row) => [row.user.id, row.user])),
+    [friends],
+  );
   const [shown, setShown] = useState<Shown>('all');
   const [rarity, setRarity] = useState<string | undefined>();
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
@@ -177,6 +185,10 @@ export function ReleaseDialog({
                   </FilterToggle>
                 </div>
 
+                {friends && friends.friends.length > 0 && (
+                  <FriendProgressPanel friends={friends.friends} anyEdition={anyEdition} />
+                )}
+
                 {!cards.length ? (
                   <EmptyState icon={CircleSlash} title={t('noCardsShown')} />
                 ) : (
@@ -186,6 +198,9 @@ export function ReleaseDialog({
                         key={card.printId}
                         card={card}
                         owned={has(card)}
+                        owners={friends?.owners[card.printId]}
+                        elsewhere={friends?.ownersAnyEdition[card.printId]}
+                        friendsById={friendsById}
                         onOpen={() => setSelectedCard(card.card.id)}
                       />
                     ))}
@@ -211,10 +226,16 @@ export function ReleaseDialog({
 function PrintTile({
   card,
   owned,
+  owners,
+  elsewhere,
+  friendsById,
   onOpen,
 }: {
   card: ReleaseCardDto;
   owned: boolean;
+  owners: string[] | undefined;
+  elsewhere: string[] | undefined;
+  friendsById: Map<string, PublicUserDto>;
   onOpen: () => void;
 }) {
   const t = useTranslations('releases');
@@ -243,6 +264,7 @@ function PrintTile({
         </div>
         <p className="truncate font-mono text-[10px] text-fg-subtle">{card.printCode}</p>
         <p className="line-clamp-2 text-[11px] leading-tight text-fg-muted">{card.rarity}</p>
+        <PrintOwners owners={owners} elsewhere={elsewhere} byId={friendsById} />
       </button>
     </li>
   );

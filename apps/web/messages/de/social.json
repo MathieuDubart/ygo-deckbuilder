@@ -1,0 +1,88 @@
+{
+  "profile": {
+    "title": "Profil",
+    "myTitle": "Mein Profil",
+    "edit": "Profil bearbeiten",
+    "username": "Benutzername",
+    "usernameHint": "Buchstaben, Zahlen, Punkt, Bindestrich und Unterstrich. So finden dich Freunde.",
+    "save": "Speichern",
+    "avatar": "Profilbild",
+    "banner": "Banner",
+    "upload": "Bild hochladen",
+    "replace": "Ersetzen",
+    "remove": "Entfernen",
+    "imageHint": "PNG, JPEG oder WebP, bis 8 MB. Wird automatisch verkleinert und umgewandelt.",
+    "memberSince": "Mitglied seit {date}",
+    "friendsSince": "Freunde seit {date}",
+    "friendCount": "{count, plural, =0 {Keine Freunde} one {# Freund} other {# Freunde}}",
+    "openFriends": "Freunde",
+    "hidden": {
+      "title": "Dieses Profil ist privat",
+      "description": "{username} und du seid noch keine Freunde. Sende eine Anfrage, um dieses Profil zu sehen und eure Sets zu vergleichen.",
+      "sent": "Anfrage gesendet. Du siehst dieses Profil, sobald sie angenommen wird.",
+      "received": "{username} hat dir eine Freundschaftsanfrage gesendet."
+    },
+    "stats": {
+      "distinctCards": "Verschiedene Karten",
+      "copies": "Exemplare",
+      "sets": "Begonnene Sets",
+      "completedSets": "Vollständige Sets"
+    },
+    "showcase": {
+      "title": "Hervorgehobene Karten",
+      "empty": "Noch keine hervorgehobene Karte",
+      "emptyHint": "Wähle einige Karten aus deiner Sammlung, um sie hier zu zeigen.",
+      "emptyOther": "{username} hat noch keine Karte gewählt",
+      "choose": "Karten wählen",
+      "dialogTitle": "Hervorgehobene Karten",
+      "dialogHint": "Bis zu {max} Karten aus deiner Sammlung. Klicken zum Hinzufügen oder Entfernen; die Reihenfolge bleibt erhalten.",
+      "search": "In deiner Sammlung suchen…",
+      "selected": "{count} von {max} gewählt",
+      "noResults": "Keine Karte deiner Sammlung passt",
+      "done": "Fertig"
+    }
+  },
+  "friends": {
+    "title": "Freunde",
+    "description": "Freunde sehen dein Profil und deinen Fortschritt in jedem Set.",
+    "search": {
+      "label": "Jemanden finden",
+      "placeholder": "Benutzername…",
+      "hint": "Mindestens 2 Zeichen",
+      "noResults": "Kein Konto passt zu „{q}“"
+    },
+    "requests": {
+      "incoming": "Erhaltene Anfragen",
+      "outgoing": "Gesendete Anfragen",
+      "accept": "Annehmen",
+      "decline": "Ablehnen",
+      "cancel": "Anfrage zurückziehen"
+    },
+    "list": {
+      "title": "Deine Freunde",
+      "empty": "Noch keine Freunde",
+      "emptyDescription": "Suche oben einen Benutzernamen, um deine erste Anfrage zu senden."
+    },
+    "actions": {
+      "add": "Als Freund hinzufügen",
+      "remove": "Freund entfernen",
+      "confirmRemove": "{username} aus deinen Freunden entfernen?",
+      "view": "Profil ansehen"
+    },
+    "state": {
+      "FRIENDS": "Freunde",
+      "REQUEST_SENT": "Anfrage gesendet",
+      "REQUEST_RECEIVED": "Möchte dein Freund sein"
+    }
+  },
+  "releases": {
+    "friends": "Freunde",
+    "none": "Füge Freunde hinzu, um euren Fortschritt zu vergleichen",
+    "onThisSet": "Freunde in diesem Set",
+    "nobodyStarted": "Kein Freund hat dieses Set begonnen",
+    "ownedBy": "{count, plural, one {# Freund hat sie} other {# Freunde haben sie}}",
+    "ownedElsewhere": "{count, plural, one {# Freund hat sie in einer anderen Auflage} other {# Freunde haben sie in einer anderen Auflage}}",
+    "nobody": "Kein Freund hat diese Karte",
+    "legend": "Ein Punkt neben einer Karte heißt, ein Freund hat sie. Für Details antippen."
+  }
+}
