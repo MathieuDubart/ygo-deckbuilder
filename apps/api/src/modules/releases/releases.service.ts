@@ -44,7 +44,7 @@ type ReleaseRow = Omit<CardSetDto, 'tcgDate'> & {
 const SELECTING = {
   prints: Prisma.sql`COALESCE(sp.prints, 0)`,
   cards: Prisma.sql`COALESCE(sp.cards, 0)`,
-  ownedPrints: Prisma.sql`COALESCE(o."ownedPrints", 0)`,
+  ownedPrints: Prisma.sql`COALESCE(pr."ownedPrints", 0)`,
 };
 const DRESSING = {
   prints: Prisma.sql`g.prints`,
@@ -104,32 +104,24 @@ export class ReleasesService {
 
   /** Valeurs de filtre réellement présentes, avec leur effectif. */
   async facets(): Promise<ReleaseFacetsDto> {
-    const known = Prisma.sql`(sp.prints > 0 OR s."announcedAt" IS NOT NULL)`;
-    const [kinds, years] = await Promise.all([
+    // Les facettes décrivent la même population que la liste : tout le catalogue.
+    const [kinds, years, statuses] = await Promise.all([
       this.prisma.$queryRaw<{ value: string; count: number }[]>`
-        WITH sp AS (${this.setPrints})
         SELECT ${PRODUCT_KIND} AS value, COUNT(*)::int AS count
-        FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
-        WHERE ${known}
-        GROUP BY 1 ORDER BY count DESC`,
+        FROM "CardSet" s GROUP BY 1 ORDER BY count DESC`,
       this.prisma.$queryRaw<{ value: string; count: number }[]>`
-        WITH sp AS (${this.setPrints})
         SELECT EXTRACT(YEAR FROM s."tcgDate")::text AS value, COUNT(*)::int AS count
-        FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
-        WHERE ${known} AND s."tcgDate" IS NOT NULL
+        FROM "CardSet" s WHERE s."tcgDate" IS NOT NULL
         GROUP BY 1 ORDER BY value DESC`,
+      this.prisma.$queryRaw<{ value: string; count: number }[]>`
+        SELECT CASE
+                 WHEN s."tcgDate" > CURRENT_DATE THEN 'UPCOMING'
+                 WHEN s."tcgDate" > CURRENT_DATE - ${RECENT_WINDOW} THEN 'RECENT'
+                 ELSE 'RELEASED'
+               END AS value,
+               COUNT(*)::int AS count
+        FROM "CardSet" s GROUP BY 1`,
     ]);
-    const statuses = await this.prisma.$queryRaw<{ value: string; count: number }[]>`
-      WITH sp AS (${this.setPrints})
-      SELECT CASE
-               WHEN s."tcgDate" > CURRENT_DATE THEN 'UPCOMING'
-               WHEN s."tcgDate" > CURRENT_DATE - ${RECENT_WINDOW} THEN 'RECENT'
-               ELSE 'RELEASED'
-             END AS value,
-             COUNT(*)::int AS count
-      FROM "CardSet" s LEFT JOIN sp ON sp."setId" = s.id
-      WHERE ${known}
-      GROUP BY 1`;
     return { kinds, statuses, years };
   }
 
@@ -208,53 +200,35 @@ export class ReleasesService {
     userId: string,
     opts: { conditions: Prisma.Sql[]; sort: SortKey; limit: number; offset: number },
   ): Promise<ReleaseRow[]> {
-    // Une extension compte dès qu'on connaît au moins une de ses impressions, ou qu'elle a
-    // été relevée parmi les sorties annoncées (sa liste n'est alors pas encore révélée).
-    const conditions = [
-      Prisma.sql`(${SELECTING.prints} > 0 OR s."announcedAt" IS NOT NULL)`,
-      ...opts.conditions,
-    ];
+    // Toutes les extensions du catalogue sont listées, y compris celles dont on ne connaît
+    // encore aucune carte : l'intérêt de l'onglet est de les avoir toutes sous les yeux.
+    const conditions = opts.conditions.length ? opts.conditions : [Prisma.sql`TRUE`];
     return this.prisma.$queryRaw<ReleaseRow[]>`
       WITH sp AS (${this.setPrints}),
-      owned AS (
-        SELECT p."setId",
-               COUNT(DISTINCT p.id)::int AS "ownedPrints",
-               SUM(ci.quantity)::int AS copies,
-               COALESCE(SUM(ci.quantity * COALESCE(p.price, c."priceCardmarket")), 0)::float
-                 AS "ownedValue"
-        FROM "CollectionItem" ci
-        JOIN "CardPrint" p ON p.id = ci."printId"
-        JOIN "Card" c ON c.id = ci."cardId"
-        WHERE ci."userId" = ${userId}
-        GROUP BY p."setId"
-      ),
-      owned_any AS (
-        SELECT p."setId", COUNT(DISTINCT p."cardId")::int AS "ownedCards"
-        FROM "CardPrint" p
-        JOIN (SELECT DISTINCT "cardId" FROM "CollectionItem" WHERE "userId" = ${userId}) mine
-          ON mine."cardId" = p."cardId"
-        GROUP BY p."setId"
-      ),
       g AS (
         SELECT s.id,
                ${SELECTING.prints} AS prints,
                ${SELECTING.cards} AS cards,
                ${SELECTING.ownedPrints} AS "ownedPrints",
-               COALESCE(a."ownedCards", 0) AS "ownedCards",
-               COALESCE(o.copies, 0) AS copies,
-               COALESCE(o."ownedValue", 0) AS "ownedValue",
+               COALESCE(pr."ownedCards", 0) AS "ownedCards",
+               COALESCE(pr.copies, 0) AS copies,
                (COUNT(*) OVER ())::int AS total
         FROM "CardSet" s
         LEFT JOIN sp ON sp."setId" = s.id
-        LEFT JOIN owned o ON o."setId" = s.id
-        LEFT JOIN owned_any a ON a."setId" = s.id
+        -- Avancement déjà calculé (SetProgressService) : pas d'agrégat à rejouer ici
+        LEFT JOIN "SetProgress" pr ON pr."setId" = s.id AND pr."userId" = ${userId}
         WHERE ${Prisma.join(conditions, ' AND ')}
         ORDER BY ${orderBy(opts.sort, SELECTING)}
         LIMIT ${opts.limit} OFFSET ${opts.offset}
       )
       SELECT ${SET_DTO_COLUMNS},
-             g.prints, g.cards, g."ownedPrints", g."ownedCards", g.copies, g."ownedValue",
-             g.total,
+             g.prints, g.cards, g."ownedPrints", g."ownedCards", g.copies, g.total,
+             (SELECT COALESCE(SUM(ci.quantity * COALESCE(p.price, c."priceCardmarket")), 0)::float
+              FROM "CollectionItem" ci
+              JOIN "CardPrint" p ON p.id = ci."printId"
+              JOIN "Card" c ON c.id = ci."cardId"
+              WHERE ci."userId" = ${userId} AND p."setId" = s.id
+             ) AS "ownedValue",
              (SELECT COALESCE(SUM(COALESCE(p.price, c."priceCardmarket")), 0)::float
               FROM "CardPrint" p JOIN "Card" c ON c.id = p."cardId"
               WHERE p."setId" = s.id

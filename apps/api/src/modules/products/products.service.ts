@@ -15,6 +15,7 @@ import { PrismaService } from '../../common/prisma/prisma.service';
 import { normalize } from '../../common/search/normalize';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
+import { SetProgressService } from '../collection/set-progress.service';
 import { ProductContentService } from './product-content.service';
 import { isDeckProduct } from './product-kind';
 import { productCards, type ProductCard } from './quantities';
@@ -50,6 +51,7 @@ export class ProductsService {
     private readonly prisma: PrismaService,
     private readonly ownership: OwnershipService,
     private readonly content: ProductContentService,
+    private readonly progress: SetProgressService,
   ) {}
 
   // ─── Import ────────────────────────────────────────────────────────────────
@@ -99,6 +101,11 @@ export class ProductsService {
         select: { id: true },
       });
     });
+
+    await this.progress.afterCards(
+      userId,
+      cards.map((c) => c.cardId),
+    );
 
     return {
       productId: product.id,
@@ -219,6 +226,13 @@ export class ProductsService {
     }
     ops.push(this.prisma.ownedProduct.delete({ where: { id: product.id } }));
     await this.prisma.$transaction(ops);
+    if (removeCards) {
+      const cards = await this.cardsOf(product.setId);
+      await this.progress.afterCards(
+        userId,
+        cards.map((c) => c.cardId),
+      );
+    }
   }
 
   // ─── Internes ──────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 {
   "title": "Extension",
   "searchPlaceholder": "Trouver une extension : nom, code (BETB)…",
+  "count": "{count, plural, one {# extension} other {# extensions}}",
   "noDate": "Date inconnue",
   "today": "Sort aujourd’hui",
   "inDays": "{count, plural, one {dans # jour} other {dans # jours}}",

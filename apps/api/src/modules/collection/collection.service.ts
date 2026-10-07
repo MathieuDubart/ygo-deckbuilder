@@ -10,6 +10,7 @@ import type {
 import { allTagsOn, CARD_TAGS } from '../../common/catalog/tag-sql';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { displayName } from '../../common/search/display-name';
+import { SetProgressService } from './set-progress.service';
 import { cardSummarySelect, toCardSummary, toNumber } from '../../common/mappers/card.mapper';
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
@@ -24,7 +25,10 @@ type ItemRow = Prisma.CollectionItemGetPayload<{ include: typeof itemInclude }>;
 
 @Injectable()
 export class CollectionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly progress: SetProgressService,
+  ) {}
 
   /**
    * Les piles de la collection, filtrées par facettes cumulables et par étiquettes. La
@@ -221,6 +225,7 @@ export class CollectionService {
           data: { ...identity, quantity: input.quantity, notes: input.notes },
           include: itemInclude,
         });
+    await this.progress.afterCards(userId, [row.cardId]);
     return toItemDto(row, await this.cardTags(userId, row.cardId));
   }
 
@@ -228,6 +233,7 @@ export class CollectionService {
     const item = await this.findOwned(userId, id);
     if (input.quantity === 0) {
       await this.prisma.collectionItem.delete({ where: { id } });
+      await this.progress.afterCards(userId, [item.cardId]);
       return null;
     }
     await this.assertPrintMatchesCard(item.cardId, input.printId);
@@ -236,12 +242,16 @@ export class CollectionService {
       data: input,
       include: itemInclude,
     });
+    // L'impression a pu changer : les deux extensions concernées sont recalculées, puisque
+    // le recalcul part de la carte et couvre toutes les extensions qui la contiennent.
+    await this.progress.afterCards(userId, [row.cardId]);
     return toItemDto(row, await this.cardTags(userId, row.cardId));
   }
 
   async remove(userId: string, id: string): Promise<void> {
-    await this.findOwned(userId, id);
+    const item = await this.findOwned(userId, id);
     await this.prisma.collectionItem.delete({ where: { id } });
+    await this.progress.afterCards(userId, [item.cardId]);
   }
 
   /**

@@ -1,6 +1,7 @@
 {
   "title": "Edition",
   "searchPlaceholder": "Edition finden: Name, Code (BETB)…",
+  "count": "{count, plural, one {# Edition} other {# Editionen}}",
   "noDate": "Datum unbekannt",
   "today": "Erscheint heute",
   "inDays": "{count, plural, one {in # Tag} other {in # Tagen}}",
