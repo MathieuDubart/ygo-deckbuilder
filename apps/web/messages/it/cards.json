@@ -1,9 +1,8 @@
 {
   "ban": {
-    "Forbidden": "Proibita",
-    "Banned": "Proibita",
-    "Limited": "Limitata",
-    "Semi-Limited": "Semi-Limitata"
+    "FORBIDDEN": "Proibita",
+    "LIMITED": "Limitata",
+    "SEMI_LIMITED": "Semi-Limitata"
   },
   "conditions": {
     "MINT": "Mint",
@@ -17,6 +16,7 @@
   "detail": {
     "fallbackTitle": "Carta",
     "banTcg": "TCG: {status}",
+    "banOcg": "OCG: {status}",
     "level": "Liv. {level}",
     "scale": "Scala {scale}",
     "ownedPrice": "Possedute: <strong>{owned}</strong> · Cardmarket da <strong>{price}</strong>",

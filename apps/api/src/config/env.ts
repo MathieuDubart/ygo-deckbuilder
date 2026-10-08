@@ -17,6 +17,15 @@ export const envSchema = z.object({
 
   YGOPRODECK_BASE_URL: z.url().default('https://db.ygoprodeck.com/api/v7'),
   CARD_SYNC_CRON: z.string().optional().default(''),
+  /** Relecture de la banlist. Vide = désactivée. Défaut : toutes les 6 h. */
+  BANLIST_CRON: z.string().optional().default('0 */6 * * *'),
+  /**
+   * Âge au-delà duquel l'ouverture d'un deck déclenche une relecture de la banlist. En dessous,
+   * ouvrir un deck ne coûte rien — c'est ce qui permet d'appeler la route à chaque ouverture.
+   */
+  BANLIST_MAX_AGE_MINUTES: z.coerce.number().int().min(1).default(360),
+  /** Après une lecture ratée (source injoignable), délai avant de retenter. */
+  BANLIST_RETRY_MINUTES: z.coerce.number().int().min(1).default(10),
   YGOPRODECK_DECKS_URL: z.url().default('https://ygoprodeck.com/api/decks/getDecks.php'),
   /** Mise à jour du meta (listes de tournoi). Vide = désactivée. Défaut : lundi 5h. */
   META_SYNC_CRON: z.string().optional().default('0 5 * * 1'),

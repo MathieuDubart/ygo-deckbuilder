@@ -16,7 +16,10 @@
     "zoneTooSmall": "{zone}: {count, plural, one {# card} other {# cards}} (mínimo {limit})",
     "zoneTooLarge": "{zone}: {count, plural, one {# card} other {# cards}} (máximo {limit})",
     "tooManyCopies": "{name}: {count, plural, one {# cópia} other {# cópias}} (máx. {limit})",
-    "wrongZone": "{name} não pode ir no {zone}"
+    "wrongZone": "{name} não pode ir no {zone}",
+    "forbidden": "{name} está proibida ({count, plural, one {# exemplar} other {# exemplares}} no deck)",
+    "fix": "Retirar o que a banlist proíbe",
+    "fixed": "{count, plural, one {# exemplar retirado} other {# exemplares retirados}}"
   },
   "missing": {
     "summary": "<strong>{count, plural, one {# cópia} other {# cópias}}</strong> que você não tem · cerca de <strong>{cost}</strong>",
@@ -27,7 +30,9 @@
     "extraDeckMonster": "Este monstro vai no Deck Adicional",
     "notExtraDeck": "Só monstros de Fusão, Sincro, Xyz e Link vão no Deck Adicional",
     "maxCopies": "{limit, plural, one {Máximo de # cópia} other {Máximo de # cópias}}",
-    "zoneFull": "{zone} está cheio"
+    "zoneFull": "{zone} está cheio",
+    "atLimit": "Já {count}",
+    "atLimitBan": "{status} · já {count}"
   },
   "picker": {
     "search": "Buscar",
@@ -37,7 +42,8 @@
     "noOwnedResults": "Nenhum card seu corresponde. Desmarque “Na coleção” para buscar em todos os cards.",
     "noResults": "Nenhum resultado.",
     "suggestionsHint": "Cards da sua coleção que compartilham um arquétipo com o seu deck ou são mencionados por ele.",
-    "suggestionsEmpty": "Adicione alguns cards ao deck: as sugestões se baseiam nos arquétipos dele."
+    "suggestionsEmpty": "Adicione alguns cards ao deck: as sugestões se baseiam nos arquétipos dele.",
+    "tileBlocked": "{name}\n{reason} — não pode ser adicionada"
   },
   "zone": {
     "emptySide": "Abra um card e adicione ao Side Deck, ou use Shift+clique para adicionar direto",
@@ -54,5 +60,8 @@
     "removeOne": "Remover uma cópia do {zone}",
     "addOne": "Adicionar uma cópia ao {zone}",
     "cannotAdd": "Não dá para adicionar este card"
+  },
+  "banlist": {
+    "updated": "A banlist mudou — este deck acabou de ser reverificado."
   }
 }

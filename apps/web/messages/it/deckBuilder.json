@@ -16,7 +16,10 @@
     "zoneTooSmall": "{zone}: {count, plural, one {# carta} other {# carte}} (minimo {limit})",
     "zoneTooLarge": "{zone}: {count, plural, one {# carta} other {# carte}} (massimo {limit})",
     "tooManyCopies": "{name}: {count, plural, one {# copia} other {# copie}} (max {limit})",
-    "wrongZone": "{name} non può andare in {zone}"
+    "wrongZone": "{name} non può andare in {zone}",
+    "forbidden": "{name} è vietata ({count, plural, one {# copia} other {# copie}} nel deck)",
+    "fix": "Togliere ciò che la banlist vieta",
+    "fixed": "{count, plural, one {# copia rimossa} other {# copie rimosse}}"
   },
   "missing": {
     "summary": "<strong>{count, plural, one {# copia} other {# copie}}</strong> non {count, plural, one {posseduta} other {possedute}} · circa <strong>{cost}</strong>",
@@ -27,7 +30,9 @@
     "extraDeckMonster": "Questo mostro va nell’Extra Deck",
     "notExtraDeck": "Solo i mostri Fusione, Synchro, Xyz e Link vanno nell’Extra Deck",
     "maxCopies": "{limit, plural, one {Massimo # copia} other {Massimo # copie}}",
-    "zoneFull": "{zone} pieno"
+    "zoneFull": "{zone} pieno",
+    "atLimit": "Già {count}",
+    "atLimitBan": "{status} · già {count}"
   },
   "picker": {
     "search": "Cerca",
@@ -37,7 +42,8 @@
     "noOwnedResults": "Nessuna delle tue carte corrisponde. Togli la spunta a «Possedute» per cercare tra tutte le carte.",
     "noResults": "Nessun risultato.",
     "suggestionsHint": "Carte della tua collezione che condividono un archetipo con il deck o che vi sono nominate.",
-    "suggestionsEmpty": "Aggiungi qualche carta al deck: i suggerimenti si basano sui suoi archetipi."
+    "suggestionsEmpty": "Aggiungi qualche carta al deck: i suggerimenti si basano sui suoi archetipi.",
+    "tileBlocked": "{name}\n{reason} — impossibile aggiungerla"
   },
   "zone": {
     "emptySide": "Apri una carta e aggiungila al Side Deck, oppure Maiusc+clic per aggiungerla subito",
@@ -54,5 +60,8 @@
     "removeOne": "Togli una copia da {zone}",
     "addOne": "Aggiungi una copia in {zone}",
     "cannotAdd": "Impossibile aggiungere questa carta"
+  },
+  "banlist": {
+    "updated": "La banlist è cambiata — questo deck è stato ricontrollato."
   }
 }

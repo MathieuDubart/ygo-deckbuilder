@@ -1,38 +1,49 @@
 'use client';
-import type { CardSummaryDto } from '@ygo/shared';
+import { BANLIST_LIMITS, banStatusOf, type BanStatus, type CardSummaryDto } from '@ygo/shared';
+import { Ban } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { CardImage } from './card-image';
 
-const banTone = {
-  Forbidden: 'bg-danger',
-  Banned: 'bg-danger',
-  Limited: 'bg-warning',
-  'Semi-Limited': 'bg-accent',
-} as const;
-type BanStatus = keyof typeof banTone;
-const isBanStatus = (v: string | null | undefined): v is BanStatus => !!v && v in banTone;
+/**
+ * Fond ET encre : `bg-accent` est presque noir en apparence claire, du texte noir dessus y
+ * disparaîtrait. Les deux autres tons sont des couleurs fixes claires.
+ */
+const banTone: Record<BanStatus, string> = {
+  FORBIDDEN: 'bg-danger text-black',
+  LIMITED: 'bg-warning text-black',
+  SEMI_LIMITED: 'bg-accent text-accent-fg',
+};
 
 /**
  * Vignette de carte. Le badge de quantité possédée est LE signal clé de l'app :
  * vert = je l'ai, discret = je ne l'ai pas.
+ *
+ * `banStatus` est le statut qui s'applique DANS CE CONTEXTE — le format du deck en cours, pas
+ * forcément le TCG. Sans lui, la pastille retombe sur la banlist TCG, qui est le défaut de
+ * l'app. `blocked` porte la raison pour laquelle la carte ne peut pas être prise : la vignette
+ * s'éteint et se barre au lieu de laisser cliquer pour rien.
  */
 export function CardTile({
   card,
   onClick,
   footer,
   dimmed,
+  banStatus,
+  blocked,
   className,
 }: {
   card: CardSummaryDto;
   onClick?: () => void;
   footer?: React.ReactNode;
   dimmed?: boolean;
+  banStatus?: string | null;
+  blocked?: string | null;
   className?: string;
 }) {
   const t = useTranslations('cards.ban');
   const owned = card.ownedQuantity;
-  const ban = isBanStatus(card.banTcg) ? card.banTcg : null;
+  const ban = banStatusOf(banStatus === undefined ? card.banTcg : banStatus);
   return (
     <div className={cn('group relative flex flex-col gap-1.5', className)}>
       <button
@@ -42,6 +53,7 @@ export function CardTile({
           'pocket relative block w-full rounded-xs p-1 transition-[filter] duration-200',
           'hover:brightness-125',
           dimmed && 'opacity-45 saturate-50 hover:opacity-100 hover:saturate-100',
+          blocked && 'opacity-40 grayscale hover:brightness-100',
         )}
         title={card.name}
       >
@@ -49,12 +61,12 @@ export function CardTile({
         {ban && (
           <span
             className={cn(
-              'absolute top-1.5 left-1.5 grid size-5 place-items-center rounded-full font-mono text-[10px] font-bold text-black',
+              'absolute top-1.5 left-1.5 grid size-5 place-items-center rounded-full font-mono text-[10px] font-bold',
               banTone[ban],
             )}
             title={t(ban)}
           >
-            {ban === 'Limited' ? 1 : ban === 'Semi-Limited' ? 2 : 0}
+            {BANLIST_LIMITS[ban]}
           </span>
         )}
         {owned !== undefined && owned > 0 && (
@@ -63,6 +75,14 @@ export function CardTile({
           </span>
         )}
       </button>
+      {/* La raison se lit SOUS la pochette : posée dessus, elle se tronque et recouvre le
+          badge de quantité, qui reste l'information la plus utile de la vignette. */}
+      {blocked && (
+        <p className="flex items-start gap-1 px-0.5 text-danger">
+          <Ban className="mt-px size-3 shrink-0" />
+          <span className="code text-[10px] leading-tight font-bold">{blocked}</span>
+        </p>
+      )}
       {footer}
     </div>
   );

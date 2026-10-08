@@ -1,9 +1,8 @@
 {
   "ban": {
-    "Forbidden": "Proibido",
-    "Banned": "Banido",
-    "Limited": "Limitado",
-    "Semi-Limited": "Semilimitado"
+    "FORBIDDEN": "Proibido",
+    "LIMITED": "Limitado",
+    "SEMI_LIMITED": "Semilimitado"
   },
   "conditions": {
     "MINT": "Mint",
@@ -17,6 +16,7 @@
   "detail": {
     "fallbackTitle": "Card",
     "banTcg": "TCG: {status}",
+    "banOcg": "OCG: {status}",
     "level": "Nv. {level}",
     "scale": "Escala {scale}",
     "ownedPrice": "Na coleção: <strong>{owned}</strong> · Cardmarket a partir de <strong>{price}</strong>",

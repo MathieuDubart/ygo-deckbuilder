@@ -16,7 +16,10 @@
     "zoneTooSmall": "{zone} : {count, plural, one {# carte} other {# cartes}} (minimum {limit})",
     "zoneTooLarge": "{zone} : {count, plural, one {# carte} other {# cartes}} (maximum {limit})",
     "tooManyCopies": "{name} : {count, plural, one {# exemplaire} other {# exemplaires}} (max {limit})",
-    "wrongZone": "{name} n’a rien à faire dans le {zone}"
+    "wrongZone": "{name} n’a rien à faire dans le {zone}",
+    "forbidden": "{name} est interdite ({count, plural, one {# exemplaire} other {# exemplaires}} dans le deck)",
+    "fix": "Retirer ce que la banlist interdit",
+    "fixed": "{count, plural, one {# exemplaire retiré} other {# exemplaires retirés}}"
   },
   "missing": {
     "summary": "<strong>{count, plural, one {# exemplaire} other {# exemplaires}}</strong> non {count, plural, one {possédé} other {possédés}} · environ <strong>{cost}</strong>",
@@ -27,7 +30,9 @@
     "extraDeckMonster": "Ce monstre va dans l’Extra Deck",
     "notExtraDeck": "Seuls les monstres Fusion/Synchro/Xyz/Link vont en Extra",
     "maxCopies": "Maximum {limit, plural, one {# exemplaire} other {# exemplaires}}",
-    "zoneFull": "{zone} plein"
+    "zoneFull": "{zone} plein",
+    "atLimit": "Déjà {count}",
+    "atLimitBan": "{status} · déjà {count}"
   },
   "picker": {
     "search": "Rechercher",
@@ -37,7 +42,8 @@
     "noOwnedResults": "Aucune carte possédée ne correspond. Décoche « Possédées » pour chercher partout.",
     "noResults": "Aucun résultat.",
     "suggestionsHint": "Cartes de ta collection qui partagent un archétype avec ton deck ou y sont citées.",
-    "suggestionsEmpty": "Ajoute quelques cartes au deck : les suggestions se basent sur ses archétypes."
+    "suggestionsEmpty": "Ajoute quelques cartes au deck : les suggestions se basent sur ses archétypes.",
+    "tileBlocked": "{name}\n{reason} — ajout impossible"
   },
   "zone": {
     "emptySide": "Ouvre une carte et ajoute-la au side, ou Maj + clic pour l’ajouter direct",
@@ -54,5 +60,8 @@
     "removeOne": "Retirer un exemplaire du {zone}",
     "addOne": "Ajouter un exemplaire au {zone}",
     "cannotAdd": "Impossible d’ajouter"
+  },
+  "banlist": {
+    "updated": "La banlist a changé — ce deck vient d’être revérifié."
   }
 }

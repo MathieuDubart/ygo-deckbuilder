@@ -46,6 +46,7 @@ export const de: DeepPartialMessages = {
     archetypeNotOwned: 'Keine „{archetype}“-Karte in deiner Sammlung',
     syncRunning: 'Es läuft bereits eine Synchronisierung',
     metaSyncRunning: 'Meta-Update läuft bereits',
+    banlistFailed: 'Banlist konnte nicht gelesen werden: {message}',
     syncFailed: 'Synchronisierung fehlgeschlagen: {message}',
   },
 
