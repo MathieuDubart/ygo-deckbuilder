@@ -301,7 +301,7 @@ function SummaryTile({
 }) {
   return (
     <div className="rounded-xl border border-border bg-bg-sunken/60 px-3 py-2">
-      <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{label}</p>
+      <p className="text-[11px] text-fg-subtle">{label}</p>
       <p
         className={cn(
           'mt-0.5 flex items-center gap-1.5 font-mono text-sm font-semibold tabular-nums',

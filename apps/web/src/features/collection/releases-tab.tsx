@@ -27,7 +27,7 @@ import { FriendProgressStrip } from '@/features/social/friend-progress';
 import { useFormat } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
 import { ReleaseDialog } from './release-dialog';
 
 const SORTS = ['date', 'progress', 'name', 'cards'] as const;
@@ -136,18 +136,15 @@ export function ReleasesTab() {
           },
         ]}
       >
-        <Select
-          aria-label={t('filters.sort')}
+        <SortSelect
+          label={t('filters.sort')}
           value={params.sort ?? 'date'}
-          onChange={(e) => set({ sort: e.target.value as ReleaseParams['sort'] })}
-          className="w-auto"
-        >
-          {SORTS.map((value) => (
-            <option key={value} value={value}>
-              {t('sort.option', { label: t(`sort.${value}`) })}
-            </option>
-          ))}
-        </Select>
+          onChange={(value) => set({ sort: value as ReleaseParams['sort'] })}
+          options={SORTS.map((value) => ({
+            value,
+            label: t('sort.option', { label: t(`sort.${value}`) }),
+          }))}
+        />
         <FilterToggle
           checked={!!params.ownedProduct}
           onChange={(checked) => set({ ownedProduct: checked || undefined })}
@@ -250,10 +247,12 @@ function ReleaseCard({
       <button
         type="button"
         onClick={onOpen}
-        className="group flex h-full w-full flex-col gap-2 rounded-2xl border border-border bg-bg-elevated p-3 text-left transition hover:border-border-strong"
+        className="group flex h-full w-full flex-col gap-2.5 rounded-xs border border-edge p-3 text-left transition-colors hover:border-edge-strong hover:bg-ink/3"
       >
         <div className="flex gap-3">
-          <ProductCover set={release.set} sizes="80px" className="aspect-[3/4] w-16 shrink-0" />
+          <div className="pocket shrink-0 rounded-xs p-0.5">
+            <ProductCover set={release.set} sizes="80px" className="aspect-[3/4] w-16" />
+          </div>
           <div className="min-w-0 flex-1 space-y-1">
             <p className="line-clamp-2 text-sm leading-snug font-medium">{release.set.name}</p>
             <div className="flex flex-wrap items-center gap-1">
@@ -295,7 +294,7 @@ function StatusBadge({ release }: { release: ReleaseDto }) {
     const days = release.daysUntil ?? 0;
     return <Badge tone="accent">{days === 0 ? t('today') : t('inDays', { count: days })}</Badge>;
   }
-  if (release.status === 'RECENT') return <Badge tone="warning">{t('status.RECENT')}</Badge>;
+  if (release.status === 'RECENT') return <Badge>{t('status.RECENT')}</Badge>;
   return null;
 }
 
@@ -318,14 +317,14 @@ function Spotlight({
   const t = useTranslations('releases');
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-elevated p-3">
-      <h3 className="mb-2 flex items-center gap-1.5 text-xs font-semibold tracking-wide text-fg-muted uppercase">
-        <Icon className="size-3.5" /> {title}
+    <section>
+      <h3 className="mb-1.5 flex items-center gap-2 border-b border-edge pb-1.5 text-sm font-medium text-ink-muted">
+        <Icon className="size-3.5" strokeWidth={1.5} /> {title}
       </h3>
       {!releases.length ? (
-        <p className="py-4 text-center text-xs text-fg-subtle">{empty}</p>
+        <p className="py-4 text-xs text-ink-faint">{empty}</p>
       ) : (
-        <ul className="divide-y divide-border">
+        <ul className="divide-y divide-edge">
           {releases.map((release) => {
             const { owned, total } = counters(release, anyEdition);
             return (

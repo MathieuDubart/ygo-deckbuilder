@@ -147,7 +147,7 @@ export function ScoreBadge({ score }: { score: number }) {
       title={t('hint')}
     >
       <span className="font-mono text-lg leading-none font-bold tabular-nums">{score}</span>
-      <span className="text-[9px] tracking-wide uppercase">{t('label')}</span>
+      <span className="text-[9px]">{t('label')}</span>
     </div>
   );
 }

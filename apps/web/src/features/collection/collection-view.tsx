@@ -10,7 +10,15 @@ import { TagFilter } from '@/components/tags/tag-filter';
 import { TagList, TagPicker } from '@/components/tags/tag-picker';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState, PageHeader, Pagination, Skeleton, Stat } from '@/components/ui/feedback';
+import {
+  EmptyState,
+  Figures,
+  PageHeader,
+  Pagination,
+  Skeleton,
+  Stat,
+} from '@/components/ui/feedback';
+import { DividerTabs } from '@/components/ui/tabs';
 import { Select } from '@/components/ui/input';
 import {
   useCollection,
@@ -23,9 +31,10 @@ import {
 } from '@/lib/api/collection';
 import { useTagCard, useTags } from '@/lib/api/tags';
 import { useFormat } from '@/lib/format';
+import { isPremiumRarity } from '@/lib/rarity';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
 import { ImportSetDialog } from './import-set-dialog';
 import { ProductDialog } from './product-dialog';
 import { ProductsTab } from './products-tab';
@@ -62,39 +71,23 @@ export function CollectionView() {
         }
       />
 
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      <Figures>
         <Stat label={t('stats.copies')} value={stats ? number(stats.totalCopies) : '—'} />
         <Stat label={t('stats.distinctCards')} value={stats ? number(stats.distinctCards) : '—'} />
         <Stat label={t('stats.estimatedValue')} value={stats ? price(stats.estimatedValue) : '—'} />
-      </div>
+      </Figures>
 
-      <div
-        role="tablist"
-        aria-label={t('tabs.label')}
-        className="mb-4 inline-grid grid-cols-3 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm"
-      >
-        {(
-          [
-            ['cards', t('tabs.cards'), Library],
-            ['products', t('tabs.products'), Boxes],
-            ['releases', t('tabs.releases'), Sparkles],
-          ] as const
-        ).map(([value, label, Icon]) => (
-          <button
-            key={value}
-            type="button"
-            role="tab"
-            aria-selected={tab === value}
-            onClick={() => setTab(value)}
-            className={cn(
-              'flex items-center justify-center gap-1.5 rounded-md px-4 py-1.5 font-medium transition',
-              tab === value ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted hover:text-fg',
-            )}
-          >
-            <Icon className="size-4" /> {label}
-          </button>
-        ))}
-      </div>
+      <DividerTabs
+        label={t('tabs.label')}
+        value={tab}
+        onChange={setTab}
+        className="mb-6"
+        items={[
+          { value: 'cards', label: t('tabs.cards'), icon: Library },
+          { value: 'products', label: t('tabs.products'), icon: Boxes },
+          { value: 'releases', label: t('tabs.releases'), icon: Sparkles },
+        ]}
+      />
 
       {tab === 'releases' ? (
         <ReleasesTab />
@@ -216,18 +209,15 @@ function CardsTab({ onImport }: { onImport: () => void }) {
           },
         ]}
       >
-        <Select
-          aria-label={tf('sort')}
+        <SortSelect
+          label={tf('sort')}
           value={params.sort ?? 'name'}
-          onChange={(e) => set({ sort: e.target.value as CollectionParams['sort'] })}
-          className="w-auto"
-        >
-          {SORTS.map((value) => (
-            <option key={value} value={value}>
-              {tf('sortOption', { label: tf(`sorts.${value}`) })}
-            </option>
-          ))}
-        </Select>
+          onChange={(value) => set({ sort: value as CollectionParams['sort'] })}
+          options={SORTS.map((value) => ({
+            value,
+            label: tf('sortOption', { label: tf(`sorts.${value}`) }),
+          }))}
+        />
         <FilterToggle
           checked={!!params.firstEdition}
           onChange={(checked) => set({ firstEdition: checked || undefined })}
@@ -264,7 +254,7 @@ function CardsTab({ onImport }: { onImport: () => void }) {
           />
         ) : (
           <div className={isFetching ? 'opacity-70 transition' : 'transition'}>
-            <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-bg-elevated">
+            <ul className="divide-y divide-edge border-y border-edge">
               {data.items.map((item) => (
                 <CollectionRow key={item.id} item={item} onOpen={() => setSelected(item.card.id)} />
               ))}
@@ -296,30 +286,40 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
   const attached = item.card.tagIds ?? [];
 
   return (
-    <li className="flex items-center gap-4 px-3 py-2.5">
-      <button onClick={onOpen} className="w-11 shrink-0">
+    <li className="flex items-center gap-4 py-2.5 pr-1 pl-2">
+      {/* La vignette est glissée dans une pochette : c'est le geste du classeur */}
+      <button onClick={onOpen} className="pocket w-11 shrink-0 rounded-xs p-0.5">
         <CardImage card={item.card} sizes="44px" />
       </button>
       <div className="min-w-0 flex-1">
-        <button onClick={onOpen} className="block truncate text-left font-medium hover:text-accent">
+        <button onClick={onOpen} className="block truncate text-left font-medium hover:underline">
           {item.card.name}
         </button>
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           {item.print ? (
-            <Badge>
-              {item.print.printCode} · {item.print.rarity}
-            </Badge>
+            <span className="flex items-center gap-2">
+              <span className="code text-[11px] text-ink-faint">{item.print.printCode}</span>
+              <span
+                className={cn(
+                  'text-[11px]',
+                  isPremiumRarity(item.print.rarity) ? 'text-gold' : 'text-ink-muted',
+                )}
+              >
+                {item.print.rarity}
+              </span>
+            </span>
           ) : (
-            <Badge>{t('row.unknownPrint')}</Badge>
+            <span className="text-[11px] text-ink-faint">{t('row.unknownPrint')}</span>
           )}
-          <Badge>{item.language}</Badge>
-          <Badge>{t(`conditions.${item.condition as CardCondition}`)}</Badge>
-          {item.firstEdition && <Badge tone="accent">1st</Badge>}
+          <span className="text-[11px] text-ink-faint">
+            {item.language} · {t(`conditions.${item.condition as CardCondition}`)}
+            {item.firstEdition && ' · 1st'}
+          </span>
           {/* Chaque étiquette garde sa couleur : c'est à ça qu'on la reconnaît */}
           <TagList tagIds={attached} tags={tags} />
         </div>
       </div>
-      <span className="hidden font-mono text-sm text-fg-muted tabular-nums sm:block">
+      <span className="code hidden text-sm text-ink-muted sm:block">
         {price(item.print?.price ?? item.card.priceCardmarket)}
       </span>
       <TagPicker
@@ -327,7 +327,7 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
         label=""
         onToggle={(tagId, on) => tagCard.mutate({ tagId, cardId: item.card.id, on })}
       />
-      <div className="flex items-center gap-1 rounded-lg border border-border bg-bg-sunken p-0.5">
+      <div className="pocket flex items-center gap-1 rounded-xs p-0.5">
         <button
           className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-40"
           disabled={busy}

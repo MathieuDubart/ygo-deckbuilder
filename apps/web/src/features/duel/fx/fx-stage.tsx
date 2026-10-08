@@ -67,10 +67,10 @@ function Scene({ event, cards }: { event: FxFrame['event']; cards: CardMap }) {
               background: `linear-gradient(90deg, transparent, color-mix(in oklch, ${tint(event.player)} 85%, black), transparent)`,
             }}
           >
-            <p className="text-xs font-semibold tracking-[0.3em] text-white/80 uppercase">
+            <p className="text-xs font-semibold tracking-[0.3em] text-white/80">
               {t('board.turn', { turn: event.turn })}
             </p>
-            <p className="text-4xl font-black tracking-wide text-white uppercase italic sm:text-5xl">
+            <p className="text-4xl font-black text-white italic sm:text-5xl">
               {event.player === 0 ? t('board.yourTurn') : t('board.opponentTurn')}
             </p>
           </div>
@@ -103,7 +103,7 @@ function Scene({ event, cards }: { event: FxFrame['event']; cards: CardMap }) {
       return (
         <Band color="var(--danger)">
           <div className="relative">
-            <p className="fx-title text-4xl font-black tracking-widest text-white uppercase sm:text-6xl">
+            <p className="fx-title text-4xl font-black tracking-widest text-white sm:text-6xl">
               {t('fx.negated')}
             </p>
             <div className="fx-slash absolute top-1/2 -left-8 -right-8 h-2 -rotate-6 bg-danger shadow-[0_0_20px_var(--danger)]" />
@@ -143,7 +143,7 @@ function Scene({ event, cards }: { event: FxFrame['event']; cards: CardMap }) {
     case 'PHASE':
       return (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="fx-pill rounded-full border border-white/15 bg-black/75 px-4 py-1.5 text-sm font-semibold tracking-wide text-white uppercase backdrop-blur">
+          <span className="fx-pill rounded-full border border-white/15 bg-black/75 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur">
             {t(`phases.${event.phase}`)}
           </span>
         </div>
@@ -246,7 +246,7 @@ function CutIn({
           </div>
         </div>
         <div className={cn('fx-title max-w-56 space-y-1', player === 1 && 'text-right')}>
-          <p className="text-[11px] font-bold tracking-[0.25em] uppercase" style={{ color }}>
+          <p className="text-[11px] font-bold tracking-[0.25em]" style={{ color }}>
             {label}
           </p>
           <p className="text-lg leading-tight font-bold text-white sm:text-xl">{title}</p>
@@ -270,7 +270,7 @@ function Attack({
   const flip = event.player === 1;
   return (
     <Band color="var(--danger)">
-      <p className="fx-title mb-3 text-xs font-bold tracking-[0.3em] text-danger uppercase">
+      <p className="fx-title mb-3 text-xs font-bold tracking-[0.3em] text-danger">
         {event.target ? t('attack') : t('direct')}
       </p>
       <div className={cn('flex items-center gap-10 sm:gap-16', flip && 'flex-row-reverse')}>
@@ -286,9 +286,7 @@ function Attack({
             </div>
           ) : (
             <div className="fx-recoil flex aspect-(--aspect-card) flex-col items-center justify-center rounded-lg border-2 border-danger/60 bg-danger/15 text-white">
-              <span className="text-xs tracking-widest uppercase">
-                {flip ? t('you') : t('opponent')}
-              </span>
+              <span className="text-xs tracking-widest">{flip ? t('you') : t('opponent')}</span>
               <span className="text-2xl font-black">LP</span>
             </div>
           )}

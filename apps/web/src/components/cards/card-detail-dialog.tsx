@@ -156,7 +156,7 @@ export function CardDetailDialog({
 
           {card.prints.length > 0 && (
             <section>
-              <h3 className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">
+              <h3 className="mb-2 text-xs font-medium text-fg-subtle">
                 {t('detail.prints', { count: card.prints.length })}
               </h3>
               <ul className="divide-y divide-border rounded-xl border border-border text-sm">

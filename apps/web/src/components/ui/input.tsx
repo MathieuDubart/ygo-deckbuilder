@@ -6,20 +6,25 @@ import {
 } from 'react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Un champ est un creux dans la page, pas une boîte posée dessus : fond plus sombre, arête
+ * interne, aucun cadre clair. Au focus, l'arête s'éclaire — rien ne grossit, rien ne saute.
+ */
 const field =
-  'w-full rounded-lg border border-border bg-bg-sunken px-3 text-sm text-fg placeholder:text-fg-subtle ' +
-  'transition focus:border-accent focus:outline-none disabled:opacity-50';
+  'pocket w-full rounded-xs px-3 text-sm text-ink placeholder:text-ink-faint ' +
+  'transition-[box-shadow] outline-none disabled:opacity-50 ' +
+  'focus:shadow-[inset_0_0_0_1px_var(--edge-strong),inset_0_1px_2px_oklch(0_0_0/0.5)]';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(field, 'h-10', className)} {...props} />
+    <input ref={ref} className={cn(field, 'h-9', className)} {...props} />
   ),
 );
 Input.displayName = 'Input';
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className, ...props }, ref) => (
-    <select ref={ref} className={cn(field, 'h-10 appearance-none pr-8', className)} {...props} />
+    <select ref={ref} className={cn(field, 'h-9 appearance-none pr-7', className)} {...props} />
   ),
 );
 Select.displayName = 'Select';
@@ -47,7 +52,7 @@ export function Field({
 }) {
   return (
     <label className={cn('flex flex-col gap-1.5', className)}>
-      <span className="text-xs font-medium tracking-wide text-fg-muted uppercase">{label}</span>
+      <span className="text-xs font-medium text-fg-muted">{label}</span>
       {children}
       {error ? (
         <span className="text-xs text-danger">{error}</span>

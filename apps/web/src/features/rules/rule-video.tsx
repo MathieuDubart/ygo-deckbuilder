@@ -21,9 +21,7 @@ export function RuleVideo({
 }) {
   return (
     <div className="mt-5">
-      <p className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">
-        {labels.video}
-      </p>
+      <p className="mb-2 text-xs font-medium text-fg-subtle">{labels.video}</p>
       <iframe
         src={`https://www.youtube-nocookie.com/embed/${video.id}?rel=0`}
         title={video.title}

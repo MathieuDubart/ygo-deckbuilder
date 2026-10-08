@@ -19,11 +19,11 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <Icon className="size-8 text-fg-subtle" strokeWidth={1.5} />
+    <div className="pocket flex flex-col items-center justify-center gap-3 rounded-md px-6 py-12 text-center">
+      <Icon className="size-7 text-ink-faint" strokeWidth={1.25} />
       <div className="space-y-1">
         <p className="font-medium">{title}</p>
-        {description && <p className="max-w-sm text-sm text-fg-muted">{description}</p>}
+        {description && <p className="max-w-sm text-sm text-ink-muted">{description}</p>}
       </div>
       {action}
     </div>
@@ -40,21 +40,87 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">{title}</h1>
-        {description && <p className="text-sm text-fg-muted">{description}</p>}
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+      <div>
+        <h1 className="text-[1.75rem] leading-none font-semibold md:text-[2.125rem]">{title}</h1>
+        {description && <p className="mt-2 max-w-prose text-sm text-ink-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>
   );
 }
 
-export function Stat({ label, value }: { label: string; value: React.ReactNode }) {
+/**
+ * Les chiffres clés d'un écran, en une seule bande séparée par des filets — pas en trois
+ * boîtes identiques. Le chiffre passe avant son libellé : c'est lui qu'on vient lire.
+ */
+/**
+ * Intertitre de section. Un filet qui court sous le titre, comme la ligne d'un intercalaire :
+ * ça sépare mieux qu'un libellé en capitales, et ça ne crie pas.
+ */
+export function SectionHeading({
+  children,
+  action,
+  className,
+}: {
+  children: React.ReactNode;
+  action?: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="rounded-xl border border-border bg-bg-elevated px-4 py-3">
-      <p className="text-xs tracking-wide text-fg-subtle uppercase">{label}</p>
-      <p className="mt-1 font-mono text-xl font-semibold tabular-nums">{value}</p>
+    <div
+      className={cn(
+        'mb-3 flex items-baseline justify-between gap-4 border-b border-edge pb-1.5',
+        className,
+      )}
+    >
+      <h2 className="text-sm font-medium text-ink-muted">{children}</h2>
+      {action}
+    </div>
+  );
+}
+
+export function Figures({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <dl
+      className={cn(
+        'mb-7 flex flex-wrap items-stretch gap-x-7 gap-y-4 border-y border-edge py-4',
+        '[&>div+div]:border-l [&>div+div]:border-edge [&>div+div]:pl-7',
+        className,
+      )}
+    >
+      {children}
+    </dl>
+  );
+}
+
+export function Stat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: React.ReactNode;
+  /** `gold` pour une valeur qui se mérite (collection complète, valeur estimée). */
+  tone?: 'gold';
+}) {
+  return (
+    <div className="min-w-24">
+      <dd
+        className={cn(
+          'code text-[1.6rem] leading-none font-semibold',
+          tone === 'gold' ? 'text-gold' : 'text-ink',
+        )}
+      >
+        {value}
+      </dd>
+      <dt className="mt-1.5 text-xs text-ink-faint">{label}</dt>
     </div>
   );
 }
@@ -75,10 +141,11 @@ export function Meter({
   className?: string;
 }) {
   const ratio = total > 0 ? Math.min(1, value / total) : 0;
-  const tone = ratio >= 1 ? 'bg-success' : ratio > 0 ? 'bg-accent' : 'bg-border-strong';
+  // L'or est réservé à ce qui se mérite : une extension bouclée en fait partie.
+  const tone = ratio >= 1 ? 'bg-gold' : ratio > 0 ? 'bg-ink-muted' : 'bg-transparent';
   return (
     <div
-      className={cn('h-1.5 overflow-hidden rounded-full bg-bg-sunken', className)}
+      className={cn('pocket h-1 overflow-hidden rounded-xs', className)}
       title={title}
       role="progressbar"
       aria-valuenow={value}
@@ -86,7 +153,7 @@ export function Meter({
       aria-valuemax={total}
     >
       <div
-        className={cn('h-full rounded-full transition-[width]', tone)}
+        className={cn('h-full transition-[width] duration-500', tone)}
         style={{ width: `${ratio * 100}%` }}
       />
     </div>
@@ -113,7 +180,7 @@ export function Pagination({
       >
         {t('previous')}
       </button>
-      <span className="font-mono text-fg-subtle tabular-nums">
+      <span className="code text-ink-faint">
         {page} / {totalPages}
       </span>
       <button

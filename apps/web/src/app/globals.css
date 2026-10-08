@@ -1,58 +1,112 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens. Dark par défaut (on joue aux cartes le soir), clair dispo.
- * Accent : or "millénaire" — utilisé avec parcimonie (actions primaires, focus).
+ * Direction : le classeur du collectionneur.
+ *
+ * Le fond est une PAGE de classeur, les vignettes sont des POCHETTES creusées dedans.
+ * Rien ne flotte : une pochette est toujours plus sombre que sa page, dans les deux thèmes
+ * (un creux, ça fait de l'ombre). Seule exception, les surfaces qui se posent vraiment
+ * par-dessus : modales, menus. C'est l'inverse du réflexe « carte claire + ombre portée ».
+ *
+ * Les cartes sont la seule couleur. Le chrome tient en noir chaud (carton), blanc os
+ * (l'étiquette collée sur l'intercalaire) et les couleurs de cadre du jeu, qui appartiennent
+ * au contenu. L'or ne décore pas : il se mérite — rareté, et extension bouclée.
  */
-:root {
-  --bg: oklch(0.155 0.008 270);
-  --bg-elevated: oklch(0.195 0.01 270);
-  --bg-sunken: oklch(0.13 0.008 270);
-  --fg: oklch(0.96 0.005 270);
-  --fg-muted: oklch(0.72 0.012 270);
-  --fg-subtle: oklch(0.55 0.012 270);
-  --border: oklch(0.28 0.012 270);
-  --border-strong: oklch(0.38 0.014 270);
-  --accent: oklch(0.82 0.13 85);
-  --accent-fg: oklch(0.2 0.03 85);
-  --danger: oklch(0.68 0.19 25);
-  --success: oklch(0.75 0.15 155);
-  --warning: oklch(0.8 0.14 70);
 
+:root {
+  /* Page, pochette, pochette profonde */
+  --sheet: oklch(0.165 0.007 70);
+  --pocket: oklch(0.125 0.006 70);
+  --pocket-deep: oklch(0.105 0.005 70);
+  /* Ce qui se pose par-dessus la page : modales, menus */
+  --sleeve: oklch(0.225 0.008 70);
+
+  --ink: oklch(0.955 0.006 85);
+  --ink-muted: oklch(0.735 0.011 80);
+  --ink-faint: oklch(0.565 0.011 80);
+
+  --edge: oklch(0.285 0.008 70);
+  --edge-strong: oklch(0.42 0.01 70);
+
+  /* L'étiquette : fond des actions primaires et de la sélection */
+  --label: oklch(0.945 0.012 85);
+  --label-ink: oklch(0.17 0.01 70);
+
+  /* Or : rareté et complétion, jamais la décoration */
+  --gold: oklch(0.81 0.125 85);
+
+  --danger: oklch(0.67 0.185 25);
+  --success: oklch(0.74 0.145 155);
+  --warning: oklch(0.79 0.135 70);
+
+  /* Couleurs de cadre du jeu : elles appartiennent aux cartes, pas à l'interface */
   --monster: oklch(0.72 0.1 60);
   --spell: oklch(0.7 0.11 170);
   --trap: oklch(0.66 0.14 340);
   --extra: oklch(0.68 0.13 290);
+
   color-scheme: dark;
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --bg: oklch(0.985 0.003 270);
-    --bg-elevated: oklch(1 0 0);
-    --bg-sunken: oklch(0.955 0.005 270);
-    --fg: oklch(0.2 0.01 270);
-    --fg-muted: oklch(0.45 0.012 270);
-    --fg-subtle: oklch(0.6 0.012 270);
-    --border: oklch(0.9 0.006 270);
-    --border-strong: oklch(0.82 0.008 270);
-    --accent: oklch(0.7 0.14 80);
-    --accent-fg: oklch(0.18 0.03 85);
+    /* Papier chaud plutôt que blanc froid : c'est du carton, pas un écran de bureau */
+    --sheet: oklch(0.968 0.007 85);
+    --pocket: oklch(0.925 0.01 85);
+    --pocket-deep: oklch(0.9 0.011 85);
+    --sleeve: oklch(1 0 0);
+
+    --ink: oklch(0.22 0.012 70);
+    --ink-muted: oklch(0.46 0.013 75);
+    --ink-faint: oklch(0.6 0.012 75);
+
+    --edge: oklch(0.885 0.008 85);
+    --edge-strong: oklch(0.79 0.01 85);
+
+    --label: oklch(0.26 0.014 70);
+    --label-ink: oklch(0.97 0.008 85);
+
+    --gold: oklch(0.63 0.12 75);
+    --success: oklch(0.58 0.13 155);
+    --warning: oklch(0.65 0.13 65);
+    --danger: oklch(0.56 0.19 25);
+
+    --monster: oklch(0.56 0.1 55);
+    --spell: oklch(0.52 0.1 175);
+    --trap: oklch(0.5 0.14 340);
+    --extra: oklch(0.52 0.13 290);
+
     color-scheme: light;
   }
 }
 
 @theme inline {
-  --color-bg: var(--bg);
-  --color-bg-elevated: var(--bg-elevated);
-  --color-bg-sunken: var(--bg-sunken);
-  --color-fg: var(--fg);
-  --color-fg-muted: var(--fg-muted);
-  --color-fg-subtle: var(--fg-subtle);
-  --color-border: var(--border);
-  --color-border-strong: var(--border-strong);
-  --color-accent: var(--accent);
-  --color-accent-fg: var(--accent-fg);
+  --color-sheet: var(--sheet);
+  --color-pocket: var(--pocket);
+  --color-pocket-deep: var(--pocket-deep);
+  --color-sleeve: var(--sleeve);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-edge: var(--edge);
+  --color-edge-strong: var(--edge-strong);
+  --color-label: var(--label);
+  --color-label-ink: var(--label-ink);
+  --color-gold: var(--gold);
+
+  /* Anciens noms, repointés : la bascule est immédiate partout, et les écrans passent
+     au nouveau vocabulaire au fur et à mesure. */
+  --color-bg: var(--sheet);
+  --color-bg-sunken: var(--pocket);
+  --color-bg-elevated: var(--sleeve);
+  --color-fg: var(--ink);
+  --color-fg-muted: var(--ink-muted);
+  --color-fg-subtle: var(--ink-faint);
+  --color-border: var(--edge);
+  --color-border-strong: var(--edge-strong);
+  --color-accent: var(--label);
+  --color-accent-fg: var(--label-ink);
+
   --color-danger: var(--danger);
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -60,30 +114,69 @@
   --color-spell: var(--spell);
   --color-trap: var(--trap);
   --color-extra: var(--extra);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Une seule famille, toutes largeurs. `--font-code` n'est pas une chasse fixe : les codes
+     d'extension sont imprimés en condensé sur les vraies cartes, pas à la machine à écrire. */
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-code);
+
+  /* Une pochette est découpée, pas moussée */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 10px;
+
   --aspect-card: 59 / 86;
 }
 
 html,
 body {
-  background: var(--bg);
-  color: var(--fg);
+  background: var(--sheet);
+  color: var(--ink);
 }
 
 body {
-  font-feature-settings: 'ss01', 'cv11';
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Les chiffres s'alignent en colonne, et se lisent à la largeur d'une étiquette */
+.font-mono,
+.code {
+  font-family: var(--font-code);
+  font-stretch: 80%;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+/* Titres : un cran plus étroit et plus serré que le texte courant — l'impression d'un dos
+   de classeur, pas d'un titre de page web. */
+h1,
+h2,
+h3 {
+  font-stretch: 92%;
+  letter-spacing: -0.015em;
+}
+
+/* La pochette : un creux dans la page. Jamais d'ombre portée, jamais de bord clair en haut. */
+@utility pocket {
+  background: var(--pocket);
+  box-shadow:
+    inset 0 1px 2px oklch(0 0 0 / 0.5),
+    inset 0 0 0 1px oklch(0 0 0 / 0.25);
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--label);
   outline-offset: 2px;
 }
 
 dialog::backdrop {
-  background: oklch(0 0 0 / 0.6);
-  backdrop-filter: blur(4px);
+  background: oklch(0 0 0 / 0.62);
+  backdrop-filter: blur(5px);
 }
 
 @media (prefers-reduced-motion: reduce) {

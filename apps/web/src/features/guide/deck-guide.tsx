@@ -282,13 +282,13 @@ function GuideBody({
         <Section icon={Swords} title={t('sections.firstSecond')}>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <p className="mb-1 text-xs font-semibold tracking-wide text-fg-subtle uppercase">
+              <p className="mb-1 text-xs font-semibold text-fg-subtle">
                 {t('sections.goingFirst')}
               </p>
               <Bullets items={guide.goingFirst} />
             </div>
             <div>
-              <p className="mb-1 text-xs font-semibold tracking-wide text-fg-subtle uppercase">
+              <p className="mb-1 text-xs font-semibold text-fg-subtle">
                 {t('sections.goingSecond')}
               </p>
               <Bullets items={guide.goingSecond} />
@@ -400,7 +400,7 @@ function Combo({
           ))}
         </div>
         <div className="min-w-0">
-          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{t('hand')}</p>
+          <p className="text-[11px] text-fg-subtle">{t('hand')}</p>
           <p className="truncate text-sm font-medium">{combo.title}</p>
         </div>
       </div>
@@ -416,7 +416,7 @@ function Combo({
       </ol>
       {board.length > 0 && (
         <div className="mt-2 flex items-center gap-2 border-t border-border pt-2">
-          <p className="text-[11px] tracking-wide text-fg-subtle uppercase">{t('endBoard')}</p>
+          <p className="text-[11px] text-fg-subtle">{t('endBoard')}</p>
           <div className="flex gap-1">
             {board.map((c, i) => (
               <CardThumb key={`${c.id}-${i}`} card={c} onInspect={onInspect} className="w-8" />

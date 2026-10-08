@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState, PageHeader, Skeleton } from '@/components/ui/feedback';
+import { EmptyState, PageHeader, SectionHeading, Skeleton } from '@/components/ui/feedback';
 import { Input } from '@/components/ui/input';
 import {
   useFriendRequests,
@@ -67,9 +67,7 @@ export function FriendsPage() {
       {outgoing.length > 0 && <RequestSection title={t('requests.outgoing')} requests={outgoing} />}
 
       <section>
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-fg-muted uppercase">
-          {t('list.title')}
-        </h2>
+        <SectionHeading>{t('list.title')}</SectionHeading>
         {friends.isPending ? (
           <div className="space-y-2">
             <Skeleton className="h-16" />
@@ -86,7 +84,7 @@ export function FriendsPage() {
             {friends.data?.map((friend) => (
               <li
                 key={friend.id}
-                className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated px-4 py-3"
+                className="flex items-center gap-3 rounded-xs border border-edge px-4 py-3"
               >
                 <UserChip user={friend} size="md" className="flex-1" />
                 <FriendCounters
@@ -126,7 +124,7 @@ function SearchRow({ result }: { result: UserSearchResultDto }) {
   const respond = useRespondToRequest();
 
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated px-4 py-3">
+    <div className="flex items-center gap-3 rounded-xs border border-edge px-4 py-3">
       <UserChip user={result} size="md" className="flex-1" />
       {result.state === 'NONE' && (
         <Button
@@ -160,12 +158,12 @@ function RequestSection({ title, requests }: { title: string; requests: FriendRe
 
   return (
     <section className="mb-8">
-      <h2 className="mb-3 text-sm font-semibold tracking-wide text-fg-muted uppercase">{title}</h2>
+      <SectionHeading>{title}</SectionHeading>
       <ul className="space-y-2">
         {requests.map((req) => (
           <li
             key={req.id}
-            className="flex items-center gap-3 rounded-xl border border-border bg-bg-elevated px-4 py-3"
+            className="flex items-center gap-3 rounded-xs border border-edge px-4 py-3"
           >
             <Avatar user={req.user} size="md" />
             <UserChip user={req.user} className="flex-1" />

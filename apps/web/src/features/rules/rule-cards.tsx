@@ -95,7 +95,7 @@ export function RuleCards({
 
   return (
     <div ref={ref} className={empty ? 'hidden' : 'mt-5'}>
-      <p className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">{label}</p>
+      <p className="mb-2 text-xs font-medium text-fg-subtle">{label}</p>
       <div className="flex gap-3 overflow-x-auto pb-1">
         {names.map((name) => (
           <Cited key={name} name={name} enabled={visible} onOpen={onOpen} onResolved={onResolved} />

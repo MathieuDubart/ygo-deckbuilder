@@ -348,9 +348,7 @@ function Hand({
           active ? 'border-accent/60 bg-accent/10' : 'border-border bg-bg-elevated',
         )}
       >
-        <span className="text-[10px] tracking-wide text-fg-subtle uppercase">
-          {mine ? t('you') : t('opponent')}
-        </span>
+        <span className="text-[10px] text-fg-subtle">{mine ? t('you') : t('opponent')}</span>
         <LpCounter value={lp?.[controller] ?? player.lp} className="text-lg font-semibold" />
         <span className="text-[10px] text-fg-subtle">{t('lp')}</span>
       </div>

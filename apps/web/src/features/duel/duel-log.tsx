@@ -102,9 +102,7 @@ export function DuelLog({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <h2 className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">
-        {t('title')}
-      </h2>
+      <h2 className="mb-2 text-xs font-medium text-fg-subtle">{t('title')}</h2>
       <ol className="min-h-0 flex-1 space-y-1 overflow-y-auto pr-1 text-xs leading-relaxed text-fg-muted">
         {!events.length && <li className="text-fg-subtle">{t('empty')}</li>}
         {events.map((e) => (
@@ -113,7 +111,7 @@ export function DuelLog({
             className={cn(
               e.kind === 'TURN' &&
                 'mt-3 border-t border-border pt-2 font-semibold text-fg first:mt-0 first:border-0 first:pt-0',
-              e.kind === 'PHASE' && 'text-[10px] tracking-wide text-fg-subtle uppercase',
+              e.kind === 'PHASE' && 'text-[10px] tracking-wide text-fg-subtle',
               e.kind === 'DAMAGE' && 'text-danger',
               e.kind === 'RECOVER' && 'text-success',
               e.kind === 'WIN' && 'font-semibold text-accent',

@@ -203,9 +203,7 @@ function OpponentControl({
   const t = useTranslations('duel.setup.opponent');
   return (
     <fieldset className="space-y-1.5">
-      <legend className="mb-1.5 text-xs font-medium tracking-wide text-fg-muted uppercase">
-        {t('label')}
-      </legend>
+      <legend className="mb-1.5 text-xs font-medium text-fg-muted">{t('label')}</legend>
       <div className="grid gap-2 sm:grid-cols-3">
         {DUEL_OPPONENT_CONTROLS.map((id) => (
           <button
@@ -251,7 +249,7 @@ function OpeningHand({
     <div className="space-y-2">
       <div className="flex items-end justify-between gap-2">
         <div>
-          <p className="text-xs font-medium tracking-wide text-fg-muted uppercase">{t('label')}</p>
+          <p className="text-xs font-medium text-fg-muted">{t('label')}</p>
           <p className="text-xs text-fg-subtle">{t('hint')}</p>
         </div>
         <div className="flex items-center gap-2 text-xs text-fg-muted">
