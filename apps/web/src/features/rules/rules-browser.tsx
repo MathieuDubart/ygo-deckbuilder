@@ -211,7 +211,7 @@ export function RulesBrowser({
                 type="button"
                 onClick={() => setQuery('')}
                 aria-label={labels.clear}
-                className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-fg-subtle hover:bg-bg-elevated hover:text-fg"
+                className="absolute top-1/2 right-2 flex size-7 -translate-y-1/2 cursor-pointer items-center justify-center rounded-md text-fg-subtle hover:bg-ink/5 hover:text-fg"
               >
                 <X className="size-4" />
               </button>

@@ -47,10 +47,8 @@ export function OfficialDecks({ onOpen }: { onOpen: (target: GenerationTarget) =
               setShown(PAGE);
             }}
             className={cn(
-              'shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition',
-              kind === k
-                ? 'border-accent/50 bg-accent/15 text-fg'
-                : 'border-border text-fg-muted hover:text-fg',
+              'h-8 shrink-0 rounded-xs px-2.5 text-xs font-medium transition-colors',
+              kind === k ? 'bg-label text-label-ink' : 'text-ink-muted hover:text-ink',
             )}
           >
             {t(`filters.${k ?? 'ALL'}`)}

@@ -362,7 +362,7 @@ function OpponentBoard({
           className="pl-9"
         />
         {query.length >= 2 && q && (
-          <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-xl border border-border-strong bg-bg-elevated p-1 shadow-2xl">
+          <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-80 overflow-y-auto rounded-xl border border-border-strong bg-sleeve p-1 shadow-2xl">
             {search.data?.items.map((card) => (
               <li key={card.id}>
                 <button
@@ -492,7 +492,7 @@ function BoardRow({
         type="button"
         onClick={onRemove}
         aria-label={t('remove')}
-        className="rounded-md p-1.5 text-fg-subtle hover:bg-bg-elevated hover:text-danger"
+        className="rounded-md p-1.5 text-fg-subtle hover:bg-ink/5 hover:text-danger"
       >
         <X className="size-4" />
       </button>

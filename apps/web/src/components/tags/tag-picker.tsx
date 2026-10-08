@@ -57,7 +57,7 @@ export function TagPicker({
       </Button>
 
       {open && (
-        <div className="absolute right-0 z-30 mt-2 w-64 space-y-3 rounded-xl border border-border bg-bg-elevated p-3 shadow-xl">
+        <div className="absolute right-0 z-30 mt-2 w-64 space-y-3 rounded-xl border border-border bg-sleeve p-3 shadow-xl">
           {tags?.length ? (
             <div className="flex max-h-48 flex-wrap gap-1.5 overflow-y-auto">
               {tags.map((tag) => (

@@ -40,7 +40,7 @@ export function Dialog({
       onClick={(e) => e.target === ref.current && onClose()}
       aria-label={title}
       className={cn(
-        'bg-bg-elevated text-fg border border-border p-0 shadow-2xl backdrop:bg-black/60',
+        'bg-sleeve text-ink border border-edge p-0 shadow-2xl backdrop:bg-black/60',
         variant === 'center' && 'm-auto w-[min(92vw,32rem)] rounded-2xl',
         variant === 'sheet' &&
           'my-0 mr-0 ml-auto h-dvh max-h-dvh w-[min(100vw,40rem)] max-w-none rounded-l-2xl',

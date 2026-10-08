@@ -1,5 +1,6 @@
 'use client';
-import { ChevronDown, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { FacetSelect } from '@/components/ui/facet-select';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
@@ -55,47 +56,18 @@ export function FacetBar({
         {facets
           .filter((facet) => facet.options.length > 0)
           .map((facet) => (
-            <FacetSelect key={facet.key} facet={facet} />
+            <FacetSelect
+              key={facet.key}
+              label={facet.label}
+              allLabel={facet.allLabel}
+              value={facet.value}
+              options={facet.options}
+              onChange={facet.onChange}
+            />
           ))}
         {children}
       </div>
     </div>
-  );
-}
-
-/**
- * Une facette se lit comme une étiquette d'intercalaire : discrète tant qu'elle ne filtre
- * rien, à l'encre inversée dès qu'elle porte une valeur. Pas de cadre : six cadres côte à côte
- * pèsent plus lourd que le contenu qu'ils trient.
- */
-function FacetSelect({ facet, selected }: { facet: Facet; selected?: string }) {
-  const active = facet.value !== undefined && facet.value !== '';
-  return (
-    <span className="relative inline-flex items-center">
-      <select
-        aria-label={facet.label}
-        value={selected ?? facet.value ?? ''}
-        onChange={(e) => facet.onChange(e.target.value || undefined)}
-        className={cn(
-          'h-8 max-w-52 appearance-none rounded-xs border-0 bg-transparent py-0 pr-6 pl-2',
-          'cursor-pointer text-xs font-medium outline-none',
-          active ? 'bg-label text-label-ink' : 'text-ink-muted hover:text-ink',
-        )}
-      >
-        <option value="">{facet.allLabel}</option>
-        {facet.options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.count === undefined ? option.label : `${option.label} (${option.count})`}
-          </option>
-        ))}
-      </select>
-      <ChevronDown
-        className={cn(
-          'pointer-events-none absolute right-1.5 size-3',
-          active ? 'text-label-ink' : 'text-ink-faint',
-        )}
-      />
-    </span>
   );
 }
 
@@ -113,16 +85,13 @@ export function SortSelect({
 }) {
   return (
     <FacetSelect
-      facet={{
-        key: 'sort',
-        label,
-        allLabel: options[0]?.label ?? label,
-        // Le tri a toujours une valeur : il ne doit pas s'afficher comme un filtre actif
-        value: undefined,
-        options: options.map((option) => ({ value: option.value, label: option.label })),
-        onChange: (next) => onChange(next ?? options[0]?.value ?? ''),
-      }}
-      selected={value}
+      label={label}
+      allLabel={options[0]?.label ?? label}
+      // Le tri a toujours une valeur : il ne doit pas s'afficher comme un filtre actif
+      value={undefined}
+      shown={value}
+      options={options.map((option) => ({ value: option.value, label: option.label }))}
+      onChange={(next) => onChange(next ?? options[0]?.value ?? '')}
     />
   );
 }

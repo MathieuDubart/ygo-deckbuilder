@@ -98,7 +98,9 @@
      au nouveau vocabulaire au fur et à mesure. */
   --color-bg: var(--sheet);
   --color-bg-sunken: var(--pocket);
-  --color-bg-elevated: var(--sleeve);
+  /* Les conteneurs de contenu sont à plat sur la page : c'est leur filet qui les délimite.
+     Ce qui se superpose vraiment (modales, menus) demande `bg-sleeve` explicitement. */
+  --color-bg-elevated: var(--sheet);
   --color-fg: var(--ink);
   --color-fg-muted: var(--ink-muted);
   --color-fg-subtle: var(--ink-faint);

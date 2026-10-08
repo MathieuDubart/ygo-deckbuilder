@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useState } from 'react';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardFilters } from '@/components/cards/card-filters';
-import { CardGrid, CardTile } from '@/components/cards/card-tile';
+import { CardGrid, CardTile, PocketPages } from '@/components/cards/card-tile';
 import { EmptyState, PageHeader, Pagination, Skeleton } from '@/components/ui/feedback';
 import { parsePrintCode } from '@ygo/shared';
 import { useCardSearch, type CardSearchParams } from '@/lib/api/cards';
@@ -44,15 +44,16 @@ export function CatalogView() {
       ) : (
         <div className={isFetching ? 'opacity-70 transition' : 'transition'}>
           {data.approximate && (
-            <p className="mb-4 rounded-lg border border-border bg-bg-elevated px-3 py-2 text-sm text-fg-muted">
+            <p className="mb-4 rounded-xs border border-edge px-3 py-2 text-sm text-ink-muted">
               {t('approximate', { query: debounced.q ?? '' })}
             </p>
           )}
-          <CardGrid>
-            {data.items.map((card) => (
+          <PocketPages
+            items={data.items}
+            render={(card) => (
               <CardTile key={card.id} card={card} onClick={() => setSelected(card.id)} />
-            ))}
-          </CardGrid>
+            )}
+          />
           <Pagination
             page={data.page}
             totalPages={data.totalPages}
