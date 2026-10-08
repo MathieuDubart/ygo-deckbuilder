@@ -3,13 +3,19 @@
     "title": "Suggestions",
     "description": "Today’s top decks, what your collection can already build, and decks built for you.",
     "sections": {
-      "playable": "Ready to play · 100% your cards",
-      "meta": "Meta decks · the most accessible for you",
-      "archetypes": "From your collection · one auto-built deck per archetype",
-      "official": "Official decks · structure, starter and box decks you can rebuild"
+      "playable": "Ready to play",
+      "meta": "Meta decks",
+      "archetypes": "From your collection",
+      "official": "Official decks"
     },
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# copy} other {# copies}}",
-    "archetypesEmpty": "Add cards to your collection to see archetypes you can build."
+    "archetypesEmpty": "Add cards to your collection to see archetypes you can build.",
+    "sectionHints": {
+      "playable": "Built entirely from cards you own",
+      "meta": "The ones within closest reach",
+      "official": "Structure decks, starters and box lists to rebuild",
+      "archetypes": "One deck per archetype you can already field"
+    }
   },
   "meta": {
     "empty": {

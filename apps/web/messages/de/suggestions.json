@@ -3,13 +3,19 @@
     "title": "Vorschläge",
     "description": "Die aktuellen Top-Decks, was deine Sammlung schon hergibt und Decks, die für dich gebaut wurden.",
     "sections": {
-      "playable": "Sofort spielbar · 100 % deine Karten",
-      "meta": "Meta-Decks · die für dich zugänglichsten",
-      "archetypes": "Aus deiner Sammlung · ein automatisch gebautes Deck pro Archetyp",
-      "official": "Offizielle Decks · Structure-, Starter- und Box-Decks zum Nachbauen"
+      "playable": "Spielbereit",
+      "meta": "Meta-Decks",
+      "archetypes": "Aus deiner Sammlung",
+      "official": "Offizielle Decks"
     },
     "archetypeStats": "{cards, plural, one {# Karte} other {# Karten}} · {copies, plural, one {# Exemplar} other {# Exemplare}}",
-    "archetypesEmpty": "Füge Karten zu deiner Sammlung hinzu, um Archetypen zu sehen, die du bauen kannst."
+    "archetypesEmpty": "Füge Karten zu deiner Sammlung hinzu, um Archetypen zu sehen, die du bauen kannst.",
+    "sectionHints": {
+      "playable": "Komplett aus deinen eigenen Karten gebaut",
+      "meta": "Die für dich am leichtesten erreichbaren",
+      "official": "Structure Decks, Starter und Box-Listen zum Nachbauen",
+      "archetypes": "Ein Deck je Archetyp, den du schon stellen kannst"
+    }
   },
   "meta": {
     "empty": {

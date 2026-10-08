@@ -32,22 +32,20 @@ export function DeckZone({
   );
 
   return (
-    <section className="rounded-2xl border border-border bg-bg-elevated/60 p-3 md:p-4">
-      <header className="mb-3 flex items-baseline justify-between">
-        <h2 className="text-sm font-semibold">{tc(`zones.${zone}`)}</h2>
-        <span
-          className={cn('font-mono text-sm tabular-nums', ok ? 'text-fg-muted' : 'text-warning')}
-        >
+    <section>
+      <header className="mb-3 flex items-baseline justify-between border-b border-edge pb-1.5">
+        <h2 className="text-sm font-medium text-ink-muted">{tc(`zones.${zone}`)}</h2>
+        <span className={cn('code text-sm', ok ? 'text-ink-muted' : 'text-warning')}>
           {count}
-          <span className="text-fg-subtle">/{zone === 'MAIN' ? `${min}–${max}` : max}</span>
+          <span className="text-ink-faint">/{zone === 'MAIN' ? `${min}–${max}` : max}</span>
         </span>
       </header>
       {copies.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-border py-8 text-center text-sm text-fg-subtle">
+        <p className="pocket rounded-xs py-8 text-center text-sm text-ink-faint">
           {zone === 'SIDE' ? t('emptySide') : t('empty')}
         </p>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(3.75rem,1fr))] gap-1.5 md:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))]">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(3.75rem,1fr))] gap-1 md:grid-cols-[repeat(auto-fill,minmax(4.5rem,1fr))]">
           {copies.map(({ entry, index, missing }) => (
             <button
               key={`${entry.card.id}-${index}`}
@@ -56,15 +54,15 @@ export function DeckZone({
               onClick={(e) =>
                 e.metaKey || e.ctrlKey ? onRemove(zone, entry.card.id) : onInspect(entry.card.id)
               }
-              className="group relative transition hover:-translate-y-0.5"
+              className="pocket group relative rounded-xs p-0.5 transition-[filter] hover:brightness-125"
             >
               <CardImage
                 card={entry.card}
                 sizes="72px"
-                className={cn(missing && 'opacity-50 grayscale')}
+                className={cn(missing && 'opacity-30 grayscale')}
               />
               {missing && (
-                <span className="absolute inset-x-0 bottom-1 mx-auto w-fit rounded bg-danger px-1 font-mono text-[9px] font-bold text-white">
+                <span className="code absolute inset-x-0 bottom-1 mx-auto w-fit text-[9px] font-bold text-danger">
                   {t('missingBadge')}
                 </span>
               )}

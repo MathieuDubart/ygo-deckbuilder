@@ -3,13 +3,19 @@
     "title": "Suggestions",
     "description": "Les decks du moment, ce que ta collection permet déjà, et des decks construits pour toi.",
     "sections": {
-      "playable": "Prêts à jouer · 100 % avec tes cartes",
-      "meta": "Decks du meta · les plus accessibles pour toi",
-      "archetypes": "Depuis ta collection · un deck auto par archétype",
-      "official": "Decks officiels · structure, starter et coffrets à remonter"
+      "playable": "Prêts à jouer",
+      "meta": "Decks du meta",
+      "archetypes": "Depuis ta collection",
+      "official": "Decks officiels"
     },
     "archetypeStats": "{cards, plural, one {# carte} other {# cartes}} · {copies} ex.",
-    "archetypesEmpty": "Ajoute des cartes à ta collection pour voir émerger des archétypes à construire."
+    "archetypesEmpty": "Ajoute des cartes à ta collection pour voir émerger des archétypes à construire.",
+    "sectionHints": {
+      "playable": "Entièrement montés avec tes cartes",
+      "meta": "Ceux qui sont le plus à ta portée",
+      "official": "Structure, starters et listes de coffrets à remonter",
+      "archetypes": "Un deck par archétype que tu peux déjà aligner"
+    }
   },
   "meta": {
     "empty": {

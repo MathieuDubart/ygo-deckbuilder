@@ -38,12 +38,16 @@ export function SuggestionsView() {
       />
 
       <section className="mb-12">
-        <SectionTitle icon={ShieldCheck}>{t('page.sections.playable')}</SectionTitle>
+        <SectionTitle icon={ShieldCheck} hint={t('page.sectionHints.playable')}>
+          {t('page.sections.playable')}
+        </SectionTitle>
         <PlayableDecks onOpen={setTarget} />
       </section>
 
       <section className="mb-12">
-        <SectionTitle icon={Trophy}>{t('page.sections.meta')}</SectionTitle>
+        <SectionTitle icon={Trophy} hint={t('page.sectionHints.meta')}>
+          {t('page.sections.meta')}
+        </SectionTitle>
         {meta.isLoading ? (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {Array.from({ length: 6 }, (_, i) => (
@@ -70,12 +74,16 @@ export function SuggestionsView() {
       </section>
 
       <section className="mb-12">
-        <SectionTitle icon={Boxes}>{t('page.sections.official')}</SectionTitle>
+        <SectionTitle icon={Boxes} hint={t('page.sectionHints.official')}>
+          {t('page.sections.official')}
+        </SectionTitle>
         <OfficialDecks onOpen={setTarget} />
       </section>
 
       <section>
-        <SectionTitle icon={Sparkles}>{t('page.sections.archetypes')}</SectionTitle>
+        <SectionTitle icon={Sparkles} hint={t('page.sectionHints.archetypes')}>
+          {t('page.sections.archetypes')}
+        </SectionTitle>
         {archetypes.data?.length ? (
           <div className="flex flex-wrap gap-2">
             {archetypes.data.map((a) => (
@@ -102,17 +110,27 @@ export function SuggestionsView() {
   );
 }
 
+/**
+ * Intertitre de section : le titre, et sa précision à droite. L'ancien « Titre · précision »
+ * collait les deux sur la même ligne au même poids — on ne savait plus lequel était le nom
+ * de la section.
+ */
 function SectionTitle({
   icon: Icon,
   children,
+  hint,
 }: {
   icon: typeof Trophy;
   children: React.ReactNode;
+  hint?: string;
 }) {
   return (
-    <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-fg-muted">
-      <Icon className="size-4 text-accent" /> {children}
-    </h2>
+    <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-edge pb-1.5">
+      <h2 className="flex items-center gap-2 text-sm font-medium text-ink">
+        <Icon className="size-4 text-ink-faint" strokeWidth={1.5} /> {children}
+      </h2>
+      {hint && <p className="text-xs text-ink-faint">{hint}</p>}
+    </div>
   );
 }
 

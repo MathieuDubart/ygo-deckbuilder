@@ -3,13 +3,19 @@
     "title": "Sugestões",
     "description": "Os decks do momento, o que sua coleção já consegue montar e decks montados para você.",
     "sections": {
-      "playable": "Prontos para jogar · 100% seus cards",
-      "meta": "Decks do meta · os mais acessíveis para você",
-      "archetypes": "Da sua coleção · um deck automático por arquétipo",
-      "official": "Decks oficiais · structure, starter e decks de caixas para remontar"
+      "playable": "Prontos a jogar",
+      "meta": "Decks do meta",
+      "archetypes": "Da tua coleção",
+      "official": "Decks oficiais"
     },
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# cópia} other {# cópias}}",
-    "archetypesEmpty": "Adicione cards à sua coleção para ver arquétipos que você pode montar."
+    "archetypesEmpty": "Adicione cards à sua coleção para ver arquétipos que você pode montar.",
+    "sectionHints": {
+      "playable": "Montados inteiramente com as tuas cartas",
+      "meta": "Os que estão mais ao teu alcance",
+      "official": "Structure decks, starters e listas de caixas para refazer",
+      "archetypes": "Um deck por arquétipo que já consegues montar"
+    }
   },
   "meta": {
     "empty": {
