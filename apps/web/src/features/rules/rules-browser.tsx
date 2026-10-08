@@ -168,9 +168,7 @@ export function RulesBrowser({
           <div className="sticky top-6 max-h-[calc(100dvh-3rem)] space-y-4 overflow-y-auto pb-6">
             {byGroup.map((g) => (
               <div key={g.key}>
-                <p className="mb-1.5 text-xs font-medium tracking-wide text-fg-subtle uppercase">
-                  {g.label}
-                </p>
+                <p className="mb-1.5 text-xs font-medium text-fg-subtle">{g.label}</p>
                 <ul className="space-y-0.5 border-l border-border">
                   {g.items.map((s) => (
                     <li key={s.id}>
@@ -267,9 +265,7 @@ export function RulesBrowser({
 
                 {s.points.length > 0 && (
                   <div className="mt-5">
-                    <p className="mb-2 text-xs font-medium tracking-wide text-fg-subtle uppercase">
-                      {labels.points}
-                    </p>
+                    <p className="mb-2 text-xs font-medium text-fg-subtle">{labels.points}</p>
                     <ul className="space-y-2 text-sm leading-relaxed">
                       {s.points.map((p, i) => (
                         <li key={i} className="flex gap-2.5">
@@ -283,9 +279,7 @@ export function RulesBrowser({
 
                 {s.example && (
                   <div className="mt-5 rounded-xl border border-spell/30 bg-spell/10 px-4 py-3 text-sm leading-relaxed">
-                    <p className="mb-1 text-xs font-semibold tracking-wide text-spell uppercase">
-                      {labels.example}
-                    </p>
+                    <p className="mb-1 text-xs font-semibold text-spell">{labels.example}</p>
                     {s.example}
                   </div>
                 )}

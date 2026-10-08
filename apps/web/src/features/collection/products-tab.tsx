@@ -14,7 +14,7 @@ import { useOwnedProducts, type OwnedProductsParams } from '@/lib/api/collection
 import { useTags } from '@/lib/api/tags';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
 import { ProductDialog } from './product-dialog';
 
 const SORTS = ['added', 'name', 'date', 'completeness'] as const;
@@ -48,18 +48,15 @@ export function ProductsTab({ onImport }: { onImport: () => void }) {
           },
         ]}
       >
-        <Select
-          aria-label={tf('sort')}
+        <SortSelect
+          label={tf('sort')}
           value={params.sort ?? 'added'}
-          onChange={(e) => set({ sort: e.target.value as OwnedProductsParams['sort'] })}
-          className="w-auto"
-        >
-          {SORTS.map((value) => (
-            <option key={value} value={value}>
-              {tf('sortOption', { label: tf(`sorts.${value}`) })}
-            </option>
-          ))}
-        </Select>
+          onChange={(value) => set({ sort: value as OwnedProductsParams['sort'] })}
+          options={SORTS.map((value) => ({
+            value,
+            label: tf('sortOption', { label: tf(`sorts.${value}`) }),
+          }))}
+        />
         <FilterToggle
           checked={!!params.complete}
           onChange={(checked) => set({ complete: checked || undefined })}

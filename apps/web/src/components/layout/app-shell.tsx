@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
       {/* Sidebar desktop */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-border bg-bg-sunken/60 px-3 py-5 md:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r border-edge bg-pocket px-3 py-5 md:flex">
         <Link href="/collection" className="mb-8 flex items-center gap-2 px-3">
           <Logo />
           <span className="font-semibold tracking-tight">{t('appName')}</span>
@@ -59,16 +59,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
-                  active ? 'bg-bg-elevated font-medium text-fg' : 'text-fg-muted hover:text-fg',
+                  'relative flex items-center gap-3 rounded-xs py-2 pr-3 pl-3.5 text-sm transition-colors',
+                  'before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full',
+                  active
+                    ? 'bg-sheet font-medium text-ink before:bg-label'
+                    : 'text-ink-muted before:bg-transparent hover:text-ink',
                 )}
               >
-                <Icon className={cn('size-4', active && 'text-accent')} />
+                <Icon className="size-4" strokeWidth={active ? 2 : 1.5} />
                 {t(`nav.${key}`)}
               </Link>
             );
           })}
-          <div className="my-3 border-t border-border" />
+          <div className="my-3 border-t border-edge" />
           {SECONDARY.map(({ href, key, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
@@ -76,11 +79,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition',
-                  active ? 'bg-bg-elevated font-medium text-fg' : 'text-fg-muted hover:text-fg',
+                  'relative flex items-center gap-3 rounded-xs py-2 pr-3 pl-3.5 text-sm transition-colors',
+                  // Un filet clair collé au bord : l'intercalaire qui dépasse de la tranche
+                  'before:absolute before:inset-y-1 before:left-0 before:w-0.5 before:rounded-full',
+                  active
+                    ? 'bg-sheet font-medium text-ink before:bg-label'
+                    : 'text-ink-muted before:bg-transparent hover:text-ink',
                 )}
               >
-                <Icon className={cn('size-4', active && 'text-accent')} />
+                <Icon className="size-4" strokeWidth={active ? 2 : 1.5} />
                 {t(`nav.${key}`)}
                 {key === 'friends' && pending > 0 && <PendingDot count={pending} />}
               </Link>
@@ -88,7 +95,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <LocaleSwitcher className="mb-3 px-3" />
-        <div className="flex items-center justify-between gap-2 border-t border-border px-3 pt-4">
+        <div className="flex items-center justify-between gap-2 border-t border-edge px-3 pt-4">
           {me ? (
             <Link
               href="/profile"
@@ -109,7 +116,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
           <button
             onClick={() => logout.mutate()}
-            className="rounded-md p-1.5 text-fg-subtle hover:bg-bg-elevated hover:text-fg"
+            className="rounded-xs p-1.5 text-ink-faint hover:text-ink"
             aria-label={t('logout')}
             title={t('logout')}
           >
@@ -140,7 +147,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Tab bar mobile */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-bg/90 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-edge bg-pocket/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
         {NAV.map(({ href, key, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -149,7 +156,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href={href}
               className={cn(
                 'flex flex-col items-center gap-1 py-2.5 text-[10px]',
-                active ? 'text-accent' : 'text-fg-subtle',
+                active ? 'text-ink' : 'text-ink-faint',
               )}
             >
               <Icon className="size-5" />

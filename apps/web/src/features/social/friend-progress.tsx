@@ -67,9 +67,7 @@ export function FriendProgressPanel({
 
   return (
     <section className="space-y-2">
-      <h3 className="text-xs font-semibold tracking-wide text-fg-muted uppercase">
-        {t('onThisSet')}
-      </h3>
+      <h3 className="text-xs font-semibold text-fg-muted">{t('onThisSet')}</h3>
       {friends.length === 0 ? (
         <p className="text-sm text-fg-muted">{t('nobodyStarted')}</p>
       ) : (

@@ -74,5 +74,7 @@ export function UserChip({
 function tint(username: string): string {
   let hash = 0;
   for (const char of username) hash = (hash * 31 + char.charCodeAt(0)) % 360;
-  return `hsl(${hash} 45% 42%)`;
+  // Teinte très désaturée : deux comptes restent distinguables sans voler la vedette aux
+  // cartes, seules choses colorées de l'interface.
+  return `oklch(0.52 0.045 ${hash})`;
 }

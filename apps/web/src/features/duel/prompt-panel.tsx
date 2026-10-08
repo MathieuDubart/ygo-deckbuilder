@@ -415,9 +415,7 @@ function SelectCards({
       </div>
       {prompt.mustCards.length > 0 && (
         <div>
-          <p className="mb-1 text-[11px] tracking-wide text-fg-subtle uppercase">
-            {t('SELECT_CARDS.always')}
-          </p>
+          <p className="mb-1 text-[11px] text-fg-subtle">{t('SELECT_CARDS.always')}</p>
           <div className="grid grid-cols-4 gap-1.5">
             {prompt.mustCards.map((c) => (
               <ChoiceTile
@@ -471,7 +469,7 @@ function SelectUnselect({
     <div className="space-y-3">
       {prompt.unselectable.length > 0 && (
         <div>
-          <p className="mb-1 text-[11px] tracking-wide text-fg-subtle uppercase">{t('selected')}</p>
+          <p className="mb-1 text-[11px] text-fg-subtle">{t('selected')}</p>
           <div className="grid grid-cols-4 gap-1.5">
             {prompt.unselectable.map((c) => (
               <ChoiceTile

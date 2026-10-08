@@ -9,7 +9,7 @@ import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { CardImage } from '@/components/cards/card-image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { EmptyState, Skeleton, Stat } from '@/components/ui/feedback';
+import { EmptyState, Figures, SectionHeading, Skeleton, Stat } from '@/components/ui/feedback';
 import { imageUrl, useProfile, useRequestFriend, useRespondToRequest } from '@/lib/api/social';
 import { Avatar } from './avatar';
 import { RemoveButton } from './friends-page';
@@ -83,25 +83,31 @@ function VisibleProfile({ profile }: { profile: ProfileDto & { visible: true } }
         </div>
       </div>
 
-      <dl className="mb-10 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <Figures>
         <Stat label={t('stats.distinctCards')} value={profile.stats.distinctCards} />
         <Stat label={t('stats.copies')} value={profile.stats.copies} />
         <Stat label={t('stats.sets')} value={profile.stats.sets} />
-        <Stat label={t('stats.completedSets')} value={profile.stats.completedSets} />
-      </dl>
+        {/* Une extension bouclée se mérite : c'est l'un des deux endroits où l'or sert */}
+        <Stat
+          label={t('stats.completedSets')}
+          value={profile.stats.completedSets}
+          tone={profile.stats.completedSets > 0 ? 'gold' : undefined}
+        />
+      </Figures>
 
       <section>
-        <div className="mb-3 flex items-center justify-between gap-4">
-          <h2 className="text-sm font-semibold tracking-wide text-fg-muted uppercase">
-            {t('showcase.title')}
-          </h2>
-          {isSelf && (
-            <Button size="sm" variant="ghost" onClick={() => setPicking(true)}>
-              <Sparkles className="size-4" />
-              {t('showcase.choose')}
-            </Button>
-          )}
-        </div>
+        <SectionHeading
+          action={
+            isSelf && (
+              <Button size="sm" variant="ghost" onClick={() => setPicking(true)}>
+                <Sparkles className="size-4" />
+                {t('showcase.choose')}
+              </Button>
+            )
+          }
+        >
+          {t('showcase.title')}
+        </SectionHeading>
         {profile.cards.length === 0 ? (
           <EmptyState
             icon={Sparkles}
@@ -171,11 +177,13 @@ function Showcase({ cards }: { cards: ProfileCardDto[] }) {
               className="group block w-full text-left"
               title={`${card.card.name} · ${card.printCode}`}
             >
-              <CardImage
-                card={card.card}
-                sizes="(max-width: 640px) 33vw, 180px"
-                className="transition group-hover:brightness-110"
-              />
+              <span className="pocket block rounded-xs p-1">
+                <CardImage
+                  card={card.card}
+                  sizes="(max-width: 640px) 33vw, 180px"
+                  className="transition group-hover:brightness-110"
+                />
+              </span>
               <p className="mt-1 truncate font-mono text-[10px] text-fg-subtle">{card.printCode}</p>
               <p className="truncate text-[11px] text-fg-muted">{card.rarity}</p>
             </button>
