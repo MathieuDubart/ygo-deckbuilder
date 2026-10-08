@@ -95,7 +95,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
       <header className="flex flex-wrap items-center gap-3">
         <Link
           href="/decks"
-          className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg"
+          className="rounded-md p-1.5 text-fg-muted hover:bg-ink/5 hover:text-fg"
           aria-label={tc('actions.back')}
         >
           <ArrowLeft className="size-5" />
@@ -105,7 +105,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
           onChange={(e) => setName(e.target.value)}
           onBlur={() => name.trim() && name !== deck.name && rename.mutate({ name: name.trim() })}
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-          className="min-w-0 flex-1 rounded-md bg-transparent px-1 text-2xl font-semibold tracking-tight outline-none hover:bg-bg-elevated focus:bg-bg-elevated"
+          className="min-w-0 flex-1 rounded-md bg-transparent px-1 text-2xl font-semibold tracking-tight outline-none hover:bg-ink/5 focus:bg-bg-elevated"
           aria-label={t('header.nameLabel')}
         />
         <SaveIndicator status={b.status} onRetry={b.retry} />

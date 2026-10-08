@@ -190,7 +190,7 @@ function DuelTable({ session }: { session: DuelSession & { state: DuelStateDto }
           <Link
             href="/rules"
             target="_blank"
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm text-fg-muted hover:bg-bg-elevated hover:text-fg"
+            className="inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-sm text-fg-muted hover:bg-ink/5 hover:text-fg"
           >
             <BookOpen className="size-4" /> {t('page.rules')}
           </Link>

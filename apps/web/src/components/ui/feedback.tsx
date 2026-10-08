@@ -174,7 +174,7 @@ export function Pagination({
   return (
     <nav className="mt-8 flex items-center justify-center gap-3 text-sm" aria-label={t('label')}>
       <button
-        className="rounded-md px-3 py-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-30"
+        className="rounded-md px-3 py-1.5 text-fg-muted hover:bg-ink/5 hover:text-fg disabled:opacity-30"
         disabled={page <= 1}
         onClick={() => onChange(page - 1)}
       >
@@ -184,7 +184,7 @@ export function Pagination({
         {page} / {totalPages}
       </span>
       <button
-        className="rounded-md px-3 py-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-30"
+        className="rounded-md px-3 py-1.5 text-fg-muted hover:bg-ink/5 hover:text-fg disabled:opacity-30"
         disabled={page >= totalPages}
         onClick={() => onChange(page + 1)}
       >

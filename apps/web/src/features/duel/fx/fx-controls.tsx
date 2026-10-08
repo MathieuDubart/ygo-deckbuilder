@@ -20,7 +20,7 @@ export function FxControls() {
         aria-pressed={sound}
         title={t('sound')}
         aria-label={t('sound')}
-        className="rounded-lg p-1.5 hover:bg-bg-elevated hover:text-fg"
+        className="rounded-lg p-1.5 hover:bg-ink/5 hover:text-fg"
       >
         {sound ? <Volume2 className="size-4" /> : <VolumeX className="size-4" />}
       </button>

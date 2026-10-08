@@ -329,7 +329,7 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
       />
       <div className="pocket flex items-center gap-1 rounded-xs p-0.5">
         <button
-          className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-40"
+          className="rounded-md p-1.5 text-fg-muted hover:bg-ink/5 hover:text-fg disabled:opacity-40"
           disabled={busy}
           onClick={() => setQty(item.quantity - 1)}
           aria-label={t('row.removeCopy')}
@@ -338,7 +338,7 @@ function CollectionRow({ item, onOpen }: { item: CollectionItemDto; onOpen: () =
         </button>
         <span className="w-6 text-center font-mono text-sm tabular-nums">{item.quantity}</span>
         <button
-          className="rounded-md p-1.5 text-fg-muted hover:bg-bg-elevated hover:text-fg disabled:opacity-40"
+          className="rounded-md p-1.5 text-fg-muted hover:bg-ink/5 hover:text-fg disabled:opacity-40"
           disabled={busy}
           onClick={() => setQty(item.quantity + 1)}
           aria-label={t('row.addCopy')}

@@ -72,7 +72,7 @@ export function ActionMenu({
       ref={ref}
       role="menu"
       style={pos ?? { top: -9999, left: -9999 }}
-      className="fixed z-50 flex w-64 max-w-[calc(100vw-1rem)] flex-col gap-0.5 rounded-xl border border-border-strong bg-bg-elevated p-1.5 shadow-2xl"
+      className="fixed z-50 flex w-64 max-w-[calc(100vw-1rem)] flex-col gap-0.5 rounded-xl border border-border-strong bg-sleeve p-1.5 shadow-2xl"
     >
       {actions.map((a) => (
         <button

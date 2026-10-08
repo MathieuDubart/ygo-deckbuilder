@@ -39,8 +39,8 @@ export function CardTile({
         type="button"
         onClick={onClick}
         className={cn(
-          'relative block w-full rounded-[4%/3%] transition duration-200',
-          'hover:-translate-y-0.5 hover:shadow-[0_8px_30px_-8px] hover:shadow-accent/30',
+          'pocket relative block w-full rounded-xs p-1 transition-[filter] duration-200',
+          'hover:brightness-125',
           dimmed && 'opacity-45 saturate-50 hover:opacity-100 hover:saturate-100',
         )}
         title={card.name}
@@ -58,7 +58,7 @@ export function CardTile({
           </span>
         )}
         {owned !== undefined && owned > 0 && (
-          <span className="absolute right-1.5 bottom-1.5 rounded-md bg-success px-1.5 py-0.5 font-mono text-[11px] font-bold text-black tabular-nums shadow">
+          <span className="code absolute right-2 bottom-2 rounded-xs bg-label px-1.5 py-0.5 text-[11px] font-bold text-label-ink">
             ×{owned}
           </span>
         )}
@@ -79,6 +79,39 @@ export function CardGrid({ children, dense }: { children: React.ReactNode; dense
       )}
     >
       {children}
+    </div>
+  );
+}
+
+/** 9 cartes par page, comme une vraie feuille de classeur. */
+const PER_PAGE = 9;
+
+/**
+ * Les cartes rangées par pages de neuf pochettes, 3 × 3, avec une gouttière franche entre
+ * deux pages. C'est le rythme du classeur, et il rend le comptage immédiat : on sait qu'une
+ * page pleine fait neuf sans la lire. À réserver aux vraies grilles de cartes — une liste de
+ * résultats hétérogènes n'y gagnerait rien.
+ */
+export function PocketPages<T>({
+  items,
+  render,
+}: {
+  items: readonly T[];
+  render: (item: T, index: number) => React.ReactNode;
+}) {
+  const pages: T[][] = [];
+  for (let i = 0; i < items.length; i += PER_PAGE) pages.push(items.slice(i, i + PER_PAGE));
+
+  return (
+    <div className="flex flex-wrap gap-x-10 gap-y-8">
+      {pages.map((page, pageIndex) => (
+        <div
+          key={pageIndex}
+          className="grid w-full grid-cols-3 gap-2 sm:w-[calc(50%-1.25rem)] lg:w-[calc(33.333%-1.667rem)]"
+        >
+          {page.map((item, index) => render(item, pageIndex * PER_PAGE + index))}
+        </div>
+      ))}
     </div>
   );
 }
