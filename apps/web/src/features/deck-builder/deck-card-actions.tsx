@@ -1,5 +1,13 @@
 'use client';
-import { DECK_RULES, maxCopiesFor, type CardSummaryDto, type DeckZone } from '@ygo/shared';
+import {
+  banStatusForFormat,
+  banStatusOf,
+  DECK_RULES,
+  maxCopiesFor,
+  type CardSummaryDto,
+  type DeckFormat,
+  type DeckZone,
+} from '@ygo/shared';
 import { Minus, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -15,24 +23,27 @@ export function DeckCardActions({
   card,
   byZone,
   counts,
-  ocg,
+  format,
   onAdd,
   onRemove,
 }: {
   card: CardSummaryDto;
   byZone: Record<DeckZone, BuilderEntry[]>;
   counts: Record<DeckZone, number>;
-  ocg: boolean;
+  /** Le format décide de la banlist qui s'applique : les deux listes divergent. */
+  format: DeckFormat;
   onAdd: (card: CardSummaryDto, zone: DeckZone) => { ok: boolean; reason?: string };
   onRemove: (zone: DeckZone, cardId: number) => void;
 }) {
   const t = useTranslations('deckBuilder.actions');
+  const tBan = useTranslations('cards.ban');
   const tc = useTranslations('common');
   const [error, setError] = useState<string | null>(null);
   const zones: DeckZone[] = card.isExtraDeck ? ['EXTRA', 'SIDE'] : ['MAIN', 'SIDE'];
   const qty = (z: DeckZone) => byZone[z].find((e) => e.card.id === card.id)?.quantity ?? 0;
   const total = (['MAIN', 'EXTRA', 'SIDE'] as const).reduce((s, z) => s + qty(z), 0);
-  const limit = ocg ? DECK_RULES.MAX_COPIES : maxCopiesFor(card.banTcg);
+  const banStatus = banStatusForFormat(card, format);
+  const limit = maxCopiesFor(banStatus);
   const owned = card.ownedQuantity ?? 0;
 
   if (card.category === 'SKILL' || card.category === 'TOKEN') return null;
@@ -46,7 +57,7 @@ export function DeckCardActions({
         <h3 className="text-sm font-semibold">{t('inDeck')}</h3>
         <span className="font-mono text-xs text-fg-muted tabular-nums">
           {t('copies', { total, limit })}
-          {!ocg && card.banTcg ? ` · ${card.banTcg}` : ''}
+          {banStatusOf(banStatus) ? ` · ${tBan(banStatusOf(banStatus)!)}` : ''}
         </span>
         <span
           className={cn(

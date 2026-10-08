@@ -6,6 +6,7 @@ export * from './domain/print-code';
 export * from './schemas/auth';
 export * from './schemas/pagination';
 export * from './schemas/cards';
+export * from './schemas/banlist';
 export * from './schemas/collection';
 export * from './schemas/decks';
 export * from './schemas/wishlist';

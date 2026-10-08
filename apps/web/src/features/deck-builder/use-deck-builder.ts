@@ -1,6 +1,9 @@
 'use client';
 import {
   DECK_RULES,
+  banStatusForFormat,
+  banStatusOf,
+  banlistFixes,
   maxCopiesFor,
   validateDeck,
   type CardSummaryDto,
@@ -28,6 +31,7 @@ const key = (zone: DeckZone, cardId: number) => `${zone}:${cardId}`;
  */
 export function useDeckBuilder(deck: DeckDto) {
   const t = useTranslations('deckBuilder.add');
+  const tBan = useTranslations('cards.ban');
   const tc = useTranslations('common');
   const update = useUpdateDeck(deck.id);
   const [entries, setEntries] = useState<Map<string, BuilderEntry>>(() => fromDeck(deck));
@@ -52,24 +56,52 @@ export function useDeckBuilder(deck: DeckDto) {
     [byZone],
   );
 
-  const issues = useMemo(
+  /** La decklist dans la forme que comprennent les règles partagées. */
+  const forValidation = useMemo(
     () =>
-      validateDeck(
-        list.map((e) => ({
-          cardId: e.card.id,
-          zone: e.zone,
-          quantity: e.quantity,
-          isExtraDeckMonster: e.card.isExtraDeck,
-          banStatus: deck.format === 'OCG' ? null : e.card.banTcg,
-        })),
-      ),
+      list.map((e) => ({
+        cardId: e.card.id,
+        zone: e.zone,
+        quantity: e.quantity,
+        isExtraDeckMonster: e.card.isExtraDeck,
+        banStatus: banStatusForFormat(e.card, deck.format),
+      })),
     [list, deck.format],
   );
+
+  const issues = useMemo(() => validateDeck(forValidation), [forValidation]);
+
+  /** Les exemplaires à retirer pour repasser la banlist, ou une liste vide si tout va bien. */
+  const fixes = useMemo(() => banlistFixes(forValidation), [forValidation]);
 
   const totalCopiesOf = useCallback(
     (cardId: number) =>
       list.filter((e) => e.card.id === cardId).reduce((s, e) => s + e.quantity, 0),
     [list],
+  );
+
+  /** Exemplaires autorisés pour cette carte, selon le format du deck. */
+  const limitOf = useCallback(
+    (card: CardSummaryDto) => maxCopiesFor(banStatusForFormat(card, deck.format)),
+    [deck.format],
+  );
+
+  /**
+   * Pourquoi cette carte ne peut pas être ajoutée, ou `null` si elle peut. Le picker s'en sert
+   * pour éteindre la vignette AVANT le clic : apprendre qu'une carte est interdite au moment où
+   * on la clique, c'est l'apprendre trop tard.
+   */
+  const blockedReason = useCallback(
+    (card: CardSummaryDto): string | null => {
+      const status = banStatusOf(banStatusForFormat(card, deck.format));
+      if (status === 'FORBIDDEN') return tBan('FORBIDDEN');
+      const count = totalCopiesOf(card.id);
+      if (count < limitOf(card)) return null;
+      // Dire ce qui bloque, pas la règle : « déjà 3 exemplaires » se comprend, « maximum 3 »
+      // laisse croire qu'on énonce une limite théorique alors qu'on vient de la toucher.
+      return status ? t('atLimitBan', { status: tBan(status), count }) : t('atLimit', { count });
+    },
+    [deck.format, limitOf, tBan, totalCopiesOf, t],
   );
 
   /** Ajoute 1 exemplaire. Zone par défaut : EXTRA pour les monstres extra, sinon MAIN. */
@@ -79,8 +111,8 @@ export function useDeckBuilder(deck: DeckDto) {
       if (target === 'MAIN' && card.isExtraDeck)
         return { ok: false, reason: t('extraDeckMonster') };
       if (target === 'EXTRA' && !card.isExtraDeck) return { ok: false, reason: t('notExtraDeck') };
-      const limit = deck.format === 'OCG' ? DECK_RULES.MAX_COPIES : maxCopiesFor(card.banTcg);
-      if (totalCopiesOf(card.id) >= limit) return { ok: false, reason: t('maxCopies', { limit }) };
+      const blocked = blockedReason(card);
+      if (blocked) return { ok: false, reason: blocked };
       if (counts[target] >= DECK_RULES[target].max)
         return { ok: false, reason: t('zoneFull', { zone: tc(`zones.${target}`) }) };
 
@@ -98,8 +130,28 @@ export function useDeckBuilder(deck: DeckDto) {
       });
       return { ok: true };
     },
-    [counts, deck.format, totalCopiesOf, t, tc],
+    [blockedReason, counts, t, tc],
   );
+
+  /**
+   * Applique le correctif de banlist : on retire, rien d'autre. Déplacer un exemplaire vers le
+   * Side ne réparerait rien — la limite compte le deck entier, Side inclus.
+   */
+  const applyBanlistFixes = useCallback(() => {
+    if (fixes.length === 0) return;
+    setEntries((prev) => {
+      const next = new Map(prev);
+      for (const fix of fixes) {
+        const k = key(fix.zone, fix.cardId);
+        const cur = next.get(k);
+        if (!cur) continue;
+        const left = cur.quantity - fix.remove;
+        if (left > 0) next.set(k, { ...cur, quantity: left });
+        else next.delete(k);
+      }
+      return next;
+    });
+  }, [fixes]);
 
   const removeOne = useCallback((zone: DeckZone, cardId: number) => {
     setEntries((prev) => {
@@ -155,7 +207,12 @@ export function useDeckBuilder(deck: DeckDto) {
     byZone,
     counts,
     issues,
+    fixes,
+    applyBanlistFixes,
     add,
+    blockedReason,
+    limitOf,
+    totalCopiesOf,
     removeOne,
     status,
     missing,

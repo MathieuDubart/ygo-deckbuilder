@@ -16,7 +16,10 @@
     "zoneTooSmall": "{zone}: {count, plural, one {# Karte} other {# Karten}} (mindestens {limit})",
     "zoneTooLarge": "{zone}: {count, plural, one {# Karte} other {# Karten}} (maximal {limit})",
     "tooManyCopies": "{name}: {count, plural, one {# Exemplar} other {# Exemplare}} (max. {limit})",
-    "wrongZone": "{name} gehört nicht ins {zone}"
+    "wrongZone": "{name} gehört nicht ins {zone}",
+    "forbidden": "{name} ist verboten ({count, plural, one {# Exemplar} other {# Exemplare}} im Deck)",
+    "fix": "Von der Banlist Verbotenes entfernen",
+    "fixed": "{count, plural, one {# Exemplar entfernt} other {# Exemplare entfernt}}"
   },
   "missing": {
     "summary": "<strong>{count, plural, one {# Exemplar} other {# Exemplare}}</strong> nicht im Besitz · etwa <strong>{cost}</strong>",
@@ -27,7 +30,9 @@
     "extraDeckMonster": "Dieses Monster gehört ins Extra Deck",
     "notExtraDeck": "Nur Fusions-, Synchro-, Xyz- und Link-Monster gehören ins Extra Deck",
     "maxCopies": "{limit, plural, one {Maximal # Exemplar} other {Maximal # Exemplare}}",
-    "zoneFull": "{zone} ist voll"
+    "zoneFull": "{zone} ist voll",
+    "atLimit": "Bereits {count}",
+    "atLimitBan": "{status} · bereits {count}"
   },
   "picker": {
     "search": "Suche",
@@ -37,7 +42,8 @@
     "noOwnedResults": "Keine deiner Karten passt. Entferne den Haken bei „Im Besitz“, um alle Karten zu durchsuchen.",
     "noResults": "Keine Ergebnisse.",
     "suggestionsHint": "Karten aus deiner Sammlung, die einen Archetyp mit deinem Deck teilen oder von ihm erwähnt werden.",
-    "suggestionsEmpty": "Füge ein paar Karten ins Deck ein: Die Vorschläge basieren auf seinen Archetypen."
+    "suggestionsEmpty": "Füge ein paar Karten ins Deck ein: Die Vorschläge basieren auf seinen Archetypen.",
+    "tileBlocked": "{name}\n{reason} — kann nicht hinzugefügt werden"
   },
   "zone": {
     "emptySide": "Öffne eine Karte und füge sie dem Side Deck hinzu – oder direkt per Umschalt+Klick",
@@ -54,5 +60,8 @@
     "removeOne": "Ein Exemplar aus dem {zone} entfernen",
     "addOne": "Ein Exemplar zum {zone} hinzufügen",
     "cannotAdd": "Diese Karte kann nicht hinzugefügt werden"
+  },
+  "banlist": {
+    "updated": "Die Banlist hat sich geändert — dieses Deck wurde neu geprüft."
   }
 }

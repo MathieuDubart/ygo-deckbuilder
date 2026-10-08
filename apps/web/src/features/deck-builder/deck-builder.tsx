@@ -9,16 +9,18 @@ import {
   Download,
   Heart,
   Loader2,
+  Scissors,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { DeckGuide } from '@/features/guide/deck-guide';
+import { useRefreshBanlist } from '@/lib/api/banlist';
 import { useUpdateDeck } from '@/lib/api/decks';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
@@ -37,6 +39,24 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
   const rename = useUpdateDeck(deck.id);
   const [name, setName] = useState(deck.name);
   const [guideOpen, setGuideOpen] = useState(false);
+
+  /**
+   * La banlist est relue à l'ouverture du deck. Le deck s'affiche sans attendre — on travaille
+   * avec la liste connue — et si le serveur signale un changement, les requêtes se rechargent
+   * et le bandeau d'anomalies se met à jour tout seul. Une fois par montage : le serveur borne
+   * déjà la fréquence réelle par l'âge de la dernière lecture.
+   */
+  const refreshBanlist = useRefreshBanlist();
+  const asked = useRef(false);
+  useEffect(() => {
+    if (asked.current) return;
+    asked.current = true;
+    refreshBanlist.mutate(undefined, {
+      onSuccess: (status) => status.changed && toast.info(t('banlist.updated')),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const guideCards = useMemo(
     () =>
       [...b.byZone.MAIN, ...b.byZone.EXTRA, ...b.byZone.SIDE].map((e) => ({
@@ -66,6 +86,9 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
           count: i.count,
           limit: i.limit,
         });
+      case 'FORBIDDEN':
+        // Pas « 2 exemplaires sur 0 » : une interdiction n'est pas un quota
+        return t('issues.forbidden', { name: nameOf(i.cardId), count: i.count });
       case 'TOO_MANY_COPIES':
         return t('issues.tooManyCopies', {
           name: nameOf(i.cardId),
@@ -137,6 +160,22 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
                   <li key={idx}>{describeIssue(i)}</li>
                 ))}
               </ul>
+              {/* Seules les anomalies de banlist se réparent toutes seules : une zone trop
+                  petite ou un monstre dans la mauvaise zone demandent un choix de joueur */}
+              {b.fixes.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-2.5"
+                  onClick={() => {
+                    const removed = b.fixes.reduce((sum, f) => sum + f.remove, 0);
+                    b.applyBanlistFixes();
+                    toast.success(t('issues.fixed', { count: removed }));
+                  }}
+                >
+                  <Scissors className="size-4" /> {t('issues.fix')}
+                </Button>
+              )}
             </div>
           )}
           {b.missing.length > 0 && (
@@ -173,7 +212,9 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
         <aside className="lg:sticky lg:top-6 lg:max-h-[calc(100dvh-3rem)] lg:overflow-y-auto lg:pr-1">
           <CardPicker
             deckId={deck.id}
+            format={deck.format}
             onInspect={setInspect}
+            blockedReason={b.blockedReason}
             onPick={(card, zone) => {
               const r = b.add(card, zone);
               if (!r.ok) toast.warning(r.reason);
@@ -222,7 +263,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
             card={card}
             byZone={b.byZone}
             counts={b.counts}
-            ocg={deck.format === 'OCG'}
+            format={deck.format}
             onAdd={b.add}
             onRemove={b.removeOne}
           />

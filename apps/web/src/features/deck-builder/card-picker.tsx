@@ -1,5 +1,5 @@
 'use client';
-import type { CardSummaryDto, DeckZone } from '@ygo/shared';
+import { banStatusForFormat, type CardSummaryDto, type DeckFormat, type DeckZone } from '@ygo/shared';
 import { Sparkles } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -20,12 +20,17 @@ type Tab = 'search' | 'suggestions';
  */
 export function CardPicker({
   deckId,
+  format,
   onPick,
   onInspect,
+  blockedReason,
 }: {
   deckId: string;
+  format: DeckFormat;
   onPick: (card: CardSummaryDto, zone?: DeckZone) => void;
   onInspect: (cardId: number) => void;
+  /** Pourquoi cette carte ne peut pas rejoindre le deck, ou `null` si elle peut. */
+  blockedReason: (card: CardSummaryDto) => string | null;
 }) {
   const t = useTranslations('deckBuilder.picker');
   const [tab, setTab] = useState<Tab>('search');
@@ -33,21 +38,38 @@ export function CardPicker({
   const search = useCardSearch(useDebounced(params), tab === 'search');
   const suggestions = useDeckCardSuggestions(deckId);
 
-  const tile = (card: CardSummaryDto) => (
-    <div
-      key={card.id}
-      title={t('tileTitle', { name: card.name })}
-      onClickCapture={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (e.metaKey || e.ctrlKey) onPick(card);
-        else if (e.shiftKey) onPick(card, 'SIDE');
-        else onInspect(card.id);
-      }}
-    >
-      <CardTile card={card} dimmed={!card.ownedQuantity} />
-    </div>
-  );
+  /**
+   * Une carte bloquée garde sa fiche cliquable — on veut pouvoir lire pourquoi — mais les
+   * raccourcis d'ajout ne répondent plus : rien ne part dans le deck, et rien n'échoue en
+   * silence non plus, la vignette porte déjà la raison.
+   */
+  const tile = (card: CardSummaryDto) => {
+    const blocked = blockedReason(card);
+    return (
+      <div
+        key={card.id}
+        title={
+          blocked
+            ? t('tileBlocked', { name: card.name, reason: blocked })
+            : t('tileTitle', { name: card.name })
+        }
+        onClickCapture={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (blocked || (!e.metaKey && !e.ctrlKey && !e.shiftKey)) return onInspect(card.id);
+          if (e.shiftKey) onPick(card, 'SIDE');
+          else onPick(card);
+        }}
+      >
+        <CardTile
+          card={card}
+          dimmed={!card.ownedQuantity}
+          banStatus={banStatusForFormat(card, format)}
+          blocked={blocked}
+        />
+      </div>
+    );
+  };
 
   return (
     <div className="flex h-full flex-col gap-3">

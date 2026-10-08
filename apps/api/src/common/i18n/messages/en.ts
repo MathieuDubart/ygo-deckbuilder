@@ -48,6 +48,7 @@ export const en = {
     archetypeNotOwned: 'No “{archetype}” card in your collection',
     syncRunning: 'A synchronization is already running',
     metaSyncRunning: 'Meta update already running',
+    banlistFailed: 'Could not read the banlist: {message}',
     syncFailed: 'Synchronization failed: {message}',
   },
 

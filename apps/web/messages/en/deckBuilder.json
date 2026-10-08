@@ -16,7 +16,10 @@
     "zoneTooSmall": "{zone}: {count, plural, one {# card} other {# cards}} (minimum {limit})",
     "zoneTooLarge": "{zone}: {count, plural, one {# card} other {# cards}} (maximum {limit})",
     "tooManyCopies": "{name}: {count, plural, one {# copy} other {# copies}} (max {limit})",
-    "wrongZone": "{name} doesn’t belong in the {zone}"
+    "wrongZone": "{name} doesn’t belong in the {zone}",
+    "forbidden": "{name} is forbidden ({count, plural, one {# copy} other {# copies}} in the deck)",
+    "fix": "Remove what the banlist forbids",
+    "fixed": "{count, plural, one {# copy removed} other {# copies removed}}"
   },
   "missing": {
     "summary": "<strong>{count, plural, one {# copy} other {# copies}}</strong> not owned · about <strong>{cost}</strong>",
@@ -27,7 +30,9 @@
     "extraDeckMonster": "This monster goes in the Extra Deck",
     "notExtraDeck": "Only Fusion, Synchro, Xyz and Link monsters go in the Extra Deck",
     "maxCopies": "{limit, plural, one {Maximum # copy} other {Maximum # copies}}",
-    "zoneFull": "{zone} is full"
+    "zoneFull": "{zone} is full",
+    "atLimit": "Already {count}",
+    "atLimitBan": "{status} · already {count}"
   },
   "picker": {
     "search": "Search",
@@ -37,7 +42,8 @@
     "noOwnedResults": "None of your cards match. Uncheck “Owned” to search all cards.",
     "noResults": "No results.",
     "suggestionsHint": "Cards from your collection that share an archetype with your deck or are mentioned by it.",
-    "suggestionsEmpty": "Add a few cards to the deck: suggestions are based on its archetypes."
+    "suggestionsEmpty": "Add a few cards to the deck: suggestions are based on its archetypes.",
+    "tileBlocked": "{name}\n{reason} — cannot be added"
   },
   "zone": {
     "emptySide": "Open a card and add it to the Side Deck, or Shift+click to add it directly",
@@ -54,5 +60,8 @@
     "removeOne": "Remove one copy from the {zone}",
     "addOne": "Add one copy to the {zone}",
     "cannotAdd": "Can’t add this card"
+  },
+  "banlist": {
+    "updated": "The banlist has changed — this deck has been rechecked."
   }
 }

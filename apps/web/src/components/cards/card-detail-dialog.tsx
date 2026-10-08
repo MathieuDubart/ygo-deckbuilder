@@ -1,6 +1,7 @@
 'use client';
 import { cardLanguageFor } from '@/lib/format';
 import {
+  banStatusOf,
   CARD_CONDITIONS,
   CARD_LANGUAGES,
   type CardDetailDto,
@@ -25,7 +26,6 @@ import { useAddToWishlist } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
 import { CardInteractions } from './card-interactions';
 
-type BanStatus = 'Forbidden' | 'Banned' | 'Limited' | 'Semi-Limited';
 
 /** Fiche carte : infos, éditions/prix, et actions "je l'ai" / "je la veux". */
 export function CardDetailDialog({
@@ -47,9 +47,11 @@ export function CardDetailDialog({
   const t = useTranslations('cards');
   const tCommon = useTranslations('common.actions');
   const { price } = useFormat();
-  // Statut TCG inconnu → affiché tel quel
-  const banLabel = (status: string) =>
-    t.has(`ban.${status as BanStatus}`) ? t(`ban.${status as BanStatus}`) : status;
+  /** Statut traduit, ou le libellé brut si la source en invente un qu'on ne connaît pas. */
+  const banLabel = (raw: string) => {
+    const status = banStatusOf(raw);
+    return status ? t(`ban.${status}`) : raw;
+  };
   // Navigation entre fiches depuis les interactions (historique propre à la fiche ouverte)
   const [trail, setTrail] = useState<number[]>([]);
   useEffect(() => setTrail([]), [cardId]);
@@ -112,9 +114,15 @@ export function CardDetailDialog({
                 {card.attribute && <Badge>{card.attribute}</Badge>}
                 {card.race && <Badge>{card.race}</Badge>}
                 {card.archetype && <Badge tone="accent">{card.archetype}</Badge>}
+                {/* Les deux listes : elles divergent, et c'est celle du format joué qui compte */}
                 {card.banTcg && (
                   <Badge tone="danger">
                     {t('detail.banTcg', { status: banLabel(card.banTcg) })}
+                  </Badge>
+                )}
+                {card.banOcg && (
+                  <Badge tone="danger">
+                    {t('detail.banOcg', { status: banLabel(card.banOcg) })}
                   </Badge>
                 )}
               </div>

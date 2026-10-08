@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import {
+  banStatusForFormat,
   parseYdk,
   toYdk,
   validateDeck,
@@ -163,7 +164,7 @@ export class DecksService {
           zone: c.zone,
           quantity: c.quantity,
           isExtraDeckMonster: c.card.isExtraDeck,
-          banStatus: deck.format === 'OCG' ? undefined : c.card.banTcg,
+          banStatus: banStatusForFormat(c.card, deck.format),
         })),
       ),
     };

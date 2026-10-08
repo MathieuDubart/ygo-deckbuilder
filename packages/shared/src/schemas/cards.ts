@@ -52,7 +52,10 @@ export interface CardSummaryDto {
   imageUrl: string | null;
   imageUrlSmall: string | null;
   isExtraDeck: boolean;
+  /** Statut sur la banlist TCG, libellé brut de la source. `banStatusOf()` le normalise. */
   banTcg: string | null;
+  /** Statut sur la banlist OCG : c'est elle qui s'applique à un deck au format OCG. */
+  banOcg: string | null;
   priceCardmarket: number | null;
   ownedQuantity?: number;
   /** Étiquettes personnelles posées sur cette carte (absent hors contexte utilisateur). */
@@ -64,7 +67,6 @@ export interface CardDetailDto extends CardSummaryDto {
   linkVal: number | null;
   linkMarkers: string[];
   scale: number | null;
-  banOcg: string | null;
   prints: CardPrintDto[];
 }
 

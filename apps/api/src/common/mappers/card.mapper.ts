@@ -24,6 +24,7 @@ export const cardSummarySelect = {
   imageUrlSmall: true,
   isExtraDeck: true,
   banTcg: true,
+  banOcg: true,
   priceCardmarket: true,
   // Noms allemand / italien / portugais (le français est dans nameFr)
   translations: { select: { locale: true, name: true } },
@@ -48,6 +49,7 @@ export function toCardSummary(card: CardSummaryRow, ownedQuantity?: number): Car
     imageUrlSmall: card.imageUrlSmall,
     isExtraDeck: card.isExtraDeck,
     banTcg: card.banTcg,
+    banOcg: card.banOcg,
     priceCardmarket: toNumber(card.priceCardmarket),
     ...(ownedQuantity !== undefined && { ownedQuantity }),
   };
@@ -82,7 +84,6 @@ export function toCardDetail(card: CardDetailRow, ownedQuantity?: number): CardD
     linkVal: card.linkVal,
     linkMarkers: card.linkMarkers,
     scale: card.scale,
-    banOcg: card.banOcg,
     prints: card.prints.map((p): CardPrintDto => ({
       id: p.id,
       setCode: p.set.code,

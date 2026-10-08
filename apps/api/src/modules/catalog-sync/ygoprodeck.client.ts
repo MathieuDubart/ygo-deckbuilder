@@ -25,6 +25,16 @@ export class YgoprodeckClient {
     return res.data;
   }
 
+  /**
+   * Les seules cartes de la banlist d'un format (~150). À ne pas confondre avec `allCards()` :
+   * on relit cette liste souvent, et tirer 13 000 cartes pour en lire 150 serait grossier
+   * envers eux comme envers nous.
+   */
+  async banlist(format: 'tcg' | 'ocg'): Promise<YgoCard[]> {
+    const res = await this.get<{ data: YgoCard[] }>(`/cardinfo.php?banlist=${format}`);
+    return res.data;
+  }
+
   allSets(): Promise<YgoSetInfo[]> {
     return this.get<YgoSetInfo[]>('/cardsets.php');
   }

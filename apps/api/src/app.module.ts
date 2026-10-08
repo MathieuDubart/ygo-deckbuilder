@@ -9,6 +9,7 @@ import { PrismaModule } from './common/prisma/prisma.module';
 import { AppConfigModule } from './config/config.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { CardsModule } from './modules/cards/cards.module';
+import { BanlistModule } from './modules/banlist/banlist.module';
 import { CatalogSyncModule } from './modules/catalog-sync/catalog-sync.module';
 import { CollectionModule } from './modules/collection/collection.module';
 import { DecksModule } from './modules/decks/decks.module';
@@ -32,6 +33,7 @@ import { WishlistModule } from './modules/wishlist/wishlist.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 300 }]),
     AuthModule,
     CardsModule,
+    BanlistModule,
     CatalogSyncModule,
     CollectionModule,
     DecksModule,

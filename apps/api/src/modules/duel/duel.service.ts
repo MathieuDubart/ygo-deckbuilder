@@ -337,6 +337,7 @@ export class DuelService implements OnModuleDestroy {
       imageUrlSmall: null,
       isExtraDeck: !!(type & (OcgType.FUSION | OcgType.SYNCHRO | OcgType.XYZ | OcgType.LINK)),
       banTcg: null,
+      banOcg: null,
       priceCardmarket: null,
     };
   }
