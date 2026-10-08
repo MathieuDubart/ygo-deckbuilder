@@ -51,17 +51,20 @@ export function CardPicker({
 
   return (
     <div className="flex h-full flex-col gap-3">
-      <div className="grid grid-cols-2 rounded-lg border border-border bg-bg-sunken p-0.5 text-sm">
+      {/* Deux intercalaires, comme ailleurs : l'actif se raccorde au panneau en dessous */}
+      <div className="flex items-end gap-1 border-b border-edge text-sm">
         {(['search', 'suggestions'] as const).map((id) => (
           <button
             key={id}
             onClick={() => setTab(id)}
             className={cn(
-              'flex items-center justify-center gap-1.5 rounded-md py-1.5 font-medium',
-              tab === id ? 'bg-bg-elevated shadow-sm' : 'text-fg-muted',
+              'flex items-center gap-1.5 rounded-t-xs px-3 transition-colors',
+              tab === id
+                ? '-mb-px border border-edge border-b-sheet bg-sheet py-2 font-medium text-ink'
+                : 'mt-1 py-1.5 text-ink-faint hover:text-ink-muted',
             )}
           >
-            {id === 'suggestions' && <Sparkles className="size-3.5 text-accent" />}
+            {id === 'suggestions' && <Sparkles className="size-3.5" />}
             {id === 'search'
               ? t('search')
               : suggestions.data

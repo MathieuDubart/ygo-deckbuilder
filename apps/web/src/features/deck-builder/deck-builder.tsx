@@ -105,7 +105,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
           onChange={(e) => setName(e.target.value)}
           onBlur={() => name.trim() && name !== deck.name && rename.mutate({ name: name.trim() })}
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-          className="min-w-0 flex-1 rounded-md bg-transparent px-1 text-2xl font-semibold tracking-tight outline-none hover:bg-ink/5 focus:bg-bg-elevated"
+          className="min-w-0 flex-1 rounded-xs bg-transparent px-1 text-2xl font-semibold outline-none hover:bg-ink/5 focus:shadow-[inset_0_0_0_1px_var(--edge-strong)]"
           aria-label={t('header.nameLabel')}
         />
         <SaveIndicator status={b.status} onRetry={b.retry} />
@@ -128,7 +128,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
       {(b.issues.length > 0 || b.missing.length > 0) && (
         <div className="grid gap-3 md:grid-cols-2">
           {b.issues.length > 0 && (
-            <div className="rounded-xl border border-warning/30 bg-warning/5 p-3 text-sm">
+            <div className="rounded-xs border border-warning/35 p-3 text-sm">
               <p className="mb-1.5 flex items-center gap-2 font-medium text-warning">
                 <AlertTriangle className="size-4" /> {t('issues.title')}
               </p>
@@ -140,7 +140,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
             </div>
           )}
           {b.missing.length > 0 && (
-            <div className="flex flex-col justify-between gap-3 rounded-xl border border-danger/30 bg-danger/5 p-3 text-sm">
+            <div className="flex flex-col justify-between gap-3 rounded-xs border border-danger/35 p-3 text-sm">
               <p className="text-fg-muted">
                 {t.rich('missing.summary', {
                   count: b.missing.reduce((s, m) => s + m.missing, 0),

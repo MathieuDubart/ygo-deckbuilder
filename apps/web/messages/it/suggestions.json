@@ -3,13 +3,19 @@
     "title": "Suggerimenti",
     "description": "I top deck del momento, quello che la tua collezione ti permette già di costruire e deck costruiti per te.",
     "sections": {
-      "playable": "Pronti da giocare · 100% carte tue",
-      "meta": "Deck meta · i più accessibili per te",
-      "archetypes": "Dalla tua collezione · un deck automatico per archetipo",
-      "official": "Deck ufficiali · structure, starter e deck dei box da ricostruire"
+      "playable": "Pronti da giocare",
+      "meta": "Deck del meta",
+      "archetypes": "Dalla tua collezione",
+      "official": "Deck ufficiali"
     },
     "archetypeStats": "{cards, plural, one {# carta} other {# carte}} · {copies, plural, one {# copia} other {# copie}}",
-    "archetypesEmpty": "Aggiungi carte alla tua collezione per vedere gli archetipi che puoi costruire."
+    "archetypesEmpty": "Aggiungi carte alla tua collezione per vedere gli archetipi che puoi costruire.",
+    "sectionHints": {
+      "playable": "Montati interamente con le tue carte",
+      "meta": "Quelli più alla tua portata",
+      "official": "Structure deck, starter e liste di box da rifare",
+      "archetypes": "Un deck per archetipo che puoi già schierare"
+    }
   },
   "meta": {
     "empty": {
