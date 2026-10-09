@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { CardLanguage } from '../domain/enums';
 
 export const registerSchema = z.object({
   email: z
@@ -28,6 +29,13 @@ export interface PublicUser {
   createdAt: string;
   /** Photo de profil, servie par l'API. Null tant qu'on n'en a pas envoyé. */
   avatarUrl: string | null;
+  /**
+   * Langue dans laquelle l'utilisateur range sa collection, indépendante de celle de
+   * l'interface. `null` tant qu'il n'a rien choisi : les clients retombent alors sur la
+   * langue d'affichage, mais la différence compte — on ne propose pas de normaliser une
+   * collection vers une langue que personne n'a demandée.
+   */
+  collectionLanguage: CardLanguage | null;
 }
 
 /**

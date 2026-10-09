@@ -12,6 +12,7 @@ import type {
 import { SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { collectionLanguageOf } from '../../common/catalog/collection-language';
 import { normalize } from '../../common/search/normalize';
 import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
@@ -67,7 +68,8 @@ export class ProductsService {
     const cards = await this.cardsOf(set.id);
     if (!cards.length) throw new NotFoundException(t('errors.productEmpty'));
 
-    const identity = importIdentity(userId, input.language);
+    const language = await collectionLanguageOf(this.prisma, userId, input.language);
+    const identity = importIdentity(userId, language);
     const existing = await this.prisma.collectionItem.findMany({
       where: { ...identity, printId: { in: cards.map((c) => c.printId) } },
       select: { id: true, printId: true },
@@ -95,8 +97,8 @@ export class ProductsService {
           })),
       });
       return tx.ownedProduct.upsert({
-        where: { userId_setId_language: { userId, setId: set.id, language: input.language } },
-        create: { userId, setId: set.id, language: input.language, copies: input.copies },
+        where: { userId_setId_language: { userId, setId: set.id, language } },
+        create: { userId, setId: set.id, language, copies: input.copies },
         update: { copies: { increment: input.copies } },
         select: { id: true },
       });

@@ -35,6 +35,18 @@ export class YgoprodeckClient {
     return res.data;
   }
 
+  /**
+   * Les cartes d'UNE extension (quelques centaines), par son nom complet. De quoi rattraper
+   * une sortie récente sans retélécharger tout le catalogue.
+   */
+  async cardsOfSet(setName: string, language?: 'fr' | 'de' | 'it' | 'pt'): Promise<YgoCard[]> {
+    const params = new URLSearchParams({ cardset: setName, misc: 'yes' });
+    if (language) params.set('language', language);
+    const res = await this.get<{ data?: YgoCard[] }>(`/cardinfo.php?${params}`);
+    // Une extension sans carte connue répond par une erreur applicative, pas par 404
+    return res.data ?? [];
+  }
+
   allSets(): Promise<YgoSetInfo[]> {
     return this.get<YgoSetInfo[]>('/cardsets.php');
   }

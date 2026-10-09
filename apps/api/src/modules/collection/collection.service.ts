@@ -1,6 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   AddCollectionItemInput,
+  CardLanguage,
+  CollectionLanguageInput,
+  CollectionLanguageResultDto,
+  CollectionLanguageStateDto,
   CollectionFacetsDto,
   CollectionQueryInput,
   FacetValueDto,
@@ -8,6 +12,8 @@ import type {
   UpdateCollectionItemInput,
 } from '@ygo/shared';
 import { allTagsOn, CARD_TAGS } from '../../common/catalog/tag-sql';
+import { collectionLanguageOf, localeLanguage } from '../../common/catalog/collection-language';
+import { languageReport, planLanguageNormalization, type Pile } from './language-merge';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { displayName } from '../../common/search/display-name';
 import { SetProgressService } from './set-progress.service';
@@ -211,7 +217,7 @@ export class CollectionService {
       cardId: input.cardId,
       printId: input.printId ?? null,
       condition: input.condition,
-      language: input.language,
+      language: await collectionLanguageOf(this.prisma, userId, input.language),
       firstEdition: input.firstEdition,
     };
     const existing = await this.prisma.collectionItem.findFirst({ where: identity });
@@ -252,6 +258,96 @@ export class CollectionService {
     const item = await this.findOwned(userId, id);
     await this.prisma.collectionItem.delete({ where: { id } });
     await this.progress.afterCards(userId, [item.cardId]);
+  }
+
+  // MARK: - Langue de la collection
+
+  /**
+   * Le réglage, et ce que normaliser vers `target` coûterait. Une seule requête : l'écran qui
+   * pose la question a besoin des deux en même temps, et le compte sert d'avertissement.
+   */
+  async languageState(
+    userId: string,
+    target: CardLanguage | undefined,
+    fallback: CardLanguage,
+  ): Promise<CollectionLanguageStateDto> {
+    const user = await this.prisma.user.findUniqueOrThrow({
+      where: { id: userId },
+      select: { collectionLanguage: true },
+    });
+    const effective = user.collectionLanguage ?? fallback;
+    return {
+      language: user.collectionLanguage,
+      effective,
+      report: { target: target ?? effective, ...languageReport(await this.piles(userId), target ?? effective) },
+    };
+  }
+
+  /** Enregistre le choix, et l'applique aux cartes déjà là si on le demande. */
+  async setLanguage(
+    userId: string,
+    input: CollectionLanguageInput,
+  ): Promise<CollectionLanguageResultDto> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { collectionLanguage: input.language },
+    });
+    if (!input.normalize) return { target: input.language, retagged: 0, merged: 0 };
+    return this.normalizeLanguage(userId, input.language);
+  }
+
+  /**
+   * Passe toute la collection dans une seule langue.
+   *
+   * Réécrire la langue ne suffit pas : deux piles de la même impression, l'une en anglais et
+   * l'autre en français, deviennent deux piles identiques. Le plan (pur et testé) dit laquelle
+   * absorbe l'autre ; ici on ne fait qu'exécuter, dans une transaction — à moitié appliqué,
+   * ce serait des exemplaires perdus.
+   */
+  async normalizeLanguage(
+    userId: string,
+    target: CardLanguage,
+  ): Promise<CollectionLanguageResultDto> {
+    const piles = await this.piles(userId);
+    const plan = planLanguageNormalization(piles, target);
+    if (plan.retag.length === 0 && plan.merge.length === 0) {
+      return { target, retagged: 0, merged: 0 };
+    }
+
+    await this.prisma.$transaction([
+      ...plan.retag.map((id) =>
+        this.prisma.collectionItem.update({ where: { id }, data: { language: target } }),
+      ),
+      ...Object.entries(plan.totals).map(([id, quantity]) =>
+        this.prisma.collectionItem.update({ where: { id }, data: { quantity } }),
+      ),
+      this.prisma.collectionItem.deleteMany({
+        where: { userId, id: { in: plan.merge.map((m) => m.id) } },
+      }),
+    ]);
+
+    // Les cartes possédées et leurs impressions ne changent pas — seule l'étiquette de langue
+    // bouge — mais la règle du projet est qu'un écrit sur CollectionItem recalcule l'avancement.
+    // On s'y tient plutôt que de raisonner au cas par cas.
+    await this.progress.afterCards(userId, [...new Set(piles.map((p) => p.cardId))]);
+    return { target, retagged: plan.retag.length, merged: plan.merge.length };
+  }
+
+  /** Les piles réduites à ce qui décide de leur identité : tout ce dont le plan a besoin. */
+  private async piles(userId: string): Promise<Pile[]> {
+    const rows = await this.prisma.collectionItem.findMany({
+      where: { userId },
+      select: {
+        id: true,
+        cardId: true,
+        printId: true,
+        condition: true,
+        language: true,
+        firstEdition: true,
+        quantity: true,
+      },
+    });
+    return rows;
   }
 
   /**
