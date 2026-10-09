@@ -36,4 +36,6 @@ export interface TagDto {
   cardCount: number;
   /** Extensions portant cette étiquette. */
   setCount: number;
+  /** Decks portant cette étiquette. */
+  deckCount: number;
 }

@@ -23,7 +23,24 @@
     "duplicate": "Duplizieren",
     "duplicated": "Deck dupliziert",
     "delete": "Löschen",
-    "confirmDelete": "„{name}“ löschen?"
+    "confirmDelete": "„{name}“ löschen?",
+    "filterPlaceholder": "Meine Decks filtern…",
+    "format": "Format",
+    "allFormats": "Alle Formate",
+    "sorts": {
+      "updated": "Bearbeitung",
+      "created": "Erstellung",
+      "name": "Name",
+      "size": "Größe"
+    },
+    "noResults": {
+      "title": "Kein Deck passt",
+      "description": "Mit diesen Filtern bleibt nichts übrig. Nimm einen weg und versuch es nochmal.",
+      "clear": "Filter zurücksetzen"
+    },
+    "fromProduct": "Aus einem Produkt",
+    "sort": "Sortierung",
+    "sortOption": "Sortierung: {label}"
   },
   "new": {
     "title": "Neues Deck",

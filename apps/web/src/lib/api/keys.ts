@@ -28,6 +28,7 @@ export const qk = {
   collectionFacets: ['collection-facets'] as const,
   collectionLanguage: (target: string | undefined) => ['collection-language', target] as const,
   decks: ['decks'] as const,
+  deckList: (params: object) => ['decks', params] as const,
   deck: (id: string) => ['deck', id] as const,
   wishlist: ['wishlist'] as const,
   metaSuggestions: ['suggestions', 'meta'] as const,

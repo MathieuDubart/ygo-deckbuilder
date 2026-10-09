@@ -22,9 +22,9 @@ export interface Facet {
 }
 
 /**
- * Barre de filtres d'un onglet de la collection : une recherche, des facettes cumulables, et
- * ce que l'appelant veut y ajouter (tri, bascules, étiquettes). Une facette sans valeur
- * disponible n'est pas affichée — on ne propose jamais un filtre qui ne renverrait rien.
+ * Barre de filtres d'une liste : une recherche, des facettes cumulables, et ce que
+ * l'appelant veut y ajouter (tri, bascules, étiquettes). Une facette sans valeur disponible
+ * n'est pas affichée — on ne propose jamais un filtre qui ne renverrait rien.
  */
 export function FacetBar({
   search,

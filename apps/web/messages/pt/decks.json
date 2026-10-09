@@ -23,7 +23,24 @@
     "duplicate": "Duplicar",
     "duplicated": "Deck duplicado",
     "delete": "Excluir",
-    "confirmDelete": "Excluir “{name}”?"
+    "confirmDelete": "Excluir “{name}”?",
+    "filterPlaceholder": "Filtrar os meus decks…",
+    "format": "Formato",
+    "allFormats": "Todos os formatos",
+    "sorts": {
+      "updated": "Modificação",
+      "created": "Criação",
+      "name": "Nome",
+      "size": "Tamanho"
+    },
+    "noResults": {
+      "title": "Nenhum deck corresponde",
+      "description": "Nada aqui passa nesses filtros. Tira um e tenta de novo.",
+      "clear": "Limpar filtros"
+    },
+    "fromProduct": "De um produto",
+    "sort": "Ordenar",
+    "sortOption": "Ordenar: {label}"
   },
   "new": {
     "title": "Novo deck",

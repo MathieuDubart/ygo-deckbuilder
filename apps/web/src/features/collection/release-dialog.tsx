@@ -17,7 +17,7 @@ import { useTagSet } from '@/lib/api/tags';
 import { FriendProgressPanel, PrintOwners } from '@/features/social/friend-progress';
 import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { FilterToggle } from './facet-bar';
+import { FilterToggle } from '@/components/ui/facet-bar';
 
 type Shown = 'all' | 'owned' | 'missing';
 

@@ -11,7 +11,15 @@ function useInvalidateTagged() {
   const qc = useQueryClient();
   return () =>
     Promise.all(
-      [qk.tags, qk.collectionAll, qk.productsAll, qk.releasesAll, ['cards'], ['card']].map(
+      [
+        qk.tags,
+        qk.collectionAll,
+        qk.productsAll,
+        qk.releasesAll,
+        qk.decks,
+        ['cards'],
+        ['card'],
+      ].map(
         (queryKey) => qc.invalidateQueries({ queryKey }),
       ),
     );
@@ -48,6 +56,16 @@ export function useTagCard() {
   return useMutation({
     mutationFn: ({ tagId, cardId, on }: { tagId: string; cardId: number; on: boolean }) =>
       api<TagDto>(`/tags/${tagId}/cards/${cardId}`, { method: on ? 'PUT' : 'DELETE' }),
+    onSuccess: invalidate,
+  });
+}
+
+/** Pose ou retire l'étiquette d'un deck. */
+export function useTagDeck() {
+  const invalidate = useInvalidateTagged();
+  return useMutation({
+    mutationFn: ({ tagId, deckId, on }: { tagId: string; deckId: string; on: boolean }) =>
+      api<TagDto>(`/tags/${tagId}/decks/${deckId}`, { method: on ? 'PUT' : 'DELETE' }),
     onSuccess: invalidate,
   });
 }

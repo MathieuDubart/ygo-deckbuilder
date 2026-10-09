@@ -1,18 +1,29 @@
 'use client';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   CardSuggestionDto,
   CreateDeckInput,
   DeckDto,
   DeckListItemDto,
+  DeckQueryInput,
   ImportYdkInput,
   UpdateDeckInput,
 } from '@ygo/shared';
 import { api } from './client';
 import { qk } from './keys';
 
-export const useDecks = () =>
-  useQuery({ queryKey: qk.decks, queryFn: () => api<DeckListItemDto[]>('/decks') });
+export type DeckParams = Partial<Omit<DeckQueryInput, 'tagIds'>> & { tagIds?: string[] };
+
+export const useDecks = (params: DeckParams = {}) =>
+  useQuery({
+    queryKey: qk.deckList(params),
+    queryFn: () =>
+      api<DeckListItemDto[]>('/decks', {
+        // Les étiquettes voyagent en liste séparée par des virgules, comme pour la collection
+        query: { ...params, tagIds: params.tagIds?.length ? params.tagIds.join(',') : undefined },
+      }),
+    placeholderData: keepPreviousData,
+  });
 
 export const useDeck = (id: string) =>
   useQuery({ queryKey: qk.deck(id), queryFn: () => api<DeckDto>(`/decks/${id}`) });

@@ -2,6 +2,23 @@ import { z } from 'zod';
 import { DECK_FORMATS, DECK_ZONES, type DeckFormat, type DeckZone } from '../domain/enums';
 import type { DeckIssue } from '../domain/deck-rules';
 import type { CardSummaryDto } from './cards';
+import { tagIdsSchema } from './tags';
+
+/** Tris de la liste des decks. Le défaut, `updated`, met en tête ce qu'on vient de toucher. */
+export const DECK_SORTS = ['updated', 'created', 'name', 'size'] as const;
+export type DeckSort = (typeof DECK_SORTS)[number];
+
+/**
+ * Filtres de « Mes decks ». Mêmes outils que la collection : une recherche, des étiquettes
+ * qui se cumulent (ET, pas OU) et un tri.
+ */
+export const deckQuerySchema = z.object({
+  q: z.string().trim().max(100).optional(),
+  tagIds: tagIdsSchema.optional(),
+  format: z.enum(DECK_FORMATS).optional(),
+  sort: z.enum(DECK_SORTS).optional(),
+});
+export type DeckQueryInput = z.infer<typeof deckQuerySchema>;
 
 export const deckCardSchema = z.object({
   cardId: z.number().int().positive(),
@@ -58,4 +75,8 @@ export interface DeckListItemDto {
   extraCount: number;
   sideCount: number;
   coverImageUrl: string | null;
+  /** Étiquettes posées par l'utilisateur. */
+  tagIds: string[];
+  /** Monté depuis la liste officielle d'un produit, et non écrit à la main. */
+  fromProduct: boolean;
 }

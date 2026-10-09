@@ -1,7 +1,10 @@
 import { Prisma } from '../../generated/prisma/client';
 
 /** Table de pose d'une étiquette et colonne qui désigne la cible. */
-type TagLink = { table: 'CardTag'; column: 'cardId' } | { table: 'SetTag'; column: 'setId' };
+type TagLink =
+  | { table: 'CardTag'; column: 'cardId' }
+  | { table: 'SetTag'; column: 'setId' }
+  | { table: 'DeckTag'; column: 'deckId' };
 
 /**
  * Condition « la cible porte TOUTES ces étiquettes » : cumuler des étiquettes restreint,
@@ -25,6 +28,7 @@ export function allTagsOn(
 
 export const CARD_TAGS: TagLink = { table: 'CardTag', column: 'cardId' };
 export const SET_TAGS: TagLink = { table: 'SetTag', column: 'setId' };
+export const DECK_TAGS: TagLink = { table: 'DeckTag', column: 'deckId' };
 
 /** Étiquettes de l'utilisateur posées sur la cible, en tableau (jamais null). */
 export function tagIdsOf(target: Prisma.Sql, link: TagLink, userId: string): Prisma.Sql {

@@ -23,7 +23,24 @@
     "duplicate": "Dupliquer",
     "duplicated": "Deck dupliqué",
     "delete": "Supprimer",
-    "confirmDelete": "Supprimer « {name} » ?"
+    "confirmDelete": "Supprimer « {name} » ?",
+    "filterPlaceholder": "Filtrer mes decks…",
+    "format": "Format",
+    "allFormats": "Tous les formats",
+    "sorts": {
+      "updated": "Modification",
+      "created": "Création",
+      "name": "Nom",
+      "size": "Taille"
+    },
+    "noResults": {
+      "title": "Aucun deck ne correspond",
+      "description": "Rien ici ne passe ces filtres. Enlèves-en un et réessaie.",
+      "clear": "Effacer les filtres"
+    },
+    "fromProduct": "Depuis un produit",
+    "sort": "Tri",
+    "sortOption": "Tri : {label}"
   },
   "new": {
     "title": "Nouveau deck",
