@@ -87,6 +87,7 @@
   },
   "language": {
     "alreadyUniform": "Tout est déjà en {language}.",
+    "breakdown": "Répartition",
     "copies": "{count} dans {piles, plural, one {# pile} other {# piles}}",
     "done": "{count, plural, one {# pile déplacée} other {# piles déplacées}}{merged, plural, =0 {} one {, # fusionnée} other {, # fusionnées}}.",
     "label": "Langue de rangement",

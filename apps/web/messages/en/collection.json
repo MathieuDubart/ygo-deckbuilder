@@ -87,6 +87,7 @@
   },
   "language": {
     "alreadyUniform": "Everything is already in {language}.",
+    "breakdown": "Breakdown",
     "copies": "{count} in {piles, plural, one {# stack} other {# stacks}}",
     "done": "{count, plural, one {# stack moved} other {# stacks moved}}{merged, plural, =0 {} one {, # merged} other {, # merged}}.",
     "label": "Filing language",
