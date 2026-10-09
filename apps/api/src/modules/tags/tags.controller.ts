@@ -81,4 +81,18 @@ export class TagsController {
   untagSet(@CurrentUser() user: AuthUser, @Param('id') id: string, @Param('setId') setId: string) {
     return this.tags.setSet(user.id, id, setId, false);
   }
+
+  @Put(':id/decks/:deckId')
+  tagDeck(@CurrentUser() user: AuthUser, @Param('id') id: string, @Param('deckId') deckId: string) {
+    return this.tags.setDeck(user.id, id, deckId, true);
+  }
+
+  @Delete(':id/decks/:deckId')
+  untagDeck(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Param('deckId') deckId: string,
+  ) {
+    return this.tags.setDeck(user.id, id, deckId, false);
+  }
 }

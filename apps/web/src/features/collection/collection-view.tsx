@@ -34,7 +34,7 @@ import { useFormat } from '@/lib/format';
 import { isPremiumRarity } from '@/lib/rarity';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from '@/components/ui/facet-bar';
 import { LanguagePanel } from './language-panel';
 import { ImportSetDialog } from './import-set-dialog';
 import { ProductDialog } from './product-dialog';

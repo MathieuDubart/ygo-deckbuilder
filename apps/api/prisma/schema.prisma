@@ -280,9 +280,22 @@ model Tag {
   user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   cards CardTag[]
   sets  SetTag[]
+  decks DeckTag[]
 
   @@unique([userId, name])
   @@index([userId])
+}
+
+/// Étiquette posée sur un deck.
+model DeckTag {
+  tagId  String
+  deckId String
+
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  deck Deck @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@id([tagId, deckId])
+  @@index([deckId])
 }
 
 /// Étiquette posée sur une carte, toutes impressions confondues.
@@ -401,6 +414,7 @@ model Deck {
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   productDeck   ProductDeck?   @relation(fields: [productDeckId], references: [id], onDelete: SetNull)
   cards         DeckCard[]
+  tags          DeckTag[]
   wishlistItems WishlistItem[]
 
   @@unique([userId, productDeckId])

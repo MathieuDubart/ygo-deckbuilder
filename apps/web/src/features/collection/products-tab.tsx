@@ -14,7 +14,7 @@ import { useOwnedProducts, type OwnedProductsParams } from '@/lib/api/collection
 import { useTags } from '@/lib/api/tags';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from '@/components/ui/facet-bar';
 import { ProductDialog } from './product-dialog';
 
 const SORTS = ['added', 'name', 'date', 'completeness'] as const;

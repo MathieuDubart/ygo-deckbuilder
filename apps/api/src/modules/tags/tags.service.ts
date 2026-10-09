@@ -8,7 +8,7 @@ const withCounts = {
   id: true,
   name: true,
   color: true,
-  _count: { select: { cards: true, sets: true } },
+  _count: { select: { cards: true, sets: true, decks: true } },
 } satisfies Prisma.TagSelect;
 
 type TagRow = Prisma.TagGetPayload<{ select: typeof withCounts }>;
@@ -87,6 +87,24 @@ export class TagsService {
     return this.one(id);
   }
 
+  /** Pose ou retire l'étiquette sur un deck de l'utilisateur. */
+  async setDeck(userId: string, id: string, deckId: string, on: boolean): Promise<TagDto> {
+    await this.own(userId, id);
+    if (on) {
+      // Le deck doit être le sien : une étiquette ne se pose pas sur le deck d'un autre,
+      // même public.
+      const deck = await this.prisma.deck.findFirst({
+        where: { id: deckId, userId },
+        select: { id: true },
+      });
+      if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
+      await this.prisma.deckTag.createMany({ data: [{ tagId: id, deckId }], skipDuplicates: true });
+    } else {
+      await this.prisma.deckTag.deleteMany({ where: { tagId: id, deckId } });
+    }
+    return this.one(id);
+  }
+
   /** Pose ou retire l'étiquette sur une extension (qu'on la possède ou non). */
   async setSet(userId: string, id: string, setId: string, on: boolean): Promise<TagDto> {
     await this.own(userId, id);
@@ -121,5 +139,6 @@ function toTagDto(row: TagRow): TagDto {
     color: row.color as TagDto['color'],
     cardCount: row._count.cards,
     setCount: row._count.sets,
+    deckCount: row._count.decks,
   };
 }

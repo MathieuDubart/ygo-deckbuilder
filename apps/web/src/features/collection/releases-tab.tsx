@@ -27,7 +27,7 @@ import { FriendProgressStrip } from '@/features/social/friend-progress';
 import { useFormat } from '@/lib/format';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
-import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
+import { FacetBar, FilterToggle, SortSelect } from '@/components/ui/facet-bar';
 import { ReleaseDialog } from './release-dialog';
 
 const SORTS = ['date', 'progress', 'name', 'cards'] as const;

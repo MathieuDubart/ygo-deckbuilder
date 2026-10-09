@@ -8,6 +8,7 @@ import {
   type DeckCardInput,
   type DeckDto,
   type DeckListItemDto,
+  type DeckQueryInput,
   type ImportYdkInput,
   type UpdateDeckInput,
 } from '@ygo/shared';
@@ -32,15 +33,25 @@ export class DecksService {
     private readonly resolver: CardResolver,
   ) {}
 
-  async list(userId: string): Promise<DeckListItemDto[]> {
+  async list(userId: string, query: DeckQueryInput = {}): Promise<DeckListItemDto[]> {
     const decks = await this.prisma.deck.findMany({
-      where: { userId },
-      orderBy: { updatedAt: 'desc' },
+      where: {
+        userId,
+        ...(query.format ? { format: query.format } : {}),
+        ...(query.q ? { name: { contains: query.q, mode: 'insensitive' } } : {}),
+        // Étiquettes cumulées : un ET, comme dans la collection. Chacune doit être posée,
+        // et la jointure sur `Tag` par `userId` empêche de filtrer sur celle d'un autre.
+        ...(query.tagIds?.length
+          ? { AND: query.tagIds.map((tagId) => ({ tags: { some: { tagId, tag: { userId } } } })) }
+          : {}),
+      },
       include: {
         cards: { include: { card: { select: { imageUrl: true, imageUrlSmall: true } } } },
+        tags: { select: { tagId: true } },
       },
     });
-    return decks.map((d) => {
+
+    const items = decks.map((d) => {
       const cover = d.cards.find((c) => c.zone === 'MAIN')?.card;
       const count = (zone: string) =>
         d.cards.filter((c) => c.zone === zone).reduce((s, c) => s + c.quantity, 0);
@@ -49,12 +60,27 @@ export class DecksService {
         name: d.name,
         format: d.format,
         updatedAt: d.updatedAt.toISOString(),
+        createdAt: d.createdAt.toISOString(),
         mainCount: count('MAIN'),
         extraCount: count('EXTRA'),
         sideCount: count('SIDE'),
         coverImageUrl: cover ? (cover.imageUrl ?? cover.imageUrlSmall) : null,
+        tagIds: d.tags.map((t) => t.tagId),
+        fromProduct: d.productDeckId !== null,
       };
     });
+
+    // Le tri se fait ici et non en SQL : « taille » additionne les trois zones, que la base
+    // ne porte pas, et les listes de decks d'un compte se comptent en dizaines.
+    const size = (d: (typeof items)[number]) => d.mainCount + d.extraCount + d.sideCount;
+    const by: Record<string, (a: (typeof items)[number], b: (typeof items)[number]) => number> = {
+      updated: (a, b) => b.updatedAt.localeCompare(a.updatedAt),
+      created: (a, b) => b.createdAt.localeCompare(a.createdAt),
+      name: (a, b) => a.name.localeCompare(b.name),
+      size: (a, b) => size(b) - size(a) || a.name.localeCompare(b.name),
+    };
+    items.sort(by[query.sort ?? 'updated'] ?? by.updated!);
+    return items.map(({ createdAt: _createdAt, ...item }) => item);
   }
 
   async get(userId: string, id: string): Promise<DeckDto> {

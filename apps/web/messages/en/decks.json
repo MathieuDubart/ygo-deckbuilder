@@ -23,7 +23,24 @@
     "duplicate": "Duplicate",
     "duplicated": "Deck duplicated",
     "delete": "Delete",
-    "confirmDelete": "Delete “{name}”?"
+    "confirmDelete": "Delete “{name}”?",
+    "filterPlaceholder": "Filter my decks…",
+    "format": "Format",
+    "allFormats": "All formats",
+    "sorts": {
+      "updated": "Last edited",
+      "created": "Newest",
+      "name": "Name",
+      "size": "Size"
+    },
+    "noResults": {
+      "title": "No deck matches",
+      "description": "Nothing here fits those filters. Drop one and try again.",
+      "clear": "Clear filters"
+    },
+    "fromProduct": "From a product",
+    "sort": "Sort",
+    "sortOption": "Sort: {label}"
   },
   "new": {
     "title": "New deck",

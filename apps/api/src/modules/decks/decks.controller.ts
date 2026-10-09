@@ -8,12 +8,15 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   createDeckSchema,
+  deckQuerySchema,
   importYdkSchema,
   updateDeckSchema,
   type CreateDeckInput,
+  type DeckQueryInput,
   type ImportYdkInput,
   type UpdateDeckInput,
 } from '@ygo/shared';
@@ -26,8 +29,11 @@ export class DecksController {
   constructor(private readonly decks: DecksService) {}
 
   @Get()
-  list(@CurrentUser() user: AuthUser) {
-    return this.decks.list(user.id);
+  list(
+    @CurrentUser() user: AuthUser,
+    @Query(new ZodValidationPipe(deckQuerySchema)) q: DeckQueryInput,
+  ) {
+    return this.decks.list(user.id, q);
   }
 
   @Post()
