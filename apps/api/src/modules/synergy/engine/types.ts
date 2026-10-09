@@ -96,6 +96,17 @@ export interface CardFeatures {
   handTrap: boolean;
   negates: boolean;
   removal: boolean;
+  /**
+   * Verrou continu : la carte interdit durablement quelque chose aux DEUX joueurs ou à
+   * l'adversaire (invoquer, activer, attaquer), ou annule les effets de tout un terrain.
+   * À ne pas confondre avec la protection d'une carte sur elle-même.
+   */
+  floodgate: boolean;
+  /**
+   * Casse un terrain déjà posé : retire ou annule PLUSIEURS cartes adverses d'un coup, ou
+   * se sert des monstres de l'adversaire. C'est ce qui permet de jouer en second.
+   */
+  boardBreaker: boolean;
   draws: boolean;
   tuner: boolean;
   /** Effet(s) limité(s) à 1 fois par tour ("hard once per turn") */

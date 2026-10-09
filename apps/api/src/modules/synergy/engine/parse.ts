@@ -278,6 +278,8 @@ export function parseCard(card: SynCard): CardFeatures {
         effectText,
       ) ||
       /Destroy all monsters your opponent controls/i.test(effectText),
+    floodgate: isFloodgate(card, effectText),
+    boardBreaker: isBoardBreaker(card, effectText),
     draws: /\bdraw (\d+|one|two) cards?/i.test(effectText),
     tuner: /\bTuner\b/.test(card.type),
     oncePerTurn:
@@ -292,6 +294,74 @@ export function parseCard(card: SynCard): CardFeatures {
     fieldNames,
     materials: isMaterialCard ? parseMaterials(card, firstLine ?? '') : undefined,
   };
+}
+
+/**
+ * Une carte dont l'effet DURE : seule une carte posée sur le terrain peut enfermer la
+ * partie. C'est ce qui sépare Skill Drain, piège continu, de Dark Ruler No More, qui dit
+ * presque la même chose mais le temps d'un tour.
+ */
+function lingers(card: SynCard): boolean {
+  return card.category === 'MONSTER' || card.race === 'Continuous' || card.race === 'Field';
+}
+
+/**
+ * Un verrou continu, par opposition à une protection.
+ *
+ * Deux conditions, et les deux comptent. Le texte doit empêcher l'adversaire ou les deux
+ * joueurs de faire quelque chose EN GÉNÉRAL — « your opponent cannot target this card » est
+ * du texte défensif, pas un verrou, et « cannot activate … in response » n'enferme rien
+ * au-delà d'une activation. Et la carte doit durer : un Normal Spell ne verrouille rien.
+ */
+function isFloodgate(card: SynCard, text: string): boolean {
+  if (!lingers(card)) return false;
+  // « in response » : l'interdiction ne vaut que le temps d'une activation
+  const lasting = text.replace(/[^.;]*\bin response\b[^.;]*/gi, '');
+  // « Neither player can … » interdit déjà sans « not » : la négation est dans le sujet.
+  const restrains =
+    /(?:Neither player|Both players|Your opponent|Each player)\s+can(?:not| only)?\b/i;
+  const what =
+    /(?:Special Summon|Normal Summon|activate|attack|conduct|control|draw|add|declare|use)/i;
+  for (const sentence of lasting.split(/[.;]/)) {
+    if (!restrains.test(sentence)) continue;
+    // « cannot target this card », « cannot destroy this card » : la carte se défend
+    if (/\bthis card\b/i.test(sentence)) continue;
+    if (what.test(sentence)) return true;
+  }
+  // Sans sujet : « Monsters cannot be Special Summoned from the Extra Deck »
+  if (
+    /\b(?:Monsters|Cards|Spells?|Traps?)[^.;]{0,30}cannot be (?:Special Summoned|Normal Summoned|activated)/i.test(
+      lasting,
+    )
+  ) {
+    return true;
+  }
+  // Annulation permanente et globale : Skill Drain et sa famille
+  return /Negate the effects of all\b/i.test(lasting);
+}
+
+/**
+ * Casse-terrain : de quoi reprendre la main quand l'adversaire a déjà posé son plateau.
+ *
+ * Le signe n'est pas « ça retire une carte » — presque tout retire une carte — mais que ça
+ * en retire PLUSIEURS d'un coup, ou que ça se serve des monstres adverses (Kaiju). Et c'est
+ * un coup unique : une carte qui dure est un verrou, pas un déblocage, même quand les deux
+ * textes se ressemblent.
+ */
+function isBoardBreaker(card: SynCard, text: string): boolean {
+  if (lingers(card) && card.category !== 'MONSTER') return false;
+  return (
+    // « Destroy all monsters your opponent controls », « banish all cards on the field »
+    /(?:destroy|banish|send|return|shuffle)\s+all\b[^.;]{0,70}(?:your opponent controls|your opponent's|on the field)/i.test(
+      text,
+    ) ||
+    // Dark Ruler No More et sa famille
+    /Negate the effects of all\b[^.;]{0,70}(?:your opponent|monsters)/i.test(text) ||
+    // Kaiju : on prend le monstre adverse plutôt que de le retirer
+    /Tribut(?:e|ing) \d+ monsters? (?:they|your opponent) controls?/i.test(text) ||
+    // Evenly Matched : « so that they control 1 card »
+    /so that (?:they|your opponent) controls? [^.;]{0,30}cards?/i.test(text)
+  );
 }
 
 /** Première ligne d'un monstre Extra Deck : ses matériaux. */

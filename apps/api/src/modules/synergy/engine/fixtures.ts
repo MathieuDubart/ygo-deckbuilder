@@ -241,3 +241,120 @@ export const BLUE_EYES_DECK: { card: SynCard; qty: number }[] = [
   { card: LINKURIBOH, qty: 1 },
   { card: RANK7, qty: 1 },
 ];
+
+// ─── Floodgates et board breakers ───
+// Textes officiels, pour les deux lectures que le profil de deck exige. Ce sont les cartes
+// que tout joueur reconnaît : si le lecteur se trompe sur elles, il se trompe sur tout.
+
+export const VANITYS_EMPTINESS = card({
+  id: 5851097,
+  name: "Vanity's Emptiness",
+  type: 'Trap Card',
+  frameType: 'trap',
+  desc: 'Neither player can Special Summon monsters. When a card(s) is sent from the field or your hand to your GY: Destroy this card.',
+  race: 'Continuous',
+  attribute: null,
+  level: null,
+});
+
+export const SKILL_DRAIN = card({
+  id: 82732705,
+  name: 'Skill Drain',
+  type: 'Trap Card',
+  frameType: 'trap',
+  desc: 'Activate this card by paying 1000 LP. Negate the effects of all face-up monsters on the field, while those monsters are face-up on the field.',
+  race: 'Continuous',
+  attribute: null,
+  level: null,
+});
+
+export const RIVALRY = card({
+  id: 90846359,
+  name: 'Rivalry of Warlords',
+  type: 'Trap Card',
+  frameType: 'trap',
+  desc: 'Each player can only control 1 Type of monster. Send the other monsters they control to the GY.',
+  race: 'Continuous',
+  attribute: null,
+  level: null,
+});
+
+export const RAIGEKI = card({
+  id: 12580477,
+  name: 'Raigeki',
+  type: 'Spell Card',
+  frameType: 'spell',
+  desc: 'Destroy all monsters your opponent controls.',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+});
+
+export const LIGHTNING_STORM = card({
+  id: 14532163,
+  name: 'Lightning Storm',
+  type: 'Spell Card',
+  frameType: 'spell',
+  desc: 'If you control no face-up cards: Activate 1 of these effects;\r\n● Destroy all Attack Position monsters your opponent controls.\r\n● Destroy all Spells and Traps your opponent controls.\r\nYou can only activate 1 "Lightning Storm" per turn.',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+});
+
+export const EVENLY_MATCHED = card({
+  id: 43607279,
+  name: 'Evenly Matched',
+  type: 'Trap Card',
+  frameType: 'trap',
+  desc: 'At the end of the Battle Phase, if your opponent controls more cards than you do: You can banish cards from the top of your opponent\'s field, face-down, so that they control the same number of cards as you do. During your opponent\'s End Phase, if you control no cards: You can banish this card from your GY; this effect becomes "banish cards from the top of your opponent\'s field, face-down, so that they control 1 card".',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+});
+
+export const GAMECIEL = card({
+  id: 31036355,
+  name: 'Gameciel, the Sea Turtle Kaiju',
+  type: 'Effect Monster',
+  frameType: 'effect',
+  desc: 'You can Special Summon this card (from your hand) to your opponent\'s field in Attack Position, by Tributing 1 monster they control. You can only control 1 "Kaiju" monster. Once per turn: You can remove 3 Kaiju Counters from the field; Special Summon this card from the GY.',
+  race: 'Aqua',
+  attribute: 'WATER',
+  level: 7,
+});
+
+/** Protection, PAS un floodgate : le piège classique du lecteur. */
+export const SHIELDED = card({
+  id: 999001,
+  name: 'Protected Dragon',
+  type: 'Effect Monster',
+  frameType: 'effect',
+  desc: 'Your opponent cannot target this card with card effects, also it cannot be destroyed by your opponent\'s card effects. When this card is Normal Summoned: You can add 1 "Blue-Eyes White Dragon" from your Deck to your hand.',
+  race: 'Dragon',
+  attribute: 'LIGHT',
+  level: 4,
+});
+
+/** Protection d'activation, PAS un floodgate : « in response » est la marque. */
+export const UNRESPONDABLE = card({
+  id: 999002,
+  name: 'Sealed Ritual',
+  type: 'Spell Card',
+  frameType: 'spell',
+  desc: 'Your opponent cannot activate cards or effects in response to this card\'s activation. Add 1 Ritual Spell from your Deck to your hand.',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+});
+
+/** Dit presque la même chose que Skill Drain, mais le temps d'un tour : un déblocage. */
+export const DARK_RULER = card({
+  id: 70791313,
+  name: 'Dark Ruler No More',
+  type: 'Spell Card',
+  frameType: 'spell',
+  desc: 'Negate the effects of all face-up monsters your opponent currently controls, until the end of this turn (even if this card leaves the field). Your opponent cannot activate monster effects in response to this card\'s activation. You take no battle damage from attacks involving monsters whose effects are negated by this effect.',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+});
