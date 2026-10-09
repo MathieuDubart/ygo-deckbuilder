@@ -31,7 +31,8 @@
       "updated": "Last edited",
       "created": "Newest",
       "name": "Name",
-      "size": "Size"
+      "size": "Size",
+      "strength": "Strength"
     },
     "noResults": {
       "title": "No deck matches",
@@ -55,6 +56,44 @@
     "submit": {
       "empty": "Create and build",
       "ydk": "Import"
+    }
+  },
+  "styles": {
+    "COMBO": "Combo",
+    "MIDRANGE": "Midrange",
+    "CONTROL": "Control",
+    "STUN": "Stun",
+    "BEATDOWN": "Beatdown"
+  },
+  "styleHints": {
+    "COMBO": "Chains plays to set a board in one turn.",
+    "MIDRANGE": "Plays its game without betting everything on one turn.",
+    "CONTROL": "Lets the opponent come, and answers.",
+    "STUN": "Locks the game down rather than answering it.",
+    "BEATDOWN": "Hits early and keeps hitting."
+  },
+  "matchups": {
+    "title": "Matchups",
+    "hint": "Where this deck wins and where it struggles, from what it plays.",
+    "vsStyle": "vs {style}",
+    "none": "Not enough cards yet to judge this deck.",
+    "strengthTitle": "Strength",
+    "verdicts": {
+      "GOOD": "Favoured",
+      "EVEN": "Even",
+      "BAD": "Unfavoured"
+    },
+    "reasons": {
+      "HAND_TRAPS": "Enough hand traps to stop them on their turn.",
+      "NO_HAND_TRAPS": "Too few hand traps: they play their turn untouched.",
+      "BREAKERS": "Enough mass removal to clear what they set up.",
+      "NO_BREAKERS": "Nothing to clear an established board.",
+      "LOCK": "Your floodgates shut their plan down.",
+      "FRAGILE_SETUP": "Your plan needs a board, and theirs stops you building one.",
+      "DISRUPTION": "Enough interaction to answer them in time.",
+      "NO_DISRUPTION": "No interaction: nothing answers them.",
+      "RESILIENCE": "You come back from what they take away.",
+      "BALANCED": "Nothing decides it either way."
     }
   }
 }

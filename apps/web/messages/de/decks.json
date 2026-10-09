@@ -31,7 +31,8 @@
       "updated": "Bearbeitung",
       "created": "Erstellung",
       "name": "Name",
-      "size": "Größe"
+      "size": "Größe",
+      "strength": "Stärke"
     },
     "noResults": {
       "title": "Kein Deck passt",
@@ -55,6 +56,44 @@
     "submit": {
       "empty": "Erstellen & bauen",
       "ydk": "Importieren"
+    }
+  },
+  "styles": {
+    "COMBO": "Combo",
+    "MIDRANGE": "Midrange",
+    "CONTROL": "Kontrolle",
+    "STUN": "Stun",
+    "BEATDOWN": "Beatdown"
+  },
+  "styleHints": {
+    "COMBO": "Verkettet Karten, um in einem Zug ein Feld aufzubauen.",
+    "MIDRANGE": "Spielt sein Spiel, ohne alles auf einen Zug zu setzen.",
+    "CONTROL": "Lässt kommen und antwortet.",
+    "STUN": "Sperrt die Partie, statt zu antworten.",
+    "BEATDOWN": "Schlägt früh zu und hört nicht auf."
+  },
+  "matchups": {
+    "title": "Matchups",
+    "hint": "Wo dieses Deck gewinnt und wo es leidet, nach dem was es spielt.",
+    "vsStyle": "gegen {style}",
+    "none": "Noch zu wenige Karten, um dieses Deck zu beurteilen.",
+    "strengthTitle": "Stärke",
+    "verdicts": {
+      "GOOD": "Im Vorteil",
+      "EVEN": "Ausgeglichen",
+      "BAD": "Im Nachteil"
+    },
+    "reasons": {
+      "HAND_TRAPS": "Genug Handkarten, um sie in ihrem Zug zu stoppen.",
+      "NO_HAND_TRAPS": "Zu wenige Handkarten: sie spielen ihren Zug ungestört.",
+      "BREAKERS": "Genug Massenentfernung, um ihr Feld zu räumen.",
+      "NO_BREAKERS": "Nichts, um ein aufgebautes Feld zu brechen.",
+      "LOCK": "Deine Sperren legen ihren Plan lahm.",
+      "FRAGILE_SETUP": "Dein Plan braucht ein Feld, und ihrer verhindert es.",
+      "DISRUPTION": "Genug Interaktion, um rechtzeitig zu antworten.",
+      "NO_DISRUPTION": "Keine Interaktion: nichts antwortet ihnen.",
+      "RESILIENCE": "Du kommst zurück, was sie dir auch nehmen.",
+      "BALANCED": "Nichts gibt den Ausschlag."
     }
   }
 }

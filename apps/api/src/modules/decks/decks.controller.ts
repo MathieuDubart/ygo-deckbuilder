@@ -57,6 +57,12 @@ export class DecksController {
     return this.decks.get(user.id, id);
   }
 
+  /** Note, forme et pronostics d'un deck. À part de la fiche : c'est le calcul le plus lourd. */
+  @Get(':id/strength')
+  strength(@CurrentUser() user: AuthUser, @Param('id') id: string) {
+    return this.decks.strength(user.id, id);
+  }
+
   @Get(':id/export.ydk')
   @Header('Content-Type', 'text/plain; charset=utf-8')
   exportYdk(@CurrentUser() user: AuthUser, @Param('id') id: string) {

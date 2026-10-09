@@ -30,6 +30,7 @@ export const qk = {
   decks: ['decks'] as const,
   deckList: (params: object) => ['decks', params] as const,
   deck: (id: string) => ['deck', id] as const,
+  deckStrength: (id: string) => ['deck', id, 'strength'] as const,
   wishlist: ['wishlist'] as const,
   metaSuggestions: ['suggestions', 'meta'] as const,
   archetypeSuggestions: ['suggestions', 'archetypes'] as const,

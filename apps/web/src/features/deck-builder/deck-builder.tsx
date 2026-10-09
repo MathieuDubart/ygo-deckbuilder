@@ -10,6 +10,7 @@ import {
   Heart,
   Loader2,
   Scissors,
+  Swords,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -19,9 +20,11 @@ import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
+import { DeckStrengthPanel } from '@/components/ui/matchups';
 import { DeckGuide } from '@/features/guide/deck-guide';
 import { useRefreshBanlist } from '@/lib/api/banlist';
-import { useUpdateDeck } from '@/lib/api/decks';
+import { Skeleton } from '@/components/ui/feedback';
+import { useDeckStrength, useUpdateDeck } from '@/lib/api/decks';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
 import { CardPicker } from './card-picker';
@@ -32,6 +35,7 @@ import { useDeckBuilder, type SaveStatus } from './use-deck-builder';
 export function DeckBuilder({ deck }: { deck: DeckDto }) {
   const t = useTranslations('deckBuilder');
   const tc = useTranslations('common');
+  const td = useTranslations('decks');
   const { price } = useFormat();
   const b = useDeckBuilder(deck);
   const [inspect, setInspect] = useState<number | null>(null);
@@ -39,6 +43,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
   const rename = useUpdateDeck(deck.id);
   const [name, setName] = useState(deck.name);
   const [guideOpen, setGuideOpen] = useState(false);
+  const [strengthOpen, setStrengthOpen] = useState(false);
 
   /**
    * La banlist est relue à l'ouverture du deck. Le deck s'affiche sans attendre — on travaille
@@ -140,6 +145,15 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
           title={t('header.guideHint')}
         >
           <BookOpen className="size-4" /> {t('header.guide')}
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() => setStrengthOpen(true)}
+          disabled={b.counts.MAIN === 0}
+          title={td('matchups.hint')}
+        >
+          <Swords className="size-4" /> {td('matchups.strengthTitle')}
         </Button>
         <a href={`/api/decks/${deck.id}/export.ydk`} download={`${deck.name}.ydk`}>
           <Button variant="secondary" size="sm">
@@ -255,6 +269,16 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
       >
         {guideOpen && <DeckGuide cards={guideCards} name={name} onInspect={setInspect} />}
       </Dialog>
+      <Dialog
+        open={strengthOpen}
+        onClose={() => setStrengthOpen(false)}
+        title={td('matchups.strengthTitle')}
+        variant="sheet"
+        className="w-[min(100vw,28rem)]"
+      >
+        {/* Monté seulement à l'ouverture : le calcul relit les textes de toutes les cartes */}
+        {strengthOpen && <DeckStrengthSection deckId={deck.id} />}
+      </Dialog>
       <CardDetailDialog
         cardId={inspect}
         onClose={() => setInspect(null)}
@@ -293,4 +317,14 @@ function SaveIndicator({ status, onRetry }: { status: SaveStatus; onRetry: () =>
       <Icon className="size-3.5" /> {t(status)}
     </button>
   );
+}
+
+/**
+ * La force du deck, chargée seulement quand on ouvre la feuille : relire les textes de
+ * soixante cartes pour un panneau que personne ne regarde serait du gâchis à chaque frappe.
+ */
+function DeckStrengthSection({ deckId }: { deckId: string }) {
+  const { data, isLoading } = useDeckStrength(deckId);
+  if (isLoading) return <Skeleton className="h-64" />;
+  return <DeckStrengthPanel strength={data} />;
 }

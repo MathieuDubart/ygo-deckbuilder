@@ -22,7 +22,7 @@ import { DeckGuide } from '@/features/guide/deck-guide';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import { ScoreBadge, ScoreBreakdown } from './playable-decks';
+import { ScoreBadge, ScoreBreakdown } from '@/components/ui/deck-score';
 
 const ZONES: DeckZone[] = ['MAIN', 'EXTRA', 'SIDE'];
 

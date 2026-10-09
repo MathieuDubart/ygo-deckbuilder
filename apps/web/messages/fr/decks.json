@@ -31,7 +31,8 @@
       "updated": "Modification",
       "created": "Création",
       "name": "Nom",
-      "size": "Taille"
+      "size": "Taille",
+      "strength": "Solidité"
     },
     "noResults": {
       "title": "Aucun deck ne correspond",
@@ -55,6 +56,44 @@
     "submit": {
       "empty": "Créer et construire",
       "ydk": "Importer"
+    }
+  },
+  "styles": {
+    "COMBO": "Combo",
+    "MIDRANGE": "Midrange",
+    "CONTROL": "Contrôle",
+    "STUN": "Verrous",
+    "BEATDOWN": "Agression"
+  },
+  "styleHints": {
+    "COMBO": "Enchaîne ses cartes pour poser un plateau en un tour.",
+    "MIDRANGE": "Joue son jeu sans tout miser sur un tour.",
+    "CONTROL": "Laisse venir, et répond.",
+    "STUN": "Enferme la partie plutôt que d’y répondre.",
+    "BEATDOWN": "Frappe tôt et continue de frapper."
+  },
+  "matchups": {
+    "title": "Pronostics",
+    "hint": "Où ce deck gagne et où il souffre, d’après ce qu’il joue.",
+    "vsStyle": "contre {style}",
+    "none": "Pas encore assez de cartes pour juger ce deck.",
+    "strengthTitle": "Solidité",
+    "verdicts": {
+      "GOOD": "Favorable",
+      "EVEN": "Équilibré",
+      "BAD": "Défavorable"
+    },
+    "reasons": {
+      "HAND_TRAPS": "Assez de cartes de main pour les arrêter pendant leur tour.",
+      "NO_HAND_TRAPS": "Trop peu de cartes de main : ils déroulent leur tour sans être inquiétés.",
+      "BREAKERS": "De quoi nettoyer ce qu’ils posent.",
+      "NO_BREAKERS": "Rien pour casser un terrain déjà en place.",
+      "LOCK": "Tes verrous ferment leur plan de jeu.",
+      "FRAGILE_SETUP": "Ton plan demande un plateau, et le leur t’empêche de le poser.",
+      "DISRUPTION": "Assez d’interaction pour répondre à temps.",
+      "NO_DISRUPTION": "Aucune interaction : rien ne leur répond.",
+      "RESILIENCE": "Tu reviens de ce qu’ils t’enlèvent.",
+      "BALANCED": "Rien ne fait pencher la partie."
     }
   }
 }

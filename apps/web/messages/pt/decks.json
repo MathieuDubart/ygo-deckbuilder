@@ -31,7 +31,8 @@
       "updated": "Modificação",
       "created": "Criação",
       "name": "Nome",
-      "size": "Tamanho"
+      "size": "Tamanho",
+      "strength": "Solidez"
     },
     "noResults": {
       "title": "Nenhum deck corresponde",
@@ -55,6 +56,44 @@
     "submit": {
       "empty": "Criar e montar",
       "ydk": "Importar"
+    }
+  },
+  "styles": {
+    "COMBO": "Combo",
+    "MIDRANGE": "Midrange",
+    "CONTROL": "Controlo",
+    "STUN": "Stun",
+    "BEATDOWN": "Agressivo"
+  },
+  "styleHints": {
+    "COMBO": "Encadeia cartas para montar um campo num turno.",
+    "MIDRANGE": "Joga o seu jogo sem apostar tudo num turno.",
+    "CONTROL": "Deixa vir e responde.",
+    "STUN": "Tranca a partida em vez de responder.",
+    "BEATDOWN": "Bate cedo e continua."
+  },
+  "matchups": {
+    "title": "Prognósticos",
+    "hint": "Onde este deck ganha e onde sofre, pelo que joga.",
+    "vsStyle": "contra {style}",
+    "none": "Ainda não há cartas suficientes para avaliar este deck.",
+    "strengthTitle": "Solidez",
+    "verdicts": {
+      "GOOD": "Favorável",
+      "EVEN": "Equilibrado",
+      "BAD": "Desfavorável"
+    },
+    "reasons": {
+      "HAND_TRAPS": "Cartas da mão suficientes para os travar no turno deles.",
+      "NO_HAND_TRAPS": "Poucas cartas da mão: jogam o turno sem incómodo.",
+      "BREAKERS": "Remoção em massa suficiente para limpar o campo deles.",
+      "NO_BREAKERS": "Nada para quebrar um campo já montado.",
+      "LOCK": "Os teus bloqueios fecham o plano deles.",
+      "FRAGILE_SETUP": "O teu plano precisa de um campo, e o deles impede-o.",
+      "DISRUPTION": "Interação suficiente para responder a tempo.",
+      "NO_DISRUPTION": "Nenhuma interação: nada lhes responde.",
+      "RESILIENCE": "Voltas daquilo que te tiram.",
+      "BALANCED": "Nada faz pender a partida."
     }
   }
 }

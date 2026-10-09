@@ -9,10 +9,12 @@ import {
   type DeckDto,
   type DeckListItemDto,
   type DeckQueryInput,
+  type DeckStrengthDto,
   type ImportYdkInput,
   type UpdateDeckInput,
 } from '@ygo/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import { DeckStrengthService } from './deck-strength.service';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
 import type { Prisma } from '../../generated/prisma/client';
 import { CardResolver } from '../../common/catalog/card-resolver.service';
@@ -31,6 +33,7 @@ export class DecksService {
     private readonly prisma: PrismaService,
     private readonly ownership: OwnershipService,
     private readonly resolver: CardResolver,
+    private readonly strengthOf: DeckStrengthService,
   ) {}
 
   async list(userId: string, query: DeckQueryInput = {}): Promise<DeckListItemDto[]> {
@@ -67,8 +70,27 @@ export class DecksService {
         coverImageUrl: cover ? (cover.imageUrl ?? cover.imageUrlSmall) : null,
         tagIds: d.tags.map((t) => t.tagId),
         fromProduct: d.productDeckId !== null,
+        strength: null as number | null,
+        style: null as DeckListItemDto['style'],
       };
     });
+
+    // La note demande de lire les textes de toutes les cartes : un seul passage pour toute
+    // la liste, et rien du tout quand personne ne la regarde.
+    const rated = await this.strengthOf.rateMany(
+      new Map(
+        decks.map((d) => [
+          d.id,
+          d.cards.map((c) => ({ cardId: c.cardId, zone: c.zone, quantity: c.quantity })),
+        ]),
+      ),
+    );
+    for (const item of items) {
+      const s = rated.get(item.id);
+      if (!s) continue;
+      item.strength = s.score.score;
+      item.style = s.profile.style;
+    }
 
     // Le tri se fait ici et non en SQL : « taille » additionne les trois zones, que la base
     // ne porte pas, et les listes de decks d'un compte se comptent en dizaines.
@@ -78,6 +100,8 @@ export class DecksService {
       created: (a, b) => b.createdAt.localeCompare(a.createdAt),
       name: (a, b) => a.name.localeCompare(b.name),
       size: (a, b) => size(b) - size(a) || a.name.localeCompare(b.name),
+      // Un deck trop incomplet pour être noté passe derrière, pas devant
+      strength: (a, b) => (b.strength ?? -1) - (a.strength ?? -1) || a.name.localeCompare(b.name),
     };
     items.sort(by[query.sort ?? 'updated'] ?? by.updated!);
     return items.map(({ createdAt: _createdAt, ...item }) => item);
@@ -90,6 +114,16 @@ export class DecksService {
     });
     if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
     return this.toDto(deck, userId);
+  }
+
+  /** Note, forme et pronostics. Null quand le deck est trop incomplet pour qu'on en dise quelque chose. */
+  async strength(userId: string, id: string): Promise<DeckStrengthDto | null> {
+    const deck = await this.prisma.deck.findFirst({
+      where: { id, OR: [{ userId }, { isPublic: true }] },
+      select: { cards: { select: { cardId: true, zone: true, quantity: true } } },
+    });
+    if (!deck) throw new NotFoundException(t('errors.deckNotFound'));
+    return this.strengthOf.rateOne(deck.cards);
   }
 
   async create(userId: string, input: CreateDeckInput): Promise<DeckDto> {

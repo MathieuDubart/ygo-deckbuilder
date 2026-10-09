@@ -6,6 +6,7 @@ import type {
   DeckDto,
   DeckListItemDto,
   DeckQueryInput,
+  DeckStrengthDto,
   ImportYdkInput,
   UpdateDeckInput,
 } from '@ygo/shared';
@@ -27,6 +28,13 @@ export const useDecks = (params: DeckParams = {}) =>
 
 export const useDeck = (id: string) =>
   useQuery({ queryKey: qk.deck(id), queryFn: () => api<DeckDto>(`/decks/${id}`) });
+
+/** Note, forme et pronostics. À part de la fiche : c'est le calcul le plus lourd. */
+export const useDeckStrength = (id: string) =>
+  useQuery({
+    queryKey: qk.deckStrength(id),
+    queryFn: () => api<DeckStrengthDto | null>(`/decks/${id}/strength`),
+  });
 
 export const useDeckCardSuggestions = (deckId: string) =>
   useQuery({
