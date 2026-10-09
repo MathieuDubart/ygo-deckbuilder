@@ -35,6 +35,7 @@ import { isPremiumRarity } from '@/lib/rarity';
 import { useDebounced } from '@/lib/hooks/use-debounced';
 import { cn } from '@/lib/utils';
 import { FacetBar, FilterToggle, SortSelect } from './facet-bar';
+import { LanguagePanel } from './language-panel';
 import { ImportSetDialog } from './import-set-dialog';
 import { ProductDialog } from './product-dialog';
 import { ProductsTab } from './products-tab';
@@ -76,6 +77,8 @@ export function CollectionView() {
         <Stat label={t('stats.distinctCards')} value={stats ? number(stats.distinctCards) : '—'} />
         <Stat label={t('stats.estimatedValue')} value={stats ? price(stats.estimatedValue) : '—'} />
       </Figures>
+
+      <LanguagePanel />
 
       <DividerTabs
         label={t('tabs.label')}

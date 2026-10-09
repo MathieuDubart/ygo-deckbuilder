@@ -2,8 +2,12 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type {
   AddCollectionItemInput,
+  CardLanguage,
   CardSummaryDto,
   CollectionFacetsDto,
+  CollectionLanguageInput,
+  CollectionLanguageResultDto,
+  CollectionLanguageStateDto,
   CollectionQueryInput,
   ImportSetInput,
   ImportSetResultDto,
@@ -161,3 +165,35 @@ export const useOwnedProduct = (id: string | null) =>
     queryFn: () => api<OwnedProductDetailDto>(`/collection/products/${id}`),
     enabled: id !== null,
   });
+
+/**
+ * Langue de rangement de la collection, et ce que normaliser coûterait. `target` permet de
+ * chiffrer une langue qu'on envisage sans l'avoir choisie : l'écran pose la question avec le
+ * nombre sous les yeux.
+ */
+export const useCollectionLanguage = (target?: CardLanguage) =>
+  useQuery({
+    queryKey: qk.collectionLanguage(target),
+    queryFn: () =>
+      api<CollectionLanguageStateDto>(
+        `/collection/language${target ? `?target=${target}` : ''}`,
+      ),
+  });
+
+export function useSetCollectionLanguage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CollectionLanguageInput) =>
+      api<CollectionLanguageResultDto>('/collection/language', { method: 'PUT', body }),
+    onSuccess: (result) => {
+      void qc.invalidateQueries({ queryKey: ['collection-language'] });
+      void qc.invalidateQueries({ queryKey: qk.me });
+      // Une normalisation déplace des exemplaires : la liste et les facettes ont bougé
+      if (result.retagged || result.merged) {
+        void qc.invalidateQueries({ queryKey: qk.collectionAll });
+        void qc.invalidateQueries({ queryKey: qk.collectionFacets });
+        void qc.invalidateQueries({ queryKey: qk.collectionStats });
+      }
+    },
+  });
+}

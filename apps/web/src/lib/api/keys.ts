@@ -26,6 +26,7 @@ export const qk = {
   friendsProgress: (setIds: string[]) => ['friends-progress', setIds] as const,
   setFriends: (setId: string) => ['set-friends', setId] as const,
   collectionFacets: ['collection-facets'] as const,
+  collectionLanguage: (target: string | undefined) => ['collection-language', target] as const,
   decks: ['decks'] as const,
   deck: (id: string) => ['deck', id] as const,
   wishlist: ['wishlist'] as const,
