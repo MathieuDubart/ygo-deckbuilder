@@ -65,5 +65,7 @@
   "empty": {
     "title": "Nessuna espansione trovata",
     "description": "Cambia i filtri, o prova un altro nome o codice."
-  }
+  },
+  "sameCode": "Altra rarità",
+  "sameCodeHint": "Hai questo numero, in un’altra rarità: la casella conta come ottenuta."
 }

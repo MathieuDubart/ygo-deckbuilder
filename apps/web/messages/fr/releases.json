@@ -65,5 +65,7 @@
   "empty": {
     "title": "Aucune extension trouvée",
     "description": "Change les filtres, ou essaie un autre nom ou code."
-  }
+  },
+  "sameCode": "Autre rareté",
+  "sameCodeHint": "Tu as ce numéro, dans une autre rareté : la case compte comme obtenue."
 }

@@ -51,7 +51,10 @@ export function ReleaseDialog({
   const [rarity, setRarity] = useState<string | undefined>();
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
 
-  const has = (card: ReleaseCardDto) => card.owned > 0 || (anyEdition && card.ownedElsewhere > 0);
+  // « Possédée » suit la case de la checklist, pas la ligne : avoir le numéro dans une
+  // autre rareté compte, exactement comme dans le pourcentage affiché au-dessus.
+  const has = (card: ReleaseCardDto) =>
+    card.owned > 0 || card.ownedSameCode > 0 || (anyEdition && card.ownedElsewhere > 0);
   const cards = useMemo(() => {
     if (!data) return [];
     return data.cards.filter(
@@ -246,15 +249,29 @@ function PrintTile({
           <CardImage
             card={card.card}
             sizes="88px"
-            className={cn('transition', !owned && 'opacity-40 saturate-0 group-hover:opacity-70')}
+            className={cn(
+              'transition',
+              !owned && card.ownedSameCode === 0 && 'opacity-40 saturate-0 group-hover:opacity-70',
+              // Possédée dans une autre rareté : à demi-teinte, ni éteinte ni pleine
+              !owned && card.ownedSameCode > 0 && 'opacity-80',
+            )}
           />
           {card.owned > 0 && (
             <span className="absolute top-1 right-1">
               <Badge tone="success">×{card.owned}</Badge>
             </span>
           )}
-          {/* Possédée, mais pas dans cette extension : utile à savoir avant de racheter */}
-          {card.owned === 0 && card.ownedElsewhere > 0 && (
+          {/* Le même numéro dans une autre rareté : la case de la checklist est cochée, ce
+              n'est simplement pas cette ligne-ci qu'on possède. À ne pas confondre avec
+              « je l'ai dans une autre extension », qui ne coche rien ici. */}
+          {card.owned === 0 && card.ownedSameCode > 0 && (
+            <span className="absolute top-1 right-1" title={t('sameCodeHint')}>
+              <Badge tone="success" className="px-1">
+                {t('sameCode')}
+              </Badge>
+            </span>
+          )}
+          {card.owned === 0 && card.ownedSameCode === 0 && card.ownedElsewhere > 0 && (
             <span className="absolute top-1 right-1" title={t('elsewhereHint')}>
               <Badge tone="warning" className="px-1">
                 {t('elsewhere')}

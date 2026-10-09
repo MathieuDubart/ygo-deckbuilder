@@ -69,7 +69,13 @@ export interface ReleaseCardDto {
   price: number | null;
   /** Exemplaires possédés de cette impression précise. */
   owned: number;
-  /** Exemplaires de la même carte possédés via une autre impression. */
+  /**
+   * Exemplaires du MÊME code, dans une autre rareté. La case de la checklist est alors
+   * cochée — c'est ce que compte `ownedPrints` — même si ce n'est pas cette ligne-ci qu'on
+   * possède : une carte éditée en Ultra et en Secret reste la carte n° 1 de l'extension.
+   */
+  ownedSameCode: number;
+  /** Exemplaires de la même carte possédés via une AUTRE extension. */
   ownedElsewhere: number;
 }
 

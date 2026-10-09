@@ -65,5 +65,7 @@
   "empty": {
     "title": "No set found",
     "description": "Change the filters, or try another name or code."
-  }
+  },
+  "sameCode": "Other rarity",
+  "sameCodeHint": "You have this number, in another rarity: the slot counts as collected."
 }

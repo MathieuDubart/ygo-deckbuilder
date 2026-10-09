@@ -49,7 +49,9 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
    */
   async function expectStoredProgressToMatchReality() {
     const [prints, items, stored] = await Promise.all([
-      prisma.cardPrint.findMany({ select: { id: true, setId: true, cardId: true } }),
+      prisma.cardPrint.findMany({
+        select: { id: true, setId: true, cardId: true, printCode: true },
+      }),
       prisma.collectionItem.findMany({
         where: { userId: USER },
         select: { cardId: true, printId: true, quantity: true },
@@ -66,20 +68,20 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
 
     const expected = new Map<string, Record<string, number>>();
     for (const print of prints) {
-      const row = expected.get(print.setId) ?? {
-        prints: 0,
-        cards: 0,
-        ownedPrints: 0,
-        ownedCards: 0,
-        copies: 0,
-      };
-      row.prints! += 1;
-      expected.set(print.setId, row);
+      if (!expected.has(print.setId)) {
+        expected.set(print.setId, { prints: 0, cards: 0, ownedPrints: 0, ownedCards: 0, copies: 0 });
+      }
     }
     for (const [setId, row] of expected) {
       const own = prints.filter((p) => p.setId === setId);
+      // Une case de la checklist = un CODE d'impression. Une carte éditée en plusieurs
+      // raretés porte le même code : elle compte une fois, sinon les 100 % seraient
+      // inatteignables pour qui ne chasse pas la rareté.
+      row.prints = new Set(own.map((p) => p.printCode)).size;
       row.cards = new Set(own.map((p) => p.cardId)).size;
-      row.ownedPrints = own.filter((p) => copiesByPrint.has(p.id)).length;
+      row.ownedPrints = new Set(
+        own.filter((p) => copiesByPrint.has(p.id)).map((p) => p.printCode),
+      ).size;
       row.ownedCards = new Set(
         own.filter((p) => ownedCardIds.has(p.cardId)).map((p) => p.cardId),
       ).size;
@@ -203,9 +205,11 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       expect(page.total).toBe(4);
       const betb = page.items.find((r) => r.set.code === 'BETB');
       expect(betb).toBeDefined();
-      // 3 impressions, 2 cartes ; 1 impression possédée, et 2 cartes si on compte l'autre édition
+      // 2 cases (EN001 et EN002) pour 3 lignes d'impression : la carte 1 est éditée deux
+      // fois sous le MÊME code, en Ultra et en Secret, et n'occupe qu'une case.
+      // 1 case possédée, et 2 cartes si on compte l'autre édition.
       expect(betb!.progress).toMatchObject({
-        prints: 3,
+        prints: 2,
         cards: 2,
         ownedPrints: 1,
         ownedCards: 2,

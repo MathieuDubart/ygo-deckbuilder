@@ -200,9 +200,11 @@ describe.runIf(URL)('profils et amitiés (PostgreSQL réel)', () => {
 
     it('rend les deux lectures de l’avancement', async () => {
       const byset = await friendProgress.forSets(ME, [setA]);
-      // L'ami a 1 impression sur 3 dans A, mais 2 cartes sur 2 (la 1 vient de B)
+      // A compte 2 cases (EN001 et EN002) pour 3 lignes d'impression : la carte 1 y est
+      // éditée deux fois sous le même code. L'ami en a 1 sur 2, mais 2 cartes sur 2 — la
+      // deuxième lui vient de B.
       expect(byset[setA]?.[0]).toMatchObject({
-        prints: 3,
+        prints: 2,
         cards: 2,
         ownedPrints: 1,
         ownedCards: 2,
