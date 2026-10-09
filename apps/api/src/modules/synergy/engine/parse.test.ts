@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
   ABYSS,
+  DARK_RULER,
+  EVENLY_MATCHED,
+  GAMECIEL,
+  LIGHTNING_STORM,
+  RAIGEKI,
+  RIVALRY,
+  SHIELDED,
+  SKILL_DRAIN,
+  UNRESPONDABLE,
+  VANITYS_EMPTINESS,
   ALTERNATIVE,
   ASH,
   BEWD,
@@ -150,5 +160,69 @@ describe('déclencheurs et coûts', () => {
 
   it('Abyss : recherche quand invoqué spécialement, puis en End Phase', () => {
     expect(parseCard(ABYSS).actions.map((a) => a.trigger)).toEqual(['SS', 'END_PHASE']);
+  });
+});
+
+describe('floodgates', () => {
+  it('reconnaît un verrou qui vise les deux joueurs', () => {
+    expect(parseCard(VANITYS_EMPTINESS).floodgate).toBe(true);
+  });
+
+  it('reconnaît une annulation permanente et globale', () => {
+    expect(parseCard(SKILL_DRAIN).floodgate).toBe(true);
+  });
+
+  it('reconnaît une limitation de ce qu’on peut contrôler', () => {
+    expect(parseCard(RIVALRY).floodgate).toBe(true);
+  });
+
+  it('ne prend pas la protection d’une carte pour un verrou', () => {
+    // « Your opponent cannot target this card » : la carte se défend, elle n'enferme personne
+    expect(parseCard(SHIELDED).floodgate).toBe(false);
+  });
+
+  it('ne prend pas un « cannot activate in response » pour un verrou', () => {
+    expect(parseCard(UNRESPONDABLE).floodgate).toBe(false);
+  });
+
+  it('laisse les cartes ordinaires tranquilles', () => {
+    for (const card of [ASH, BEWD, SAGE, POLYMERIZATION, RAIGEKI]) {
+      expect({ name: card.name, floodgate: parseCard(card).floodgate }).toEqual({
+        name: card.name,
+        floodgate: false,
+      });
+    }
+  });
+});
+
+describe('casse-terrain', () => {
+  it('reconnaît une destruction de masse', () => {
+    expect(parseCard(RAIGEKI).boardBreaker).toBe(true);
+    expect(parseCard(LIGHTNING_STORM).boardBreaker).toBe(true);
+  });
+
+  it('reconnaît un Kaiju, qui prend le monstre au lieu de le retirer', () => {
+    expect(parseCard(GAMECIEL).boardBreaker).toBe(true);
+  });
+
+  it('reconnaît un « so that they control 1 card »', () => {
+    expect(parseCard(EVENLY_MATCHED).boardBreaker).toBe(true);
+  });
+
+  it('sépare le déblocage d’un tour du verrou permanent', () => {
+    // Les deux disent « Negate the effects of all » : c'est la durée qui les distingue,
+    // et elle ne se lit pas dans le texte mais dans le type de la carte.
+    expect(parseCard(DARK_RULER)).toMatchObject({ boardBreaker: true, floodgate: false });
+    expect(parseCard(SKILL_DRAIN)).toMatchObject({ boardBreaker: false, floodgate: true });
+  });
+
+  it('ne confond pas un retrait ponctuel avec un casse-terrain', () => {
+    // Ash négocie une carte, elle ne débloque pas une partie
+    for (const card of [ASH, BEWD, SAGE, SKILL_DRAIN]) {
+      expect({ name: card.name, breaker: parseCard(card).boardBreaker }).toEqual({
+        name: card.name,
+        breaker: false,
+      });
+    }
   });
 });
