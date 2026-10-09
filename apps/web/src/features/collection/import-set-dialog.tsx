@@ -1,6 +1,12 @@
 'use client';
 import { cardLanguageFor } from '@/lib/format';
-import { CARD_LANGUAGES, type CardLanguage, type CardSetDto, type ProductKind } from '@ygo/shared';
+import {
+  CARD_LANGUAGES,
+  mayContainDecks,
+  type CardLanguage,
+  type CardSetDto,
+  type ProductKind,
+} from '@ygo/shared';
 import { ArrowLeft, PackageOpen, Search } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useState } from 'react';
@@ -168,6 +174,10 @@ function ConfirmImport({
   const [copies, setCopies] = useState(1);
   const uiLocale = useLocale();
   const [language, setLanguage] = useState<CardLanguage>(cardLanguageFor(uiLocale));
+  // Coché d'avance : c'est ce qu'on veut dans presque tous les cas. La case n'apparaît que
+  // pour les produits qui peuvent contenir une liste — un booster n'en a pas.
+  const hasDecks = mayContainDecks(set);
+  const [createDecks, setCreateDecks] = useState(true);
 
   return (
     <div className="grid gap-6 sm:grid-cols-[14rem_1fr]">
@@ -209,6 +219,21 @@ function ConfirmImport({
           </Field>
         </div>
 
+        {hasDecks && (
+          <label className="flex items-start gap-2.5 text-sm">
+            <input
+              type="checkbox"
+              checked={createDecks}
+              onChange={(e) => setCreateDecks(e.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-accent"
+            />
+            <span>
+              {t('confirm.createDecks')}
+              <span className="block text-xs text-ink-faint">{t('confirm.createDecksHint')}</span>
+            </span>
+          </label>
+        )}
+
         {importSet.error && (
           <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
             {importSet.error.message}
@@ -224,7 +249,7 @@ function ConfirmImport({
             loading={importSet.isPending}
             onClick={() =>
               importSet.mutate(
-                { setName: set.name, copies, language },
+                { setName: set.name, copies, language, createDecks: hasDecks && createDecks },
                 {
                   onSuccess: (r) => {
                     toast.success(
@@ -233,6 +258,14 @@ function ConfirmImport({
                         set: r.set,
                       }),
                     );
+                    if (r.decksCreated.length > 0) {
+                      toast.success(
+                        t('confirm.decksToast', {
+                          count: r.decksCreated.length,
+                          name: r.decksCreated[0]!.name,
+                        }),
+                      );
+                    }
                     onDone(r.productId);
                   },
                 },

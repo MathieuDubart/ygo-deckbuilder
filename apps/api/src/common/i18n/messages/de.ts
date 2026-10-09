@@ -4,6 +4,11 @@ import type { DeepPartialMessages } from './types';
 export const de: DeepPartialMessages = {
   format: { quote: '„{text}“' },
 
+  products: {
+    deckName: '{name} (×{copies})',
+    deckFromProduct: 'Aus {name} gebaut, in der Drei-Boxen-Variante.',
+  },
+
   duel: {
     errors: {
       disabled: 'Der Duell-Simulator ist auf diesem Server deaktiviert.',

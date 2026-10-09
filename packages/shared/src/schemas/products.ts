@@ -70,4 +70,6 @@ export interface ImportSetResultDto {
   cardsAdded: number;
   copiesAdded: number;
   quantitiesVerified: boolean;
+  /** Decks posés dans « Mes decks » au passage, un par liste officielle du produit. */
+  decksCreated: { id: string; name: string }[];
 }

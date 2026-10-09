@@ -18,6 +18,7 @@ import { Prisma } from '../../generated/prisma/client';
 import { OwnershipService } from '../collection/ownership.service';
 import { SetProgressService } from '../collection/set-progress.service';
 import { ProductContentService } from './product-content.service';
+import { ProductDecksService } from './product-decks.service';
 import { isDeckProduct } from './product-kind';
 import { productCards, type ProductCard } from './quantities';
 import { t } from '../../common/i18n/locale-context';
@@ -53,6 +54,7 @@ export class ProductsService {
     private readonly ownership: OwnershipService,
     private readonly content: ProductContentService,
     private readonly progress: SetProgressService,
+    private readonly decks: ProductDecksService,
   ) {}
 
   // ─── Import ────────────────────────────────────────────────────────────────
@@ -109,12 +111,19 @@ export class ProductsService {
       cards.map((c) => c.cardId),
     );
 
+    // Après l'import : les cartes sont en collection, donc le deck créé sait déjà ce qui
+    // est possédé et ce qui manque. Un échec ici ne doit pas perdre l'import lui-même.
+    const decksCreated = input.createDecks
+      ? await this.decks.createFromSet(userId, set.id).catch(() => [])
+      : [];
+
     return {
       productId: product.id,
       set: set.name,
       cardsAdded: cards.length,
       copiesAdded: cards.reduce((s, c) => s + c.quantity, 0) * input.copies,
       quantitiesVerified: verified,
+      decksCreated,
     };
   }
 

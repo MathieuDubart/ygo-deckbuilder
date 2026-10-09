@@ -60,3 +60,16 @@ export const RECENT_RELEASE_DAYS = 60;
 /** Filtre d'avancement d'une extension : rien, commencée, complète. */
 export const RELEASE_PROGRESS_FILTERS = ['NONE', 'STARTED', 'COMPLETE'] as const;
 export type ReleaseProgressFilter = (typeof RELEASE_PROGRESS_FILTERS)[number];
+
+/**
+ * Ce produit est-il susceptible de contenir une ou plusieurs decklists officielles ?
+ *
+ * À ne pas confondre avec « jouable tel quel » (`isDeckProduct`, côté API) : un coffret à
+ * deux decks n'est pas un deck, mais il en contient deux. Sert uniquement à décider si on
+ * propose de créer les decks à l'import — se tromper ne coûte rien, le serveur ne crée que
+ * ce qu'il trouve.
+ */
+export function mayContainDecks(set: { kind: ProductKind; name: string }): boolean {
+  if (set.kind === 'STRUCTURE' || set.kind === 'STARTER' || set.kind === 'BOX') return true;
+  return /\bdecks?\b/i.test(set.name) && !/booster|pack/i.test(set.name);
+}

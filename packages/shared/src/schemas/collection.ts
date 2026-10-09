@@ -32,6 +32,11 @@ export const importSetSchema = z.object({
   copies: z.number().int().min(1).max(10).default(1),
   /** Omise, elle vaut la langue de collection de l'utilisateur. */
   language: z.enum(CARD_LANGUAGES).optional(),
+  /**
+   * Poser aussi les decks du produit dans « Mes decks ». Sans effet sur un produit qui n'en
+   * contient pas — un booster n'a pas de liste officielle.
+   */
+  createDecks: z.boolean().default(false),
 });
 export type ImportSetInput = z.infer<typeof importSetSchema>;
 

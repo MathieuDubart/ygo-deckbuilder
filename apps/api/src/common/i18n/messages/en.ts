@@ -6,6 +6,11 @@
 export const en = {
   format: { quote: '“{text}”' },
 
+  products: {
+    deckName: '{name} (×{copies})',
+    deckFromProduct: 'Built from {name}, as it is played with three boxes.',
+  },
+
   duel: {
     errors: {
       disabled: 'The duel simulator is disabled on this server.',

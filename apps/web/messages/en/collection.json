@@ -58,7 +58,10 @@
       "language": "Language",
       "add": "Add this product",
       "toast": "{count, plural, one {# card} other {# cards}} added from “{set}”",
-      "toastVerified": "{count, plural, one {# card} other {# cards}} added from “{set}” (official quantities)"
+      "toastVerified": "{count, plural, one {# card} other {# cards}} added from “{set}” (official quantities)",
+      "createDecks": "Also add its deck to my decks",
+      "createDecksHint": "The three-box build: the key cards in triple, the filler cut. What you are missing shows up in the builder.",
+      "decksToast": "{count, plural, one {Deck added: {name}} other {# decks added}}"
     }
   },
   "filters": {

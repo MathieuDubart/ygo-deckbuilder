@@ -3,6 +3,11 @@ import type { DeepPartialMessages } from './types';
 export const it: DeepPartialMessages = {
   format: { quote: '«{text}»' },
 
+  products: {
+    deckName: '{name} (×{copies})',
+    deckFromProduct: 'Montato da {name}, nella versione a tre scatole.',
+  },
+
   duel: {
     errors: {
       disabled: 'Il simulatore di duelli è disattivato su questo server.',
