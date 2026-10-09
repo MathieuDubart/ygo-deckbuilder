@@ -2,10 +2,11 @@ import { z } from 'zod';
 import { DECK_FORMATS, DECK_ZONES, type DeckFormat, type DeckZone } from '../domain/enums';
 import type { DeckIssue } from '../domain/deck-rules';
 import type { CardSummaryDto } from './cards';
+import type { DeckScoreDto } from './suggestions';
 import { tagIdsSchema } from './tags';
 
 /** Tris de la liste des decks. Le défaut, `updated`, met en tête ce qu'on vient de toucher. */
-export const DECK_SORTS = ['updated', 'created', 'name', 'size'] as const;
+export const DECK_SORTS = ['updated', 'created', 'name', 'size', 'strength'] as const;
 export type DeckSort = (typeof DECK_SORTS)[number];
 
 /**
@@ -79,4 +80,67 @@ export interface DeckListItemDto {
   tagIds: string[];
   /** Monté depuis la liste officielle d'un produit, et non écrit à la main. */
   fromProduct: boolean;
+  /**
+   * Solidité du deck, 0..100, la même note que les decks suggérés. Null quand le deck est
+   * trop incomplet pour qu'une note veuille dire quoi que ce soit.
+   */
+  strength: number | null;
+  /** Style déduit du contenu, ou null si le deck est trop incomplet. */
+  style: DeckStyle | null;
+}
+
+/**
+ * Les cinq formes de jeu. Un deck n'est pas « fort » dans l'absolu : il l'est contre
+ * certaines formes et pas contre d'autres, et c'est ce que les pronostics disent.
+ */
+export const DECK_STYLES = ['COMBO', 'MIDRANGE', 'CONTROL', 'STUN', 'BEATDOWN'] as const;
+export type DeckStyle = (typeof DECK_STYLES)[number];
+
+export const MATCHUP_VERDICTS = ['GOOD', 'EVEN', 'BAD'] as const;
+export type MatchupVerdict = (typeof MATCHUP_VERDICTS)[number];
+
+/** Pourquoi le pronostic est ce qu'il est — une clé, le texte vit côté client. */
+export const MATCHUP_REASONS = [
+  'HAND_TRAPS',
+  'NO_HAND_TRAPS',
+  'BREAKERS',
+  'NO_BREAKERS',
+  'LOCK',
+  'FRAGILE_SETUP',
+  'DISRUPTION',
+  'NO_DISRUPTION',
+  'RESILIENCE',
+  'BALANCED',
+] as const;
+export type MatchupReason = (typeof MATCHUP_REASONS)[number];
+
+export interface MatchupDto {
+  /** Le style affronté. */
+  against: DeckStyle;
+  /** Nom du deck du meta quand le pronostic vise un adversaire réel, sinon null. */
+  opponent: string | null;
+  verdict: MatchupVerdict;
+  reason: MatchupReason;
+  /** −1..1 */
+  edge: number;
+}
+
+/** Ce qu'un deck sait faire, en six axes de 0 à 1. */
+export interface DeckProfileDto {
+  style: DeckStyle;
+  setup: number;
+  disruption: number;
+  handInteraction: number;
+  breaking: number;
+  lock: number;
+  resilience: number;
+  consistency: number;
+}
+
+/** Force d'un deck : sa note, sa forme, et contre quoi elle vaut. */
+export interface DeckStrengthDto {
+  score: DeckScoreDto;
+  profile: DeckProfileDto;
+  /** Du plus favorable au moins favorable. Nommé quand le meta est connu. */
+  matchups: MatchupDto[];
 }

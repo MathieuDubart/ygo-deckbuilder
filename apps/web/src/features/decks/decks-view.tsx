@@ -10,6 +10,7 @@ import { TagChip } from '@/components/tags/tag-chip';
 import { TagFilter } from '@/components/tags/tag-filter';
 import { TagPicker } from '@/components/tags/tag-picker';
 import { Badge } from '@/components/ui/badge';
+import { ScoreBadge } from '@/components/ui/deck-score';
 import { Button } from '@/components/ui/button';
 import { FacetBar, SortSelect } from '@/components/ui/facet-bar';
 import { EmptyState, PageHeader, Skeleton } from '@/components/ui/feedback';
@@ -137,10 +138,12 @@ export function DecksView() {
                     />
                   )}
                 </div>
-                <div className="min-w-0 space-y-2">
+                <div className="min-w-0 flex-1 space-y-2">
                   <p className="truncate font-semibold">{d.name}</p>
                   <div className="flex flex-wrap gap-1.5">
                     <Badge>{t(`formats.${d.format}`)}</Badge>
+                    {/* La forme du deck, à côté du format : les deux disent ce qu'il est */}
+                    {d.style && <Badge tone="accent">{t(`styles.${d.style}`)}</Badge>}
                     <Badge tone={d.mainCount >= 40 && d.mainCount <= 60 ? 'success' : 'warning'}>
                       {t('view.counts.main', { count: d.mainCount })}
                     </Badge>
@@ -161,6 +164,8 @@ export function DecksView() {
                     {t('view.updatedOn', { date: date(d.updatedAt) })}
                   </p>
                 </div>
+                {/* Le deck trop incomplet pour être noté n'affiche rien : un zéro serait un jugement */}
+                {d.strength !== null && <ScoreBadge score={d.strength} />}
               </Link>
               {/* Hors du lien : cliquer sur une étiquette ne doit pas ouvrir le deck */}
               <div className="px-4 pb-3">

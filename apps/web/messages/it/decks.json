@@ -31,7 +31,8 @@
       "updated": "Modifica",
       "created": "Creazione",
       "name": "Nome",
-      "size": "Dimensione"
+      "size": "Dimensione",
+      "strength": "Solidità"
     },
     "noResults": {
       "title": "Nessun deck corrisponde",
@@ -55,6 +56,44 @@
     "submit": {
       "empty": "Crea e costruisci",
       "ydk": "Importa"
+    }
+  },
+  "styles": {
+    "COMBO": "Combo",
+    "MIDRANGE": "Midrange",
+    "CONTROL": "Controllo",
+    "STUN": "Stun",
+    "BEATDOWN": "Aggressivo"
+  },
+  "styleHints": {
+    "COMBO": "Concatena le carte per costruire un campo in un turno.",
+    "MIDRANGE": "Gioca il suo gioco senza puntare tutto su un turno.",
+    "CONTROL": "Lascia venire e risponde.",
+    "STUN": "Blocca la partita invece di rispondere.",
+    "BEATDOWN": "Colpisce presto e continua."
+  },
+  "matchups": {
+    "title": "Pronostici",
+    "hint": "Dove questo deck vince e dove soffre, in base a ciò che gioca.",
+    "vsStyle": "contro {style}",
+    "none": "Non ci sono ancora abbastanza carte per giudicare questo deck.",
+    "strengthTitle": "Solidità",
+    "verdicts": {
+      "GOOD": "Favorevole",
+      "EVEN": "Equilibrato",
+      "BAD": "Sfavorevole"
+    },
+    "reasons": {
+      "HAND_TRAPS": "Abbastanza carte dalla mano per fermarli nel loro turno.",
+      "NO_HAND_TRAPS": "Troppo poche carte dalla mano: giocano il turno indisturbati.",
+      "BREAKERS": "Abbastanza rimozione di massa per ripulire il loro campo.",
+      "NO_BREAKERS": "Niente per rompere un campo già costruito.",
+      "LOCK": "I tuoi blocchi chiudono il loro piano.",
+      "FRAGILE_SETUP": "Il tuo piano richiede un campo, e il loro te lo impedisce.",
+      "DISRUPTION": "Abbastanza interazione per rispondere in tempo.",
+      "NO_DISRUPTION": "Nessuna interazione: niente risponde loro.",
+      "RESILIENCE": "Torni da ciò che ti tolgono.",
+      "BALANCED": "Niente fa pendere la partita."
     }
   }
 }
