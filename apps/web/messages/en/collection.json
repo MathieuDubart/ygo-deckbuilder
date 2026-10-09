@@ -84,5 +84,18 @@
       "rarity": "Rarity",
       "newest": "Recently added"
     }
+  },
+  "language": {
+    "alreadyUniform": "Everything is already in {language}.",
+    "copies": "{count} in {piles, plural, one {# stack} other {# stacks}}",
+    "done": "{count, plural, one {# stack moved} other {# stacks moved}}{merged, plural, =0 {} one {, # merged} other {, # merged}}.",
+    "label": "Filing language",
+    "neverChosen": "Never set — new cards follow the interface language.",
+    "normalize": "Move everything to {language} ({count})",
+    "onlyFuture": "Only for new cards",
+    "saved": "New cards will be filed in {language}.",
+    "title": "Collection language",
+    "willMerge": "{count, plural, one {# stack joins another} other {# stacks join another}} — copies are added up, none are lost.",
+    "willRetag": "{count, plural, one {# stack changes language} other {# stacks change language}}."
   }
 }

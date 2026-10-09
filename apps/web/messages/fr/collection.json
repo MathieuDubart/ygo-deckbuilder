@@ -84,5 +84,18 @@
       "rarity": "Rareté",
       "newest": "Ajout récent"
     }
+  },
+  "language": {
+    "alreadyUniform": "Tout est déjà en {language}.",
+    "copies": "{count} dans {piles, plural, one {# pile} other {# piles}}",
+    "done": "{count, plural, one {# pile déplacée} other {# piles déplacées}}{merged, plural, =0 {} one {, # fusionnée} other {, # fusionnées}}.",
+    "label": "Langue de rangement",
+    "neverChosen": "Jamais choisie — les nouvelles cartes suivent la langue de l’interface.",
+    "normalize": "Tout passer en {language} ({count})",
+    "onlyFuture": "Seulement pour les prochaines",
+    "saved": "Les prochaines cartes seront rangées en {language}.",
+    "title": "Langue de la collection",
+    "willMerge": "{count, plural, one {# pile en rejoint une autre} other {# piles en rejoignent une autre}} — les exemplaires s’additionnent, rien ne se perd.",
+    "willRetag": "{count, plural, one {# pile change de langue} other {# piles changent de langue}}."
   }
 }
