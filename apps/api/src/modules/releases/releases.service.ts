@@ -157,13 +157,22 @@ export class ReleasesService {
 
     const byPrint = new Map<string, number>();
     const byCard = new Map<number, number>();
+    /** Exemplaires possédés par code d'impression : une case de la checklist. */
+    const byCode = new Map<string, number>();
+    const codeOfPrint = new Map<string, string>(prints.map((p) => [p.id, p.printCode]));
     for (const item of items) {
       byCard.set(item.cardId, (byCard.get(item.cardId) ?? 0) + item.quantity);
-      if (item.printId) byPrint.set(item.printId, (byPrint.get(item.printId) ?? 0) + item.quantity);
+      if (!item.printId) continue;
+      byPrint.set(item.printId, (byPrint.get(item.printId) ?? 0) + item.quantity);
+      const code = codeOfPrint.get(item.printId);
+      if (code) byCode.set(code, (byCode.get(code) ?? 0) + item.quantity);
     }
 
     const cards: ReleaseCardDto[] = prints.map((print) => {
       const owned = byPrint.get(print.id) ?? 0;
+      // Le même code dans une autre rareté : la case est cochée, ce n'est juste pas cette
+      // ligne-ci. À ne pas confondre avec « je l'ai dans une autre extension ».
+      const sameCode = (byCode.get(print.printCode) ?? 0) - owned;
       return {
         card: toCardSummary(print.card),
         printId: print.id,
@@ -172,9 +181,10 @@ export class ReleasesService {
         rarityCode: print.rarityCode,
         price: toNumber(print.price),
         owned,
-        // Exemplaires de la même carte venus d'ailleurs : une autre impression, ou une pile
-        // saisie sans impression précise.
-        ownedElsewhere: Math.max(0, (byCard.get(print.cardId) ?? 0) - owned),
+        ownedSameCode: Math.max(0, sameCode),
+        // Venus d'une autre extension, ou d'une pile saisie sans impression précise. On
+        // retire ce qui vient du même code : ce n'est pas « ailleurs ».
+        ownedElsewhere: Math.max(0, (byCard.get(print.cardId) ?? 0) - owned - Math.max(0, sameCode)),
       };
     });
 
@@ -191,9 +201,15 @@ export class ReleasesService {
 
   // ─── Requête commune ───────────────────────────────────────────────────────
 
-  /** Impressions et cartes distinctes par extension : une seule passe, réutilisée partout. */
+  /**
+   * Impressions et cartes distinctes par extension : une seule passe, réutilisée partout.
+   * On compte les CODES et non les lignes, comme `SetProgressService` : une carte éditée en
+   * plusieurs raretés est une seule case de la checklist.
+   */
   private readonly setPrints = Prisma.sql`
-    SELECT "setId", COUNT(*)::int AS prints, COUNT(DISTINCT "cardId")::int AS cards
+    SELECT "setId",
+           COUNT(DISTINCT "printCode")::int AS prints,
+           COUNT(DISTINCT "cardId")::int AS cards
     FROM "CardPrint" GROUP BY "setId"`;
 
   private async rows(

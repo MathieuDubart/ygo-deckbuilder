@@ -1,6 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { Prisma } from '../../generated/prisma/client';
+
+/**
+ * À incrémenter quand la FORMULE d'avancement change : les lignes déjà écrites deviennent
+ * fausses, et rien dans un mouvement de collection ne les rattraperait. L'avancement est
+ * alors reconstruit une fois au démarrage.
+ */
+export const SET_PROGRESS_VERSION = 2;
+const STATE_ID = 'set-progress';
 
 /**
  * Tenue à jour de `SetProgress` : combien de cartes d'une extension un utilisateur possède,
@@ -18,10 +26,30 @@ import { Prisma } from '../../generated/prisma/client';
  *    totaux d'extensions auxquelles l'utilisateur n'a pas touché.
  */
 @Injectable()
-export class SetProgressService {
+export class SetProgressService implements OnApplicationBootstrap {
   private readonly logger = new Logger(SetProgressService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * `SetProgress` est une dénormalisation : quand sa formule change, les lignes en base
+   * mentent jusqu'au prochain mouvement sur chaque carte. On les reconstruit donc une fois,
+   * en arrière-plan — l'app reste utilisable pendant, avec les anciens chiffres.
+   */
+  async onApplicationBootstrap(): Promise<void> {
+    const state = await this.prisma.syncState.findUnique({ where: { id: STATE_ID } });
+    if (state?.databaseVersion === String(SET_PROGRESS_VERSION)) return;
+    void this.rebuildAll()
+      .then(async () => {
+        const data = { databaseVersion: String(SET_PROGRESS_VERSION), lastSyncAt: new Date() };
+        await this.prisma.syncState.upsert({
+          where: { id: STATE_ID },
+          create: { id: STATE_ID, ...data },
+          update: data,
+        });
+      })
+      .catch((e) => this.logger.error(`Reconstruction de l'avancement : ${e}`));
+  }
 
   /** Après un mouvement sur ces cartes : recalcule les extensions qui les contiennent. */
   async afterCards(userId: string, cardIds: number[]): Promise<void> {
@@ -65,14 +93,19 @@ export class SetProgressService {
           ON mine."cardId" = p."cardId"
         GROUP BY 1
       ),
+      -- Le dénominateur compte les CODES d'impression, pas les lignes : une carte éditée en
+      -- plusieurs raretés occupe UNE case de la checklist de l'extension, pas trois. Les
+      -- compter séparément rendait les 100 % inatteignables pour qui ne chasse pas la rareté.
       tot AS (
-        SELECT p."setId", COUNT(*)::int AS prints, COUNT(DISTINCT p."cardId")::int AS cards
+        SELECT p."setId",
+               COUNT(DISTINCT p."printCode")::int AS prints,
+               COUNT(DISTINCT p."cardId")::int AS cards
         FROM "CardPrint" p JOIN scope ON scope.id = p."setId"
         GROUP BY 1
       ),
       exact AS (
         SELECT p."setId",
-               COUNT(DISTINCT p.id)::int AS "ownedPrints",
+               COUNT(DISTINCT p."printCode")::int AS "ownedPrints",
                SUM(ci.quantity)::int AS copies
         FROM "CollectionItem" ci
         JOIN "CardPrint" p ON p.id = ci."printId"
