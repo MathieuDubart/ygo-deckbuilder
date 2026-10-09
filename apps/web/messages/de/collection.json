@@ -87,6 +87,7 @@
   },
   "language": {
     "alreadyUniform": "Alles ist bereits auf {language}.",
+    "breakdown": "Verteilung",
     "copies": "{count} in {piles, plural, one {# Stapel} other {# Stapeln}}",
     "done": "{count, plural, one {# Stapel umgestellt} other {# Stapel umgestellt}}{merged, plural, =0 {} other {, # zusammengelegt}}.",
     "label": "Einsortierungssprache",

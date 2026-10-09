@@ -87,6 +87,7 @@
   },
   "language": {
     "alreadyUniform": "Já está tudo em {language}.",
+    "breakdown": "Repartição",
     "copies": "{count} em {piles, plural, one {# pilha} other {# pilhas}}",
     "done": "{count, plural, one {# pilha movida} other {# pilhas movidas}}{merged, plural, =0 {} other {, # fundidas}}.",
     "label": "Idioma de arrumação",
