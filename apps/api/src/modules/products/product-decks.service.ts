@@ -1,8 +1,12 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
+import type { ProductKind } from '@ygo/shared';
+import { PRODUCT_KIND } from '../../common/catalog/product-sql';
 import { t } from '../../common/i18n/locale-context';
 import { PrismaService } from '../../common/prisma/prisma.service';
+import type { DeckZone } from '../../generated/prisma/client';
 import { fillDeck, type GenCardInfo } from '../meta-decks/engine/generator';
 import {
+  copiesFor,
   mainTargetFor,
   officialCandidates,
   STRUCTURE_COPIES,
@@ -10,11 +14,14 @@ import {
 } from './product-deck-build';
 
 /**
- * À incrémenter pour relancer le rattrapage, par exemple après une évolution de
- * l'assembleur : les decks déjà montés sont reconnus et laissés tels quels, seuls les
- * manquants sont posés.
+ * À incrémenter après une évolution de l'assembleur. Le rattrapage repasse alors sur tous
+ * les produits possédés : il pose ce qui manque, et remonte les decks qu'il avait lui-même
+ * montés autrement — sans jamais toucher à ceux que l'utilisateur a renommés.
+ *
+ * 2 : seul le structure deck est monté en triple. Les coffrets de decks légendaires sont
+ * vendus complets, leur liste est le deck.
  */
-const BACKFILL_VERSION = 1;
+const BACKFILL_VERSION = 2;
 const BACKFILL_STATE_ID = 'product-decks-backfill';
 
 /** Un deck posé dans « Mes decks » à partir d'une liste officielle. */
@@ -98,6 +105,7 @@ export class ProductDecksService implements OnApplicationBootstrap {
    * c'est ainsi qu'ils sont vendus et joués.
    */
   async createFromSet(userId: string, setId: string): Promise<CreatedProductDeck[]> {
+    const copies = copiesFor(await this.kindOf(setId));
     const lists = await this.prisma.productDeck.findMany({
       where: { setId },
       orderBy: { position: 'asc' },
@@ -121,12 +129,66 @@ export class ProductDecksService implements OnApplicationBootstrap {
 
     const created: CreatedProductDeck[] = [];
     for (const list of lists) {
-      if (already.has(list.id)) continue;
-      if (await this.adopt(userId, list)) continue;
-      const deck = await this.createOne(userId, list);
+      if (already.has(list.id)) {
+        await this.refresh(userId, list, copies);
+        continue;
+      }
+      if (await this.adopt(userId, list, copies)) continue;
+      const deck = await this.createOne(userId, list, copies);
       if (deck) created.push(deck);
     }
     return created;
+  }
+
+  /**
+   * Type du produit, par la même expression SQL que partout ailleurs : c'est elle qui fait
+   * d'un « Structure Deck: … » un STRUCTURE et d'un « Legendary Decks II » un coffret, et
+   * la dupliquer en TypeScript garantirait qu'un jour les deux divergent.
+   */
+  private async kindOf(setId: string): Promise<ProductKind> {
+    const rows = await this.prisma.$queryRaw<{ kind: ProductKind }[]>`
+      SELECT ${PRODUCT_KIND} AS kind FROM "CardSet" s WHERE s.id = ${setId}`;
+    return rows[0]?.kind ?? 'OTHER';
+  }
+
+  /**
+   * Remonte un deck que l'assembleur nommerait autrement aujourd'hui — typiquement un
+   * coffret monté en triple avant qu'on sache que seuls les structure decks se jouent
+   * ainsi. On ne touche qu'aux noms que l'assembleur a pu produire lui-même : renommé, le
+   * deck appartient à son propriétaire et on le laisse tranquille.
+   */
+  private async refresh(
+    userId: string,
+    list: Awaited<ReturnType<ProductDecksService['listsOf']>>[number],
+    copies: number,
+  ): Promise<void> {
+    const wanted = this.name(list, copies);
+    const deck = await this.prisma.deck.findFirst({
+      where: { userId, productDeckId: list.id },
+      select: { id: true, name: true },
+    });
+    if (!deck || deck.name === wanted) return;
+    if (!this.generatedNames(list).has(deck.name)) return;
+
+    const built = await this.build(list, copies);
+    if (!built) return;
+    await this.prisma.$transaction([
+      this.prisma.deckCard.deleteMany({ where: { deckId: deck.id } }),
+      this.prisma.deck.update({
+        where: { id: deck.id },
+        data: {
+          name: wanted,
+          description: t('products.deckFromProduct', { name: list.set.name }),
+          cards: { create: built },
+        },
+      }),
+    ]);
+    this.logger.log(`Deck « ${deck.name} » remonté en « ${wanted} »`);
+  }
+
+  /** Tous les noms que l'assembleur a pu donner à cette liste, toutes versions confondues. */
+  private generatedNames(list: { name: string | null; set: { name: string } }): Set<string> {
+    return new Set([this.name(list, 1), this.name(list, STRUCTURE_COPIES)]);
   }
 
   /**
@@ -136,24 +198,51 @@ export class ProductDecksService implements OnApplicationBootstrap {
    */
   private async adopt(
     userId: string,
-    list: { id: string; name: string | null; set: { name: string } },
+    list: Awaited<ReturnType<ProductDecksService['listsOf']>>[number],
+    copies: number,
   ): Promise<boolean> {
     const orphan = await this.prisma.deck.findFirst({
-      where: { userId, productDeckId: null, name: this.name(list) },
-      select: { id: true },
+      where: { userId, productDeckId: null, name: { in: [...this.generatedNames(list)] } },
+      select: { id: true, name: true },
     });
     if (!orphan) return false;
     await this.prisma.deck.update({
       where: { id: orphan.id },
       data: { productDeckId: list.id },
     });
+    // Adopté, il peut porter l'ancien nom triple : `refresh` le remonte si besoin.
+    await this.refresh(userId, list, copies);
     return true;
   }
 
   private async createOne(
     userId: string,
     list: Awaited<ReturnType<ProductDecksService['listsOf']>>[number],
+    copies: number,
   ): Promise<CreatedProductDeck | null> {
+    const built = await this.build(list, copies);
+    if (!built) return null;
+
+    const name = this.name(list, copies);
+    const deck = await this.prisma.deck.create({
+      data: {
+        userId,
+        productDeckId: list.id,
+        name,
+        description: t('products.deckFromProduct', { name: list.set.name }),
+        cards: { create: built },
+      },
+      select: { id: true },
+    });
+    this.logger.log(`Deck « ${name} » créé depuis ${list.set.name}`);
+    return { id: deck.id, name };
+  }
+
+  /** Les cartes du deck, telles que l'assembleur les pose. Null si la liste est vide. */
+  private async build(
+    list: Awaited<ReturnType<ProductDecksService['listsOf']>>[number],
+    copies: number,
+  ): Promise<{ cardId: number; zone: DeckZone; quantity: number }[] | null> {
     if (list.cards.length === 0) return null;
 
     const shares = await this.deckShares(list.cards.map((c) => c.cardId));
@@ -177,39 +266,24 @@ export class ProductDecksService implements OnApplicationBootstrap {
 
     // `onlyOwned: false` : la liste décrit le produit, pas la collection. L'assembleur applique
     // quand même la banlist — une carte interdite depuis la sortie du produit n'y entre pas.
-    const result = fillDeck(officialCandidates(official, STRUCTURE_COPIES), {
+    const result = fillDeck(officialCandidates(official, copies), {
       cards,
       owned: new Map(),
       onlyOwned: false,
-      mainTarget: mainTargetFor(official, STRUCTURE_COPIES),
+      mainTarget: mainTargetFor(official, copies),
     });
     if (result.entries.length === 0) return null;
-
-    const name = this.name(list);
-    const deck = await this.prisma.deck.create({
-      data: {
-        userId,
-        productDeckId: list.id,
-        name,
-        description: t('products.deckFromProduct', { name: list.set.name }),
-        cards: {
-          create: result.entries.map((e) => ({
-            cardId: e.cardId,
-            zone: e.zone,
-            quantity: e.quantity,
-          })),
-        },
-      },
-      select: { id: true },
-    });
-    this.logger.log(`Deck « ${name} » créé depuis ${list.set.name}`);
-    return { id: deck.id, name };
+    return result.entries.map((e) => ({ cardId: e.cardId, zone: e.zone, quantity: e.quantity }));
   }
 
-  /** Nom du deck : le produit, et la liste quand le produit en contient plusieurs. */
-  private name(list: { name: string | null; set: { name: string } }): string {
+  /**
+   * Nom du deck : le produit, et la liste quand le produit en contient plusieurs. Le « ×3 »
+   * n'apparaît que s'il veut dire quelque chose — un coffret vendu complet n'est pas monté
+   * en triple, son nom n'a donc rien à annoncer.
+   */
+  private name(list: { name: string | null; set: { name: string } }, copies: number): string {
     const base = list.name ? `${list.set.name} — ${list.name}` : list.set.name;
-    return t('products.deckName', { name: base, copies: STRUCTURE_COPIES });
+    return copies > 1 ? t('products.deckName', { name: base, copies }) : base;
   }
 
   /** Taux de jeu en tournoi, pour départager deux cartes à égalité d'exemplaires. */

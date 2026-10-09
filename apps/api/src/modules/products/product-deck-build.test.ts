@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { mainTargetFor, officialCandidates, type OfficialCard } from './product-deck-build';
+import {
+  copiesFor,
+  mainTargetFor,
+  officialCandidates,
+  type OfficialCard,
+} from './product-deck-build';
 
 const card = (cardId: number, quantity: number, deckShare?: number): OfficialCard => ({
   cardId,
@@ -51,6 +56,20 @@ describe('officialCandidates', () => {
 
   it('traite zéro boîte comme une', () => {
     expect(officialCandidates([card(1, 2)], 0)[0]!.want).toBe(2);
+  });
+});
+
+describe('copiesFor', () => {
+  it('triple le structure deck, qui est une base à compléter', () => {
+    expect(copiesFor('STRUCTURE')).toBe(3);
+  });
+
+  it('laisse tel quel tout produit vendu comme un deck fini', () => {
+    // Legendary Decks, coffrets 5D's, decks légendaires : leur liste EST le deck, et la
+    // tripler donnerait une chose que personne n'a jamais jouée.
+    for (const kind of ['BOX', 'STARTER', 'TIN', 'BOOSTER', 'OTHER'] as const) {
+      expect(copiesFor(kind)).toBe(1);
+    }
   });
 });
 
