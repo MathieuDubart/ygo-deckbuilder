@@ -66,6 +66,6 @@
     "title": "Keine Edition gefunden",
     "description": "Ändere die Filter oder versuche einen anderen Namen oder Code."
   },
-  "sameCode": "Andere Seltenheit",
+  "sameCode": "Seltenheit",
   "sameCodeHint": "Du hast diese Nummer in einer anderen Seltenheit: das Feld zählt als erhalten."
 }
