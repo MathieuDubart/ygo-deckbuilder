@@ -1,4 +1,4 @@
-import { DECK_RULES } from '@ygo/shared';
+import { DECK_RULES, type ProductKind } from '@ygo/shared';
 import type { Candidate } from '../meta-decks/engine/generator';
 
 /** Une ligne de la liste officielle d'un produit, avec de quoi la classer. */
@@ -10,8 +10,21 @@ export interface OfficialCard {
   deckShare?: number | null;
 }
 
-/** Nombre de boîtes dont on suppose le montage. Trois : c'est ainsi que ces decks se jouent. */
+/** Nombre de boîtes dont on suppose le montage d'un structure deck. */
 export const STRUCTURE_COPIES = 3;
+
+/**
+ * Combien d'exemplaires du produit on suppose achetés pour monter son deck.
+ *
+ * Seul le structure deck se joue en trois boîtes : il est conçu comme une base à compléter,
+ * vendu avec un exemplaire de presque tout, et personne ne le joue tel quel. Tous les autres
+ * produits à liste — Legendary Decks, coffrets 5D's, decks légendaires — sont au contraire
+ * vendus complets : leur liste EST le deck, et la tripler donnerait une chose que personne
+ * n'a jamais jouée.
+ */
+export function copiesFor(kind: ProductKind): number {
+  return kind === 'STRUCTURE' ? STRUCTURE_COPIES : 1;
+}
 
 /**
  * La liste à monter avec plusieurs boîtes du même produit, dans l'ordre où il faut la garder.
