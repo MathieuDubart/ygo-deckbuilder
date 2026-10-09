@@ -51,8 +51,9 @@ export function ReleaseDialog({
   const [rarity, setRarity] = useState<string | undefined>();
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
 
-  // « Possédée » suit la case de la checklist, pas la ligne : avoir le numéro dans une
-  // autre rareté compte, exactement comme dans le pourcentage affiché au-dessus.
+  // « Possédée » suit la case de la checklist, pas la ligne : un exemplaire acheté ici
+  // coche sa case, qu'il soit rangé sur une autre rareté ou sur un autre numéro de la même
+  // carte — exactement comme dans le pourcentage affiché au-dessus.
   const has = (card: ReleaseCardDto) =>
     card.owned > 0 || card.ownedSameCode > 0 || (anyEdition && card.ownedElsewhere > 0);
   const cards = useMemo(() => {
@@ -252,7 +253,8 @@ function PrintTile({
             className={cn(
               'transition',
               !owned && card.ownedSameCode === 0 && 'opacity-40 saturate-0 group-hover:opacity-70',
-              // Possédée dans une autre rareté : à demi-teinte, ni éteinte ni pleine
+              // La case est cochée, mais pas par cette ligne : à demi-teinte, ni éteinte
+              // ni pleine
               !owned && card.ownedSameCode > 0 && 'opacity-80',
             )}
           />
@@ -261,9 +263,10 @@ function PrintTile({
               <Badge tone="success">×{card.owned}</Badge>
             </span>
           )}
-          {/* Le même numéro dans une autre rareté : la case de la checklist est cochée, ce
-              n'est simplement pas cette ligne-ci qu'on possède. À ne pas confondre avec
-              « je l'ai dans une autre extension », qui ne coche rien ici. */}
+          {/* La case est cochée par un exemplaire acheté ici, mais pas par cette ligne :
+              une autre rareté du même numéro, ou un autre numéro de la même carte — un
+              structure deck contient trois Dragon Blanc sous trois numéros. À ne pas
+              confondre avec « je l'ai dans une autre extension », qui ne coche rien ici. */}
           {card.owned === 0 && card.ownedSameCode > 0 && (
             <span className="absolute top-1 right-1" title={t('sameCodeHint')}>
               <Badge tone="success" className="px-1">
