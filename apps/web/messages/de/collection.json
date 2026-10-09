@@ -58,7 +58,10 @@
       "language": "Sprache",
       "add": "Produkt hinzufügen",
       "toast": "{count, plural, one {# Karte} other {# Karten}} aus „{set}“ hinzugefügt",
-      "toastVerified": "{count, plural, one {# Karte} other {# Karten}} aus „{set}“ hinzugefügt (offizielle Mengen)"
+      "toastVerified": "{count, plural, one {# Karte} other {# Karten}} aus „{set}“ hinzugefügt (offizielle Mengen)",
+      "createDecks": "Sein Deck zu meinen Decks hinzufügen",
+      "createDecksHint": "Die Drei-Boxen-Variante: Schlüsselkarten dreifach, Füllmaterial gestrichen. Was dir fehlt, zeigt der Builder.",
+      "decksToast": "{count, plural, one {Deck hinzugefügt: {name}} other {# Decks hinzugefügt}}"
     }
   },
   "filters": {

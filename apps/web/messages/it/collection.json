@@ -58,7 +58,10 @@
       "language": "Lingua",
       "add": "Aggiungi questo prodotto",
       "toast": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}»",
-      "toastVerified": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}» (quantità ufficiali)"
+      "toastVerified": "{count, plural, one {# carta aggiunta} other {# carte aggiunte}} da «{set}» (quantità ufficiali)",
+      "createDecks": "Aggiungere anche il suo deck ai miei",
+      "createDecksHint": "La versione a tre scatole: le carte chiave in triplo, il riempitivo tagliato. Quello che ti manca appare nel builder.",
+      "decksToast": "{count, plural, one {Deck aggiunto: {name}} other {# deck aggiunti}}"
     }
   },
   "filters": {
