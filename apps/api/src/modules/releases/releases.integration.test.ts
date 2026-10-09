@@ -79,9 +79,17 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       // inatteignables pour qui ne chasse pas la rareté.
       row.prints = new Set(own.map((p) => p.printCode)).size;
       row.cards = new Set(own.map((p) => p.cardId)).size;
-      row.ownedPrints = new Set(
-        own.filter((p) => copiesByPrint.has(p.id)).map((p) => p.printCode),
-      ).size;
+      // Une case est cochée dès qu'on a, dans l'extension, de quoi la couvrir. Une carte
+      // présente sous trois numéros (les trois Dragon Blanc d'un structure deck) occupe
+      // trois cases et demande trois exemplaires ; une carte à deux raretés n'en occupe
+      // qu'une, et un seul exemplaire suffit, quelle que soit la rareté possédée.
+      row.ownedPrints = 0;
+      for (const cardId of new Set(own.map((p) => p.cardId))) {
+        const rows = own.filter((p) => p.cardId === cardId);
+        const slots = new Set(rows.map((p) => p.printCode)).size;
+        const copies = rows.reduce((sum, p) => sum + (copiesByPrint.get(p.id) ?? 0), 0);
+        row.ownedPrints += Math.min(slots, copies);
+      }
       row.ownedCards = new Set(
         own.filter((p) => ownedCardIds.has(p.cardId)).map((p) => p.cardId),
       ).size;
@@ -137,10 +145,16 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
     // Extension dont on ne connaît aucune carte et qui n'est pas annoncée : elle doit
     // quand même être listée — le but de l'onglet est de les avoir toutes sous les yeux.
     await prisma.cardSet.create({ data: { name: 'Mystery Vault', code: 'MYVA' } });
+    // Un structure deck : la même carte y occupe trois numéros, parce qu'il en contient
+    // trois exemplaires. Trois cases à cocher pour une seule carte.
+    const structure = await prisma.cardSet.create({
+      data: { name: 'Structure Deck: White Dragon', code: 'SDWD', tcgDate: new Date('2024-01-01') },
+    });
 
     for (const [id, name] of [
       [1, 'Blue-Eyes White Dragon'],
       [2, 'Raigeki'],
+      [3, 'Pot of Greed'],
     ] as const) {
       await prisma.card.create({
         data: {
@@ -184,8 +198,23 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       data: { cardId: 2, setId: other.id, printCode: 'OTIN-EN050', rarity: 'Common', price: 2 },
     });
 
+    // Les trois numéros du structure deck, pour la même carte
+    const sd1 = await prisma.cardPrint.create({
+      data: { cardId: 3, setId: structure.id, printCode: 'SDWD-EN001', rarity: 'Common', price: 1 },
+    });
+    for (const code of ['SDWD-EN002', 'SDWD-EN003']) {
+      await prisma.cardPrint.create({
+        data: { cardId: 3, setId: structure.id, printCode: code, rarity: 'Common', price: 1 },
+      });
+    }
+
     await prisma.collectionItem.create({
       data: { userId: USER, cardId: 1, printId: p1.id, quantity: 2 },
+    });
+    // Trois exemplaires, rangés sur une seule impression : c'est ce que fait la collection,
+    // puisque les trois numéros sont la même carte dans la même rareté.
+    await prisma.collectionItem.create({
+      data: { userId: USER, cardId: 3, printId: sd1.id, quantity: 3 },
     });
     await prisma.collectionItem.create({
       data: { userId: USER, cardId: 2, printId: elsewhere.id, quantity: 1 },
@@ -202,7 +231,7 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
   describe('SQL du suivi par extension', () => {
     it('liste les extensions avec leur avancement', async () => {
       const page = await releases.list(USER, { page: 1, pageSize: 24 });
-      expect(page.total).toBe(4);
+      expect(page.total).toBe(5);
       const betb = page.items.find((r) => r.set.code === 'BETB');
       expect(betb).toBeDefined();
       // 2 cases (EN001 et EN002) pour 3 lignes d'impression : la carte 1 est éditée deux
@@ -219,6 +248,26 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       expect(betb!.missingValue).toBeCloseTo(51); // 50 + 1
       expect(betb!.status).toBe('RECENT');
       expect(betb!.set.kind).toBe('BOOSTER'); // cardCount 100 → booster
+    });
+
+    it('complète un structure deck où une carte occupe plusieurs numéros', async () => {
+      // Le cas qui faisait mentir la jauge : trois exemplaires rangés sur une impression
+      // ne cochaient qu'une case sur trois, et le produit restait éternellement incomplet.
+      const page = await releases.list(USER, { page: 1, pageSize: 24, q: 'white dragon' });
+      const sd = page.items.find((r) => r.set.code === 'SDWD')!;
+      expect(sd.progress).toMatchObject({ prints: 3, cards: 1, ownedPrints: 3, copies: 3 });
+
+      const detail = await releases.detail(USER, sd.set.id);
+      expect(detail.cards).toHaveLength(3);
+      // La ligne qui porte les exemplaires, puis les deux autres, couvertes par eux
+      expect(detail.cards.map((c) => [c.printCode, c.owned, c.ownedSameCode])).toEqual([
+        ['SDWD-EN001', 3, 0],
+        ['SDWD-EN002', 0, 1],
+        ['SDWD-EN003', 0, 1],
+      ]);
+      // Rien n'est « ailleurs » : les trois exemplaires viennent bien de cette extension
+      expect(detail.cards.every((c) => c.ownedElsewhere === 0)).toBe(true);
+      expect(detail.rarities).toEqual([{ rarity: 'Common', prints: 3, ownedPrints: 3 }]);
     });
 
     it('garde l_extension annoncée sans impression', async () => {
@@ -242,7 +291,7 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
 
     it('trie sans casser', async () => {
       for (const sort of ['date', 'progress', 'name', 'cards'] as const) {
-        expect((await releases.list(USER, { page: 1, pageSize: 24, sort })).items).toHaveLength(4);
+        expect((await releases.list(USER, { page: 1, pageSize: 24, sort })).items).toHaveLength(5);
       }
     });
 
@@ -282,10 +331,10 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
 
   describe('SQL de la collection', () => {
     it('liste, filtre et trie', async () => {
-      expect((await collection.list(USER, { page: 1, pageSize: 50 })).total).toBe(2);
+      expect((await collection.list(USER, { page: 1, pageSize: 50 })).total).toBe(3);
       for (const sort of ['name', 'quantity', 'value', 'newest', 'rarity'] as const) {
         expect((await collection.list(USER, { page: 1, pageSize: 50, sort })).items).toHaveLength(
-          2,
+          3,
         );
       }
       expect(
@@ -294,8 +343,9 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       expect(
         (await collection.list(USER, { page: 1, pageSize: 50, archetype: 'blue-eyes' })).total,
       ).toBe(1);
+      // Raigeki via l'autre extension, et la carte du structure deck
       expect((await collection.list(USER, { page: 1, pageSize: 50, rarity: 'Common' })).total).toBe(
-        1,
+        2,
       );
       expect((await collection.list(USER, { page: 1, pageSize: 50, q: 'raigeki' })).total).toBe(1);
     });
@@ -307,6 +357,7 @@ describe.runIf(URL)('suivi par extension (PostgreSQL réel)', () => {
       expect(facets.sets.map((f) => f.label).sort()).toEqual([
         'Beyond the Brave',
         'Old Reprint Tin',
+        'Structure Deck: White Dragon',
       ]);
     });
 

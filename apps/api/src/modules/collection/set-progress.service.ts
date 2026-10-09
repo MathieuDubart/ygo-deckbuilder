@@ -7,7 +7,7 @@ import { Prisma } from '../../generated/prisma/client';
  * fausses, et rien dans un mouvement de collection ne les rattraperait. L'avancement est
  * alors reconstruit une fois au démarrage.
  */
-export const SET_PROGRESS_VERSION = 2;
+export const SET_PROGRESS_VERSION = 3;
 const STATE_ID = 'set-progress';
 
 /**
@@ -103,14 +103,31 @@ export class SetProgressService implements OnApplicationBootstrap {
         FROM "CardPrint" p JOIN scope ON scope.id = p."setId"
         GROUP BY 1
       ),
-      exact AS (
-        SELECT p."setId",
-               COUNT(DISTINCT p."printCode")::int AS "ownedPrints",
-               SUM(ci.quantity)::int AS copies
+      -- Cases qu'une carte occupe dans l'extension. Souvent une, mais un structure deck
+      -- contient trois Dragon Blanc sous trois numéros : trois cases pour une seule carte.
+      slots AS (
+        SELECT p."setId", p."cardId", COUNT(DISTINCT p."printCode")::int AS n
+        FROM "CardPrint" p JOIN scope ON scope.id = p."setId"
+        GROUP BY 1, 2
+      ),
+      -- Exemplaires achetés DANS l'extension, par carte.
+      held AS (
+        SELECT p."setId", p."cardId", SUM(ci.quantity)::int AS copies
         FROM "CollectionItem" ci
         JOIN "CardPrint" p ON p.id = ci."printId"
         JOIN scope ON scope.id = p."setId"
         WHERE ci."userId" = ${userId}
+        GROUP BY 1, 2
+      ),
+      -- LEAST : on ne coche pas plus de cases qu'il n'y en a, ni plus que d'exemplaires
+      -- en main. Trois Dragon Blanc cochent les trois numéros, même rangés sur une seule
+      -- impression — c'est la même carte, la collection n'a aucune raison de les séparer.
+      exact AS (
+        SELECT h."setId",
+               SUM(LEAST(s.n, h.copies))::int AS "ownedPrints",
+               SUM(h.copies)::int AS copies
+        FROM held h
+        JOIN slots s ON s."setId" = h."setId" AND s."cardId" = h."cardId"
         GROUP BY 1
       ),
       upserted AS (

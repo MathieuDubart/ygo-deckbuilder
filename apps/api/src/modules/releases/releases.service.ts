@@ -20,6 +20,19 @@ import { normalizeProductQuery } from '../../common/search/normalize';
 import { textQuery } from '../../common/search/text-search';
 import { Prisma } from '../../generated/prisma/client';
 import { daysUntilRelease, releaseStatus, sortRarities } from './release-progress';
+import { coverSlots, filledSlots } from './release-slots';
+
+/** Regroupe en conservant l'ordre de première apparition. */
+function groupBy<T, K>(rows: readonly T[], key: (row: T) => K): Map<K, T[]> {
+  const out = new Map<K, T[]>();
+  for (const row of rows) {
+    const k = key(row);
+    const bucket = out.get(k);
+    if (bucket) bucket.push(row);
+    else out.set(k, [row]);
+  }
+  return out;
+}
 
 /** Ligne brute d'une extension : le DTO du produit, plus l'avancement de l'utilisateur. */
 type ReleaseRow = Omit<CardSetDto, 'tcgDate'> & {
@@ -156,23 +169,39 @@ export class ReleasesService {
       : [];
 
     const byPrint = new Map<string, number>();
+    /** Exemplaires de la carte, toutes extensions confondues. */
     const byCard = new Map<number, number>();
-    /** Exemplaires possédés par code d'impression : une case de la checklist. */
-    const byCode = new Map<string, number>();
-    const codeOfPrint = new Map<string, string>(prints.map((p) => [p.id, p.printCode]));
+    /** Exemplaires de la carte achetés DANS cette extension : ceux qui cochent ses cases. */
+    const hereByCard = new Map<number, number>();
+    const printById = new Map(prints.map((p) => [p.id, p]));
     for (const item of items) {
       byCard.set(item.cardId, (byCard.get(item.cardId) ?? 0) + item.quantity);
       if (!item.printId) continue;
+      const print = printById.get(item.printId);
+      if (!print) continue; // impression d'une autre extension : comptée dans `byCard` seul
       byPrint.set(item.printId, (byPrint.get(item.printId) ?? 0) + item.quantity);
-      const code = codeOfPrint.get(item.printId);
-      if (code) byCode.set(code, (byCode.get(code) ?? 0) + item.quantity);
+      hereByCard.set(item.cardId, (hereByCard.get(item.cardId) ?? 0) + item.quantity);
+    }
+
+    // Une carte occupe autant de cases qu'elle a de numéros dans l'extension, et chaque
+    // numéro peut avoir plusieurs lignes (une par rareté). On répartit donc les exemplaires
+    // sur les cases, puis on redescend la réponse sur les lignes.
+    const coveredByCode = new Map<string, number>();
+    for (const [cardId, group] of groupBy(prints, (p) => p.cardId)) {
+      const slots = [...groupBy(group, (p) => p.printCode)].map(([printCode, rows]) => ({
+        printCode,
+        owned: rows.reduce((sum, r) => sum + (byPrint.get(r.id) ?? 0), 0),
+      }));
+      for (const slot of coverSlots(slots, hereByCard.get(cardId) ?? 0)) {
+        coveredByCode.set(slot.printCode, slot.covered);
+      }
     }
 
     const cards: ReleaseCardDto[] = prints.map((print) => {
       const owned = byPrint.get(print.id) ?? 0;
-      // Le même code dans une autre rareté : la case est cochée, ce n'est juste pas cette
-      // ligne-ci. À ne pas confondre avec « je l'ai dans une autre extension ».
-      const sameCode = (byCode.get(print.printCode) ?? 0) - owned;
+      // La case est cochée, mais par un exemplaire qui n'est pas sur cette ligne : une autre
+      // rareté du même numéro, ou un autre numéro de la même carte dans ce produit.
+      const covered = owned > 0 ? 0 : (coveredByCode.get(print.printCode) ?? 0);
       return {
         card: toCardSummary(print.card),
         printId: print.id,
@@ -181,19 +210,34 @@ export class ReleasesService {
         rarityCode: print.rarityCode,
         price: toNumber(print.price),
         owned,
-        ownedSameCode: Math.max(0, sameCode),
-        // Venus d'une autre extension, ou d'une pile saisie sans impression précise. On
-        // retire ce qui vient du même code : ce n'est pas « ailleurs ».
-        ownedElsewhere: Math.max(0, (byCard.get(print.cardId) ?? 0) - owned - Math.max(0, sameCode)),
+        ownedSameCode: covered,
+        // Venus d'une autre extension, ou d'une pile saisie sans impression précise : tout
+        // ce qui n'a pas été acheté ici. Ce qui vient d'ici coche une case, ce n'est pas
+        // « ailleurs », même si la case n'est pas celle de cette ligne.
+        ownedElsewhere: Math.max(
+          0,
+          (byCard.get(print.cardId) ?? 0) - (hereByCard.get(print.cardId) ?? 0),
+        ),
       };
     });
 
+    // Même règle par rareté, mais cases et exemplaires restreints à cette rareté : avoir
+    // l'Ultra d'un numéro ne coche pas sa Commune, alors que trois Communes du même numéro
+    // en cochent bien trois.
     const byRarity = new Map<string, ReleaseRarityDto>();
-    for (const card of cards) {
-      const row = byRarity.get(card.rarity) ?? { rarity: card.rarity, prints: 0, ownedPrints: 0 };
-      row.prints += 1;
-      if (card.owned > 0) row.ownedPrints += 1;
-      byRarity.set(card.rarity, row);
+    for (const [rarity, group] of groupBy(prints, (p) => p.rarity)) {
+      let slotCount = 0;
+      let ownedPrints = 0;
+      for (const [, rows] of groupBy(group, (p) => p.cardId)) {
+        const slots = [...groupBy(rows, (p) => p.printCode)].map(([printCode, same]) => ({
+          printCode,
+          owned: same.reduce((sum, r) => sum + (byPrint.get(r.id) ?? 0), 0),
+        }));
+        const copies = slots.reduce((sum, s) => sum + s.owned, 0);
+        slotCount += slots.length;
+        ownedPrints += filledSlots(slots.length, copies);
+      }
+      byRarity.set(rarity, { rarity, prints: slotCount, ownedPrints });
     }
 
     return { ...toReleaseDto(header), cards, rarities: sortRarities([...byRarity.values()]) };
