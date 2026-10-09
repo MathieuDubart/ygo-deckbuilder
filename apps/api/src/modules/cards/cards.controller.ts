@@ -9,12 +9,16 @@ import { CurrentUser, type AuthUser } from '../../common/decorators/current-user
 import { Public } from '../../common/decorators/public.decorator';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe';
 import { CardsService } from './cards.service';
+import { PrintLookupService } from './print-lookup.service';
 
 /** Catalogue public ; si l'utilisateur est connecté, on enrichit avec ses quantités possédées. */
 @Public()
 @Controller('cards')
 export class CardsController {
-  constructor(private readonly cards: CardsService) {}
+  constructor(
+    private readonly cards: CardsService,
+    private readonly lookup: PrintLookupService,
+  ) {}
 
   @Get()
   search(
@@ -22,6 +26,15 @@ export class CardsController {
     @CurrentUser() user?: AuthUser,
   ) {
     return this.cards.search(query, user?.id);
+  }
+
+  /**
+   * Un code imprimé → la carte, en une requête. Rattrape au passage une extension absente du
+   * catalogue : c'est le chemin du scanner, et une sortie récente ne doit pas être une impasse.
+   */
+  @Get('by-print/:code')
+  byPrint(@Param('code') code: string, @CurrentUser() user?: AuthUser) {
+    return this.lookup.resolve(code, user?.id);
   }
 
   @Get('archetypes')

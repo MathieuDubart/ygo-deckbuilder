@@ -134,6 +134,51 @@ export class CatalogSyncService implements OnModuleInit, OnApplicationBootstrap 
     }
   }
 
+  /**
+   * Rattrape UNE extension absente ou incomplète, sans relire les 13 000 cartes.
+   *
+   * Le cas qui l'exige : on scanne « DUAD-FR001 », l'extension est sortie après la dernière
+   * synchro hebdomadaire, et le code ne correspond à rien. Plutôt qu'une impasse, on va
+   * chercher cette extension-là — une requête, quelques centaines de cartes — et on réessaie.
+   *
+   * Renvoie `null` si YGOPRODeck ne connaît aucune extension portant ce préfixe : c'est alors
+   * une faute de lecture, pas un catalogue en retard, et il ne faut pas réessayer sans fin.
+   */
+  async syncSetByPrefix(prefix: string): Promise<{ setName: string; cards: number } | null> {
+    const name = await this.setNameFor(prefix);
+    if (!name) return null;
+
+    const cards = await this.ygo.cardsOfSet(name);
+    if (cards.length === 0) return null;
+    const fr = new Map(
+      (await this.ygo.cardsOfSet(name, 'fr').catch(() => [])).map((c) => [
+        c.id,
+        { name: c.name, desc: c.desc },
+      ]),
+    );
+
+    // Les cartes d'une extension appartiennent aussi à d'autres : on laisse `upsertSets`
+    // créer celles qu'il découvre, sinon leurs impressions seraient muettes.
+    const setIds = await this.upsertSets([], cards);
+    await this.upsertCards(cards.map((c) => mapCard(c, fr.get(c.id))));
+    await this.upsertPrints(cards, setIds);
+    await this.upsertArts(cards);
+    await this.refreshSearchIndex();
+    this.logger.log(`Extension ${prefix} rattrapée : ${cards.length} cartes`);
+    return { setName: name, cards: cards.length };
+  }
+
+  /** Nom complet d'une extension à partir de son préfixe, en base puis chez YGOPRODeck. */
+  private async setNameFor(prefix: string): Promise<string | null> {
+    const known = await this.prisma.cardSet.findFirst({
+      where: { code: { equals: prefix, mode: 'insensitive' } },
+      select: { name: true },
+    });
+    if (known) return known.name;
+    const sets = await this.ygo.allSets();
+    return sets.find((s) => s.set_code?.toUpperCase() === prefix.toUpperCase())?.set_name ?? null;
+  }
+
   private async upsertSets(
     sets: Awaited<ReturnType<YgoprodeckClient['allSets']>>,
     cards: Awaited<ReturnType<YgoprodeckClient['allCards']>>,

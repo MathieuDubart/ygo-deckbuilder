@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CARD_CATEGORIES, CARD_CONDITIONS, CARD_LANGUAGES } from '../domain/enums';
+import type { CardLanguage } from '../domain/enums';
 import { paginationSchema } from './pagination';
 import { tagIdsSchema } from './tags';
 
@@ -8,7 +9,12 @@ export const addCollectionItemSchema = z.object({
   printId: z.string().optional(),
   quantity: z.number().int().min(1).max(99).default(1),
   condition: z.enum(CARD_CONDITIONS).default('NEAR_MINT'),
-  language: z.enum(CARD_LANGUAGES).default('FR'),
+  /**
+   * Omise, elle vaut la langue de collection de l'utilisateur. Volontairement sans défaut
+   * ici : un défaut figé rangerait les cartes de tout le monde dans la même langue, et
+   * c'est exactement ce qui mélangeait les collections.
+   */
+  language: z.enum(CARD_LANGUAGES).optional(),
   firstEdition: z.boolean().default(false),
   notes: z.string().max(500).optional(),
 });
@@ -24,7 +30,8 @@ export type UpdateCollectionItemInput = z.infer<typeof updateCollectionItemSchem
 export const importSetSchema = z.object({
   setName: z.string().min(1).max(200),
   copies: z.number().int().min(1).max(10).default(1),
-  language: z.enum(CARD_LANGUAGES).default('FR'),
+  /** Omise, elle vaut la langue de collection de l'utilisateur. */
+  language: z.enum(CARD_LANGUAGES).optional(),
 });
 export type ImportSetInput = z.infer<typeof importSetSchema>;
 
@@ -47,3 +54,40 @@ export const collectionQuerySchema = paginationSchema.extend({
   sort: z.enum(['name', 'quantity', 'value', 'newest', 'rarity']).optional(),
 });
 export type CollectionQueryInput = z.infer<typeof collectionQuerySchema>;
+
+/**
+ * Langue dans laquelle on range sa collection. Indépendante de celle de l'interface : on peut
+ * lire l'app en français et collectionner en anglais.
+ */
+export const collectionLanguageSchema = z.object({
+  language: z.enum(CARD_LANGUAGES),
+  /** Appliquer aussi le choix aux cartes déjà en collection. */
+  normalize: z.boolean().default(false),
+});
+export type CollectionLanguageInput = z.infer<typeof collectionLanguageSchema>;
+
+/** Ce que la normalisation ferait, avant de l'avoir faite. */
+export interface CollectionLanguageReportDto {
+  target: CardLanguage;
+  /** Répartition actuelle, les langues les plus nombreuses d'abord. */
+  byLanguage: { language: CardLanguage; piles: number; copies: number }[];
+  /** Piles qui changeraient de langue. */
+  affected: number;
+  /** Piles qui disparaîtraient, absorbées par une pile devenue identique. */
+  merged: number;
+}
+
+export interface CollectionLanguageResultDto {
+  target: CardLanguage;
+  retagged: number;
+  merged: number;
+}
+
+/** État du réglage, et ce que normaliser vers `report.target` coûterait. */
+export interface CollectionLanguageStateDto {
+  /** Choix explicite, ou `null` tant que personne n'a tranché. */
+  language: CardLanguage | null;
+  /** Celle qui s'applique aujourd'hui : le choix, sinon la langue de la requête. */
+  effective: CardLanguage;
+  report: CollectionLanguageReportDto;
+}

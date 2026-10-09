@@ -89,3 +89,13 @@ export interface CardSetDto {
   /** Nombre de cartes distinctes réellement connues dans ce produit. */
   cardCount: number;
 }
+
+/**
+ * Résolution d'un code imprimé lu par le scanner. Le statut dit où ça a coincé : la lecture
+ * (`INVALID_CODE`), notre catalogue (`UNKNOWN_SET` — on ne connaît pas l'extension), ou le
+ * numéro lui-même (`UNKNOWN_NUMBER` — l'extension est là, pas cette carte). Sans cette
+ * distinction, un catalogue en retard et un code mal lu donnent le même « introuvable ».
+ */
+export type PrintLookupDto =
+  | { status: 'FOUND'; code: string; card: CardDetailDto; imported?: string | null }
+  | { status: 'INVALID_CODE' | 'UNKNOWN_SET' | 'UNKNOWN_NUMBER'; code: string; imported?: string | null };
