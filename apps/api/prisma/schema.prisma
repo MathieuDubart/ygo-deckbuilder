@@ -392,13 +392,18 @@ model Deck {
   description String?
   format      DeckFormat @default(TCG)
   isPublic    Boolean    @default(false)
+  /// Liste officielle dont ce deck a été monté, le cas échéant. L'unicité par utilisateur
+  /// est ce qui rend le montage rejouable : l'import et le rattrapage visent la même ligne.
+  productDeckId String?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productDeck   ProductDeck?   @relation(fields: [productDeckId], references: [id], onDelete: SetNull)
   cards         DeckCard[]
   wishlistItems WishlistItem[]
 
+  @@unique([userId, productDeckId])
   @@index([userId])
 }
 
@@ -610,6 +615,7 @@ model ProductDeck {
 
   set   CardSet           @relation(fields: [setId], references: [id], onDelete: Cascade)
   cards ProductDeckCard[]
+  decks Deck[]
 
   @@index([setId])
 }
