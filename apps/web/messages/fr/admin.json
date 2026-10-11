@@ -1,0 +1,77 @@
+{
+  "title": "Administration",
+  "description": "Qui a un compte, si les synchros tournent, comment va le serveur.",
+  "tabs": {
+    "label": "Section",
+    "users": "Comptes",
+    "syncs": "Synchros",
+    "instance": "Instance"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "USER": "Membre"
+  },
+  "users": {
+    "search": "Chercher un pseudo ou un email…",
+    "role": "Rôle",
+    "allRoles": "Tous les rôles",
+    "sorts": {
+      "recent": "Inscription",
+      "name": "Nom",
+      "cards": "Cartes",
+      "decks": "Decks"
+    },
+    "none": "Aucun compte ne correspond",
+    "noneHint": "Enlève un filtre et réessaie.",
+    "copies": "cartes",
+    "decks": "decks",
+    "products": "produits",
+    "joined": "Inscrit le {date}",
+    "lastSeen": "Vu le {date}",
+    "neverSeen": "Jamais connecté",
+    "fromEnv": "ADMIN_EMAIL",
+    "promote": "Passer admin",
+    "demote": "Retirer admin",
+    "promoted": "{name} est maintenant administrateur",
+    "demoted": "{name} n’est plus administrateur",
+    "cannotDemoteSelf": "Tu ne peux pas retirer ton propre rôle d’administrateur.",
+    "cannotDemoteEnv": "Ce compte est celui d’ADMIN_EMAIL : il reprendrait le rôle à sa prochaine connexion."
+  },
+  "syncs": {
+    "none": "Aucune synchro enregistrée",
+    "run": "Lancer",
+    "runHint": "Peut prendre plusieurs minutes : le résultat n’arrive qu’à la fin.",
+    "done": "{id} terminée",
+    "failed": "En échec",
+    "never": "Jamais lancée",
+    "lastRun": "Dernière fois le {date}",
+    "neverHint": "N’a jamais tourné sur cette instance",
+    "count": "{count} entrées"
+  },
+  "counts": {
+    "users": "Comptes",
+    "decks": "Decks",
+    "copies": "Cartes possédées",
+    "products": "Produits",
+    "cards": "Catalogue",
+    "prints": "Impressions",
+    "sets": "Extensions",
+    "uploads": "Images"
+  },
+  "health": {
+    "database": "Base joignable",
+    "uploads": "Dossier d’images accessible en écriture",
+    "duel": "Données du duel",
+    "duelData": {
+      "READY": "Téléchargées",
+      "MISSING": "Absentes",
+      "DISABLED": "Simulateur désactivé"
+    },
+    "node": "Node",
+    "uptime": "En ligne depuis"
+  },
+  "denied": {
+    "title": "Réservé à l’administrateur de l’instance",
+    "hint": "Ton compte n’a pas accès à cette page."
+  }
+}

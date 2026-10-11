@@ -1,0 +1,77 @@
+{
+  "title": "Administração",
+  "description": "Quem tem conta, se as sincronizações correm, como está o servidor.",
+  "tabs": {
+    "label": "Secção",
+    "users": "Contas",
+    "syncs": "Sincronizações",
+    "instance": "Instância"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "USER": "Membro"
+  },
+  "users": {
+    "search": "Procurar um nome de utilizador ou email…",
+    "role": "Papel",
+    "allRoles": "Todos os papéis",
+    "sorts": {
+      "recent": "Registo",
+      "name": "Nome",
+      "cards": "Cartas",
+      "decks": "Decks"
+    },
+    "none": "Nenhuma conta corresponde",
+    "noneHint": "Tira um filtro e tenta de novo.",
+    "copies": "cartas",
+    "decks": "decks",
+    "products": "produtos",
+    "joined": "Registado em {date}",
+    "lastSeen": "Visto em {date}",
+    "neverSeen": "Nunca entrou",
+    "fromEnv": "ADMIN_EMAIL",
+    "promote": "Tornar admin",
+    "demote": "Retirar admin",
+    "promoted": "{name} é agora administrador",
+    "demoted": "{name} já não é administrador",
+    "cannotDemoteSelf": "Não podes retirar o teu próprio papel de administrador.",
+    "cannotDemoteEnv": "Esta conta é a de ADMIN_EMAIL: retomaria o papel no próximo início de sessão."
+  },
+  "syncs": {
+    "none": "Nenhuma sincronização registada",
+    "run": "Executar",
+    "runHint": "Pode demorar vários minutos: o resultado só chega no fim.",
+    "done": "{id} concluída",
+    "failed": "Falhou",
+    "never": "Nunca executada",
+    "lastRun": "Última vez em {date}",
+    "neverHint": "Nunca correu nesta instância",
+    "count": "{count} entradas"
+  },
+  "counts": {
+    "users": "Contas",
+    "decks": "Decks",
+    "copies": "Cartas possuídas",
+    "products": "Produtos",
+    "cards": "Catálogo",
+    "prints": "Impressões",
+    "sets": "Edições",
+    "uploads": "Imagens"
+  },
+  "health": {
+    "database": "Base de dados acessível",
+    "uploads": "Pasta de imagens gravável",
+    "duel": "Dados do duelo",
+    "duelData": {
+      "READY": "Transferidos",
+      "MISSING": "Ausentes",
+      "DISABLED": "Simulador desligado"
+    },
+    "node": "Node",
+    "uptime": "Online há"
+  },
+  "denied": {
+    "title": "Reservado ao administrador da instância",
+    "hint": "A tua conta não tem acesso a esta página."
+  }
+}

@@ -91,6 +91,25 @@ export class AuthService {
     user: UserRow,
     userAgent?: string,
   ): Promise<{ user: PublicUser; tokens: IssuedTokens }> {
-    return { user: toPublicUser(user), tokens: await this.tokens.issue(user, userAgent) };
+    const current = await this.ensureAdmin(user);
+    return { user: toPublicUser(current), tokens: await this.tokens.issue(current, userAgent) };
+  }
+
+  /**
+   * `ADMIN_EMAIL` donne le rôle à CHAQUE ouverture de session, pas seulement à l'inscription.
+   *
+   * Sans ça, définir la variable après coup — le cas normal sur une instance qu'on vient de
+   * monter, et celui de toutes les installations existantes — laisse le seul compte du
+   * serveur sans accès à son propre panneau, sans que rien ne l'explique.
+   *
+   * On ne rétrograde jamais ici : une promotion faite à la main dans le panneau doit
+   * survivre, et retirer un rôle est une décision, pas un effet de bord d'un redémarrage
+   * avec une variable différente.
+   */
+  private async ensureAdmin(user: UserRow): Promise<UserRow> {
+    const admin = this.config.get('ADMIN_EMAIL');
+    if (!admin || user.email !== admin || user.role === 'ADMIN') return user;
+    await this.prisma.user.update({ where: { id: user.id }, data: { role: 'ADMIN' } });
+    return { ...user, role: 'ADMIN' };
   }
 }

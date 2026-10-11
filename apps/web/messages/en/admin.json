@@ -1,0 +1,77 @@
+{
+  "title": "Administration",
+  "description": "Who has an account, whether the syncs run, how the server is doing.",
+  "tabs": {
+    "label": "Section",
+    "users": "Accounts",
+    "syncs": "Syncs",
+    "instance": "Instance"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "USER": "Member"
+  },
+  "users": {
+    "search": "Search a username or an email…",
+    "role": "Role",
+    "allRoles": "All roles",
+    "sorts": {
+      "recent": "Newest",
+      "name": "Name",
+      "cards": "Cards",
+      "decks": "Decks"
+    },
+    "none": "No account matches",
+    "noneHint": "Drop a filter and try again.",
+    "copies": "cards",
+    "decks": "decks",
+    "products": "products",
+    "joined": "Joined {date}",
+    "lastSeen": "Seen {date}",
+    "neverSeen": "Never signed in",
+    "fromEnv": "ADMIN_EMAIL",
+    "promote": "Make admin",
+    "demote": "Remove admin",
+    "promoted": "{name} is now an admin",
+    "demoted": "{name} is no longer an admin",
+    "cannotDemoteSelf": "You cannot remove your own admin role.",
+    "cannotDemoteEnv": "This account is the one set in ADMIN_EMAIL: it would take the role back on its next sign-in."
+  },
+  "syncs": {
+    "none": "No sync recorded yet",
+    "run": "Run",
+    "runHint": "Can take several minutes: the result only comes back at the end.",
+    "done": "{id} finished",
+    "failed": "Failed",
+    "never": "Never run",
+    "lastRun": "Last run {date}",
+    "neverHint": "Has never run on this instance",
+    "count": "{count} entries"
+  },
+  "counts": {
+    "users": "Accounts",
+    "decks": "Decks",
+    "copies": "Cards owned",
+    "products": "Products",
+    "cards": "Catalogue",
+    "prints": "Prints",
+    "sets": "Sets",
+    "uploads": "Images"
+  },
+  "health": {
+    "database": "Database reachable",
+    "uploads": "Image folder writable",
+    "duel": "Duel data",
+    "duelData": {
+      "READY": "Downloaded",
+      "MISSING": "Missing",
+      "DISABLED": "Simulator off"
+    },
+    "node": "Node",
+    "uptime": "Uptime"
+  },
+  "denied": {
+    "title": "Reserved for the instance administrator",
+    "hint": "Your account does not have access to this page."
+  }
+}

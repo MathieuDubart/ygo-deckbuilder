@@ -103,7 +103,7 @@ pnpm cards:sync                              # ~13,000 cards in 5 languages, a f
 pnpm dev                                     # web :3000, api :4000
 ```
 
-Put your email in `ADMIN_EMAIL` before creating your account to get the admin role.
+Put your email in `ADMIN_EMAIL` to get the admin role: the account matching it is promoted at every sign-in, so you can set the variable after signing up and just log in again. The admin panel lives at `/admin` and is only linked for admin accounts.
 
 ## Deploying (VPS / self-hosting)
 
@@ -128,7 +128,7 @@ repository's *Packages* tab.
 
 In Coolify: **+ New → Docker Compose**, paste [`docker-compose.coolify.yml`](docker-compose.coolify.yml),
 deploy. Coolify generates the domain (service `web`, port 3000), the Postgres password and the JWT
-secret; the only variable worth setting is `ADMIN_EMAIL` (that account becomes admin when it signs up).
+secret; the only variable worth setting is `ADMIN_EMAIL` (that account becomes admin at its next sign-in).
 Only the web service is reachable: the API and the database stay on the internal network. It is also
 published on host port 3089 (`WEB_PORT` to change it) for hosts that front it with their own reverse
 proxy. The catalog syncs itself on first start, and the duel engine downloads its data into the

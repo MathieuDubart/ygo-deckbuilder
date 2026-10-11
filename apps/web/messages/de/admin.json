@@ -1,0 +1,77 @@
+{
+  "title": "Verwaltung",
+  "description": "Wer ein Konto hat, ob die Synchronisierungen laufen, wie es dem Server geht.",
+  "tabs": {
+    "label": "Bereich",
+    "users": "Konten",
+    "syncs": "Synchros",
+    "instance": "Instanz"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "USER": "Mitglied"
+  },
+  "users": {
+    "search": "Benutzernamen oder E-Mail suchen…",
+    "role": "Rolle",
+    "allRoles": "Alle Rollen",
+    "sorts": {
+      "recent": "Registrierung",
+      "name": "Name",
+      "cards": "Karten",
+      "decks": "Decks"
+    },
+    "none": "Kein Konto passt",
+    "noneHint": "Nimm einen Filter weg und versuch es nochmal.",
+    "copies": "Karten",
+    "decks": "Decks",
+    "products": "Produkte",
+    "joined": "Dabei seit {date}",
+    "lastSeen": "Gesehen am {date}",
+    "neverSeen": "Nie angemeldet",
+    "fromEnv": "ADMIN_EMAIL",
+    "promote": "Zum Admin machen",
+    "demote": "Admin entziehen",
+    "promoted": "{name} ist jetzt Administrator",
+    "demoted": "{name} ist kein Administrator mehr",
+    "cannotDemoteSelf": "Du kannst dir deine eigene Administratorrolle nicht entziehen.",
+    "cannotDemoteEnv": "Dieses Konto ist das aus ADMIN_EMAIL: es würde die Rolle bei der nächsten Anmeldung zurückbekommen."
+  },
+  "syncs": {
+    "none": "Noch keine Synchronisierung erfasst",
+    "run": "Starten",
+    "runHint": "Kann mehrere Minuten dauern: das Ergebnis kommt erst am Ende.",
+    "done": "{id} abgeschlossen",
+    "failed": "Fehlgeschlagen",
+    "never": "Nie gelaufen",
+    "lastRun": "Zuletzt am {date}",
+    "neverHint": "Ist auf dieser Instanz nie gelaufen",
+    "count": "{count} Einträge"
+  },
+  "counts": {
+    "users": "Konten",
+    "decks": "Decks",
+    "copies": "Karten im Besitz",
+    "products": "Produkte",
+    "cards": "Katalog",
+    "prints": "Drucke",
+    "sets": "Editionen",
+    "uploads": "Bilder"
+  },
+  "health": {
+    "database": "Datenbank erreichbar",
+    "uploads": "Bildordner beschreibbar",
+    "duel": "Duell-Daten",
+    "duelData": {
+      "READY": "Heruntergeladen",
+      "MISSING": "Fehlen",
+      "DISABLED": "Simulator aus"
+    },
+    "node": "Node",
+    "uptime": "Online seit"
+  },
+  "denied": {
+    "title": "Dem Administrator der Instanz vorbehalten",
+    "hint": "Dein Konto hat keinen Zugriff auf diese Seite."
+  }
+}

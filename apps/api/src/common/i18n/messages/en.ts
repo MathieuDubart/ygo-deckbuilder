@@ -23,6 +23,9 @@ export const en = {
   },
 
   errors: {
+    cannotDemoteSelf: 'You cannot remove your own admin role.',
+    cannotDemoteEnvAdmin: 'This account is the one set in ADMIN_EMAIL: it would take the role back on its next sign-in.',
+    unknownSync: 'Unknown sync: {id}',
     imageUnreadable: 'Unreadable image file',
     userNotFound: 'No account with this username',
     cannotFriendSelf: 'You cannot add yourself',
