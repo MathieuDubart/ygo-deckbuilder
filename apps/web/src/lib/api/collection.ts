@@ -15,6 +15,7 @@ import type {
   OwnedProductDto,
   OwnedProductsQueryInput,
   Paginated,
+  RebuildProductDecksResultDto,
   UpdateCollectionItemInput,
 } from '@ygo/shared';
 import { api } from './client';
@@ -143,6 +144,27 @@ export function useRemoveProduct() {
     onSuccess: (_, { id }) => {
       qc.removeQueries({ queryKey: qk.product(id) });
       return invalidate();
+    },
+  });
+}
+
+/**
+ * Repose les decks officiels du produit. Invalide les decks ET la fiche du produit : c'est
+ * elle qui dit lesquels sont déjà montés, et la réponse la rend fausse.
+ */
+export function useRebuildProductDecks() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, force = false }: { id: string; force?: boolean }) =>
+      api<RebuildProductDecksResultDto>(`/collection/products/${id}/decks`, {
+        method: 'POST',
+        body: { force },
+      }),
+    onSuccess: async (_, { id }) => {
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: qk.product(id) }),
+        qc.invalidateQueries({ queryKey: qk.decks }),
+      ]);
     },
   });
 }

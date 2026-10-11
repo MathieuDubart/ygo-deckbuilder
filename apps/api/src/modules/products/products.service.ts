@@ -8,6 +8,7 @@ import type {
   OwnedProductDetailDto,
   OwnedProductDto,
   OwnedProductsQueryInput,
+  RebuildProductDecksResultDto,
 } from '@ygo/shared';
 import { SET_DTO_COLUMNS } from '../../common/catalog/product-sql';
 import { cardSummarySelect, toCardSummary } from '../../common/mappers/card.mapper';
@@ -174,9 +175,10 @@ export class ProductsService {
     if (!set) throw new NotFoundException(t('errors.productNotFound'));
 
     const ids = cards.map((c) => c.cardId);
-    const [rows, owned] = await Promise.all([
+    const [rows, owned, officialDecks] = await Promise.all([
       this.prisma.card.findMany({ where: { id: { in: ids } }, select: cardSummarySelect }),
       this.ownership.quantities(userId, ids),
+      this.decks.official(userId, product.setId),
     ]);
     const byId = new Map(rows.map((r) => [r.id, r]));
 
@@ -196,7 +198,22 @@ export class ProductsService {
         },
       ];
     });
-    return { ...this.summary(product, set, cards, owned), cards: list };
+    return { ...this.summary(product, set, cards, owned), cards: list, officialDecks };
+  }
+
+  /**
+   * Remonte les decks officiels du produit. Supprimer un deck est définitif et c'est très
+   * bien ainsi ; mais un deck de produit n'est que le résultat d'un calcul sur une liste
+   * connue, donc le reposer ne coûte rien et évite de devoir retirer puis réimporter le
+   * produit pour le retrouver.
+   */
+  async rebuildDecks(
+    userId: string,
+    id: string,
+    force: boolean,
+  ): Promise<RebuildProductDecksResultDto> {
+    const product = await this.find(userId, id);
+    return this.decks.rebuild(userId, product.setId, force);
   }
 
   /** Retire le produit ; en option, retire aussi de la collection les exemplaires qu'il avait apportés. */

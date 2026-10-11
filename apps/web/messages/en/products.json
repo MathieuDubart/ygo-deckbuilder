@@ -42,6 +42,16 @@
       "confirmRemove": "Remove “{name}” from your products?",
       "removeCardsToo": "Also remove its {count, plural, one {# card} other {# cards}} from my collection (otherwise they stay, only the product disappears from the list)"
     },
+    "officialDecks": {
+      "title": "Decks from this product",
+      "hint": "Sold complete: its list is the deck.",
+      "hintTripled": "A structure deck is built in its three-box version.",
+      "deleted": "Not in your decks",
+      "rebuildMissing": "{count, plural, one {Rebuild the deck} other {Rebuild the # decks}}",
+      "rebuildAll": "Rebuild from scratch",
+      "confirmForce": "{count, plural, one {Rebuild this deck} other {Rebuild these # decks}} from the official list? Any card you added or removed yourself will be lost — the name and the notes stay.",
+      "done": "{count, plural, one {# deck rebuilt} other {# decks rebuilt}}."
+    },
     "content": {
       "forCopies": "Quantities for {count} products.",
       "all": "The product’s full contents, with what you still have.",

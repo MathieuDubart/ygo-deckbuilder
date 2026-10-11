@@ -2,9 +2,11 @@ import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query } from '@ne
 import {
   importSetSchema,
   ownedProductsQuerySchema,
+  rebuildProductDecksSchema,
   removeProductSchema,
   type ImportSetInput,
   type OwnedProductsQueryInput,
+  type RebuildProductDecksInput,
   type RemoveProductInput,
 } from '@ygo/shared';
 import { CurrentUser, type AuthUser } from '../../common/decorators/current-user.decorator';
@@ -36,6 +38,16 @@ export class ProductsController {
   @Get('products/:id')
   detail(@CurrentUser() user: AuthUser, @Param('id') id: string) {
     return this.products.detail(user.id, id);
+  }
+
+  /** Repose les decks officiels du produit — celui qu'on a supprimé par erreur revient. */
+  @Post('products/:id/decks')
+  rebuildDecks(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body(new ZodValidationPipe(rebuildProductDecksSchema)) body: RebuildProductDecksInput,
+  ) {
+    return this.products.rebuildDecks(user.id, id, body.force);
   }
 
   @Delete('products/:id')

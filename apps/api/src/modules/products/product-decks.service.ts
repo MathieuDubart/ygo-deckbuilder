@@ -1,5 +1,9 @@
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
-import type { ProductKind } from '@ygo/shared';
+import type {
+  ProductKind,
+  ProductOfficialDeckDto,
+  RebuildProductDecksResultDto,
+} from '@ygo/shared';
 import { PRODUCT_KIND } from '../../common/catalog/product-sql';
 import { t } from '../../common/i18n/locale-context';
 import { PrismaService } from '../../common/prisma/prisma.service';
@@ -106,14 +110,7 @@ export class ProductDecksService implements OnApplicationBootstrap {
    */
   async createFromSet(userId: string, setId: string): Promise<CreatedProductDeck[]> {
     const copies = copiesFor(await this.kindOf(setId));
-    const lists = await this.prisma.productDeck.findMany({
-      where: { setId },
-      orderBy: { position: 'asc' },
-      include: {
-        set: { select: { name: true } },
-        cards: { include: { card: { select: { isExtraDeck: true, banTcg: true, category: true } } } },
-      },
-    });
+    const lists = await this.listsOf(setId);
     if (!lists.length) return [];
 
     // Une liste déjà montée ne l'est pas deux fois : l'import, le rattrapage au démarrage et
@@ -138,6 +135,75 @@ export class ProductDecksService implements OnApplicationBootstrap {
       if (deck) created.push(deck);
     }
     return created;
+  }
+
+  /**
+   * Les decks officiels du produit, avec celui de « Mes decks » qui les porte s'il existe.
+   * C'est ce qui permet à la fiche du produit de dire « déjà monté » ou « à remonter » sans
+   * rejouer l'assembleur pour le savoir.
+   *
+   * Un deck monté avant l'existence de `productDeckId` n'est pas reconnu ici — il le sera
+   * dès qu'on appuie sur le bouton, qui l'adopte au lieu d'en poser un second.
+   */
+  async official(userId: string, setId: string): Promise<ProductOfficialDeckDto[]> {
+    const lists = await this.prisma.productDeck.findMany({
+      where: { setId },
+      orderBy: { position: 'asc' },
+      select: { id: true, name: true, set: { select: { name: true } } },
+    });
+    if (!lists.length) return [];
+
+    const copies = copiesFor(await this.kindOf(setId));
+    const decks = await this.prisma.deck.findMany({
+      where: { userId, productDeckId: { in: lists.map((l) => l.id) } },
+      select: { id: true, productDeckId: true },
+    });
+    const byList = new Map(
+      decks.flatMap((d) => (d.productDeckId ? [[d.productDeckId, d.id] as const] : [])),
+    );
+    return lists.map((list) => ({
+      listId: list.id,
+      name: this.name(list, copies),
+      copies,
+      deckId: byList.get(list.id) ?? null,
+    }));
+  }
+
+  /**
+   * Remonte les decks officiels du produit. Sans `force`, ne repose que ceux qui manquent :
+   * c'est le cas qui compte, celui du deck supprimé par erreur. Avec `force`, le contenu des
+   * decks encore présents est remplacé par celui que l'assembleur produit aujourd'hui —
+   * mais leur nom et leur description sont laissés tels quels : un deck qu'on a renommé ou
+   * annoté reste le sien, on ne lui remplace que la liste de cartes qu'on a demandé à revoir.
+   */
+  async rebuild(
+    userId: string,
+    setId: string,
+    force: boolean,
+  ): Promise<RebuildProductDecksResultDto> {
+    const created = await this.createFromSet(userId, setId);
+    if (!force) return { created, rebuilt: [] };
+
+    const fresh = new Set(created.map((d) => d.id));
+    const copies = copiesFor(await this.kindOf(setId));
+    const rebuilt: CreatedProductDeck[] = [];
+    for (const list of await this.listsOf(setId)) {
+      const deck = await this.prisma.deck.findFirst({
+        where: { userId, productDeckId: list.id },
+        select: { id: true, name: true },
+      });
+      // Un deck que l'appel vient de poser est déjà à neuf : le remonter serait du bruit.
+      if (!deck || fresh.has(deck.id)) continue;
+      const built = await this.build(list, copies);
+      if (!built) continue;
+      await this.prisma.$transaction([
+        this.prisma.deckCard.deleteMany({ where: { deckId: deck.id } }),
+        this.prisma.deck.update({ where: { id: deck.id }, data: { cards: { create: built } } }),
+      ]);
+      this.logger.log(`Deck « ${deck.name} » remonté depuis ${list.set.name}`);
+      rebuilt.push({ id: deck.id, name: deck.name });
+    }
+    return { created, rebuilt };
   }
 
   /**
@@ -178,7 +244,7 @@ export class ProductDecksService implements OnApplicationBootstrap {
         where: { id: deck.id },
         data: {
           name: wanted,
-          description: t('products.deckFromProduct', { name: list.set.name }),
+          description: this.description(list, copies),
           cards: { create: built },
         },
       }),
@@ -229,7 +295,7 @@ export class ProductDecksService implements OnApplicationBootstrap {
         userId,
         productDeckId: list.id,
         name,
-        description: t('products.deckFromProduct', { name: list.set.name }),
+        description: this.description(list, copies),
         cards: { create: built },
       },
       select: { id: true },
@@ -286,6 +352,17 @@ export class ProductDecksService implements OnApplicationBootstrap {
     return copies > 1 ? t('products.deckName', { name: base, copies }) : base;
   }
 
+  /**
+   * Description du deck. Elle ne parle de plusieurs boîtes que s'il en a fallu plusieurs :
+   * un coffret vendu complet est monté tel quel, et annoncer « trois boîtes » sur sa fiche
+   * serait faux.
+   */
+  private description(list: { set: { name: string } }, copies: number): string {
+    return copies > 1
+      ? t('products.deckFromProductCopies', { name: list.set.name, copies })
+      : t('products.deckFromProduct', { name: list.set.name });
+  }
+
   /** Taux de jeu en tournoi, pour départager deux cartes à égalité d'exemplaires. */
   private async deckShares(cardIds: number[]): Promise<Map<number, number>> {
     const stats = await this.prisma.cardMetaStat.findMany({
@@ -295,10 +372,11 @@ export class ProductDecksService implements OnApplicationBootstrap {
     return new Map(stats.map((s) => [s.cardId, s.deckShare]));
   }
 
-  /** Signature de la requête ci-dessus, pour typer `createOne` sans la dupliquer. */
+  /** Les listes officielles du produit, dans l'ordre de la boîte. */
   private listsOf(setId: string) {
     return this.prisma.productDeck.findMany({
       where: { setId },
+      orderBy: { position: 'asc' },
       include: {
         set: { select: { name: true } },
         cards: { include: { card: { select: { isExtraDeck: true, banTcg: true, category: true } } } },

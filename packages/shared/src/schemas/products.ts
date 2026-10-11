@@ -60,8 +60,43 @@ export interface OwnedProductCardDto {
   zone: 'MAIN' | 'EXTRA';
 }
 
+/**
+ * Un deck officiel du produit, et son état dans « Mes decks ».
+ *
+ * `deckId` est la seule chose qui distingue « pas encore monté » de « déjà là » : un deck
+ * supprimé par erreur repasse à null, et le bouton de remontage retrouve alors son utilité.
+ */
+export interface ProductOfficialDeckDto {
+  /** Identifiant de la liste officielle, pas du deck. */
+  listId: string;
+  /** Nom du deck tel que l'assembleur le pose, dans la langue de la requête. */
+  name: string;
+  /** Boîtes dont la liste est montée : 3 pour un structure deck, 1 pour tout le reste. */
+  copies: number;
+  /** Le deck dans « Mes decks », s'il y est encore. */
+  deckId: string | null;
+}
+
 export interface OwnedProductDetailDto extends OwnedProductDto {
   cards: OwnedProductCardDto[];
+  /** Les decks officiels de ce produit. Vide si aucune liste n'est connue (un booster). */
+  officialDecks: ProductOfficialDeckDto[];
+}
+
+export const rebuildProductDecksSchema = z.object({
+  /**
+   * Remonter aussi les decks encore présents : leur contenu est remplacé par celui que
+   * l'assembleur produit aujourd'hui. Sans ça, seuls les decks manquants sont reposés.
+   */
+  force: z.boolean().default(false),
+});
+export type RebuildProductDecksInput = z.infer<typeof rebuildProductDecksSchema>;
+
+export interface RebuildProductDecksResultDto {
+  /** Decks reposés dans « Mes decks ». */
+  created: { id: string; name: string }[];
+  /** Decks déjà présents dont le contenu a été remplacé. */
+  rebuilt: { id: string; name: string }[];
 }
 
 export interface ImportSetResultDto {

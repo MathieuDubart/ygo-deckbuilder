@@ -42,6 +42,16 @@
       "confirmRemove": "Retirer « {name} » de tes produits ?",
       "removeCardsToo": "Retirer aussi ses {count, plural, one {# carte} other {# cartes}} de ma collection (sinon elles restent, seul le produit disparaît de la liste)"
     },
+    "officialDecks": {
+      "title": "Decks de ce produit",
+      "hint": "Vendu complet : sa liste est le deck.",
+      "hintTripled": "Un structure deck est monté dans sa version à trois boîtes.",
+      "deleted": "Absent de tes decks",
+      "rebuildMissing": "{count, plural, one {Remonter le deck} other {Remonter les # decks}}",
+      "rebuildAll": "Remonter à neuf",
+      "confirmForce": "{count, plural, one {Remonter ce deck} other {Remonter ces # decks}} depuis la liste officielle ? Les cartes que tu as ajoutées ou retirées toi-même seront perdues — le nom et les notes restent.",
+      "done": "{count, plural, one {# deck remonté} other {# decks remontés}}."
+    },
     "content": {
       "forCopies": "Quantités pour {count} produits.",
       "all": "Tout le contenu du produit, avec ce que tu as encore.",
