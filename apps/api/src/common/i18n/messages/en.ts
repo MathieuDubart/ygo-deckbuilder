@@ -8,7 +8,8 @@ export const en = {
 
   products: {
     deckName: '{name} (×{copies})',
-    deckFromProduct: 'Built from {name}, as it is played with three boxes.',
+    deckFromProduct: 'Built from {name}.',
+    deckFromProductCopies: 'Built from {name}, as it is played with {copies} boxes.',
   },
 
   duel: {

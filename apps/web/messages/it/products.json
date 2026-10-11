@@ -42,6 +42,16 @@
       "confirmRemove": "Togliere «{name}» dai tuoi prodotti?",
       "removeCardsToo": "Togli anche le sue {count, plural, one {# carta} other {# carte}} dalla mia collezione (altrimenti restano, sparisce solo il prodotto dalla lista)"
     },
+    "officialDecks": {
+      "title": "Deck di questo prodotto",
+      "hint": "Venduto completo: la sua lista è il deck.",
+      "hintTripled": "Uno structure deck è montato nella versione a tre scatole.",
+      "deleted": "Assente dai tuoi deck",
+      "rebuildMissing": "{count, plural, one {Rimonta il deck} other {Rimonta i # deck}}",
+      "rebuildAll": "Rimonta da zero",
+      "confirmForce": "{count, plural, one {Rimontare questo deck} other {Rimontare questi # deck}} dalla lista ufficiale? Le carte che hai aggiunto o tolto tu andranno perse — il nome e le note restano.",
+      "done": "{count, plural, one {# deck rimontato} other {# deck rimontati}}."
+    },
     "content": {
       "forCopies": "Quantità per {count} prodotti.",
       "all": "Il contenuto completo del prodotto, con quello che hai ancora.",

@@ -42,6 +42,16 @@
       "confirmRemove": "„{name}“ aus deinen Produkten entfernen?",
       "removeCardsToo": "Auch die {count, plural, one {# Karte} other {# Karten}} aus meiner Sammlung entfernen (sonst bleiben sie, nur das Produkt verschwindet aus der Liste)"
     },
+    "officialDecks": {
+      "title": "Decks aus diesem Produkt",
+      "hint": "Komplett verkauft: seine Liste ist das Deck.",
+      "hintTripled": "Ein Structure Deck wird in der Drei-Boxen-Variante gebaut.",
+      "deleted": "Nicht in deinen Decks",
+      "rebuildMissing": "{count, plural, one {Deck neu bauen} other {# Decks neu bauen}}",
+      "rebuildAll": "Von Grund auf neu bauen",
+      "confirmForce": "{count, plural, one {Dieses Deck} other {Diese # Decks}} aus der offiziellen Liste neu bauen? Karten, die du selbst hinzugefügt oder entfernt hast, gehen verloren – Name und Notizen bleiben.",
+      "done": "{count, plural, one {# Deck neu gebaut} other {# Decks neu gebaut}}."
+    },
     "content": {
       "forCopies": "Mengen für {count} Produkte.",
       "all": "Der komplette Inhalt des Produkts, mit dem, was du noch hast.",

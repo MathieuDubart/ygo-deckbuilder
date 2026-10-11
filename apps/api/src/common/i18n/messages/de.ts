@@ -6,7 +6,8 @@ export const de: DeepPartialMessages = {
 
   products: {
     deckName: '{name} (×{copies})',
-    deckFromProduct: 'Aus {name} gebaut, in der Drei-Boxen-Variante.',
+    deckFromProduct: 'Aus {name} gebaut.',
+    deckFromProductCopies: 'Aus {name} gebaut, in der {copies}-Boxen-Variante.',
   },
 
   duel: {

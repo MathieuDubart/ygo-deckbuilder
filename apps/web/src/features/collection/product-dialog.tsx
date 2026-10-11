@@ -1,6 +1,16 @@
 'use client';
 import { maxCopiesFor, type OwnedProductCardDto, type OwnedProductDetailDto } from '@ygo/shared';
-import { BookOpen, Check, ClipboardCopy, ListChecks, Trash2, Wand2 } from 'lucide-react';
+import {
+  BookOpen,
+  Check,
+  CircleDashed,
+  ClipboardCopy,
+  ListChecks,
+  RefreshCw,
+  Trash2,
+  Wand2,
+} from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
@@ -13,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
 import { DeckGuide } from '@/features/guide/deck-guide';
-import { useOwnedProduct, useRemoveProduct } from '@/lib/api/collection';
+import { useOwnedProduct, useRebuildProductDecks, useRemoveProduct } from '@/lib/api/collection';
 import { useCreateDeck } from '@/lib/api/decks';
 import { useTagSet } from '@/lib/api/tags';
 import { useFormat } from '@/lib/format';
@@ -76,6 +86,7 @@ export function ProductDialog({
         ) : (
           <div className="space-y-5">
             <Header product={product} onDone={close} />
+            <OfficialDecks product={product} onDone={close} />
 
             {product.isDeck && (
               <div
@@ -204,7 +215,12 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {p.isDeck && (
+        {/*
+          Une copie de la liste, sans provenance ni montage : seulement pour les produits
+          jouables dont aucune liste officielle n'est connue. Dès qu'il y en a une, c'est
+          `OfficialDecks` qui s'en occupe, et bien mieux.
+        */}
+        {p.isDeck && p.officialDecks.length === 0 && (
           <Button size="sm" onClick={createFromProduct} loading={createDeck.isPending}>
             <Wand2 className="size-4" /> {td('header.createDeck')}
           </Button>
@@ -262,6 +278,118 @@ function Header({ product: p, onDone }: { product: OwnedProductDetailDto; onDone
         </p>
       )}
     </div>
+  );
+}
+
+/**
+ * Les decks officiels du produit, et de quoi les remonter. Supprimer un deck est définitif
+ * partout ailleurs dans l'app ; celui-là n'est que le résultat d'un calcul sur une liste
+ * connue, donc il n'y a aucune raison de faire retirer puis réimporter le produit pour le
+ * récupérer. La fiche dit lesquels sont là, le bouton repose le reste.
+ */
+function OfficialDecks({
+  product: p,
+  onDone,
+}: {
+  product: OwnedProductDetailDto;
+  onDone: () => void;
+}) {
+  const t = useTranslations('products.dialog.officialDecks');
+  const tc = useTranslations('common.actions');
+  const rebuild = useRebuildProductDecks();
+  const [confirmForce, setConfirmForce] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState(0);
+
+  if (p.officialDecks.length === 0) return null;
+  const missing = p.officialDecks.filter((d) => !d.deckId).length;
+  const tripled = p.officialDecks.some((d) => d.copies > 1);
+
+  function run(force: boolean) {
+    setError(null);
+    rebuild.mutate(
+      { id: p.id, force },
+      {
+        onSuccess: (r) => {
+          setConfirmForce(false);
+          setDone(r.created.length + r.rebuilt.length);
+        },
+        onError: (e) => setError(e.message),
+      },
+    );
+  }
+
+  return (
+    <section className="space-y-3 rounded-xl border border-border bg-bg-sunken/40 p-3">
+      {/* Le repère passe sous le titre quand la fiche est étroite, plutôt que de s'y écraser */}
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h3 className="text-sm font-semibold">{t('title')}</h3>
+        <p className="text-xs text-fg-subtle">{tripled ? t('hintTripled') : t('hint')}</p>
+      </div>
+
+      <ul className="space-y-1.5">
+        {p.officialDecks.map((deck) => (
+          <li key={deck.listId} className="flex items-center gap-2 text-sm">
+            {deck.deckId ? (
+              <Check className="size-4 shrink-0 text-success" />
+            ) : (
+              <CircleDashed className="size-4 shrink-0 text-fg-subtle" />
+            )}
+            {deck.deckId ? (
+              <Link
+                href={`/decks/${deck.deckId}`}
+                onClick={onDone}
+                className="min-w-0 flex-1 truncate hover:underline"
+              >
+                {deck.name}
+              </Link>
+            ) : (
+              <span className="min-w-0 flex-1 truncate text-fg-muted">{deck.name}</span>
+            )}
+            {!deck.deckId && (
+              <Badge tone="warning" className="shrink-0">
+                {t('deleted')}
+              </Badge>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {confirmForce ? (
+        <div className="space-y-3 rounded-lg border border-warning/30 bg-warning/5 p-3 text-sm">
+          <p>{t('confirmForce', { count: p.officialDecks.length })}</p>
+          <div className="flex gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setConfirmForce(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button size="sm" loading={rebuild.isPending} onClick={() => run(true)}>
+              <RefreshCw className="size-4" /> {t('rebuildAll')}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-2">
+          {missing > 0 ? (
+            <Button size="sm" loading={rebuild.isPending} onClick={() => run(false)}>
+              <RefreshCw className="size-4" /> {t('rebuildMissing', { count: missing })}
+            </Button>
+          ) : (
+            <Button size="sm" variant="secondary" onClick={() => setConfirmForce(true)}>
+              <RefreshCw className="size-4" /> {t('rebuildAll')}
+            </Button>
+          )}
+          {done > 0 && !rebuild.isPending && (
+            <p className="text-xs text-success">{t('done', { count: done })}</p>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="rounded-lg bg-danger/10 px-3 py-2 text-sm text-danger">
+          {error}
+        </p>
+      )}
+    </section>
   );
 }
 
