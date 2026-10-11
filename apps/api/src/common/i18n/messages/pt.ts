@@ -22,6 +22,9 @@ export const pt: DeepPartialMessages = {
   },
 
   errors: {
+    cannotDemoteSelf: 'Não podes retirar o teu próprio papel de administrador.',
+    cannotDemoteEnvAdmin: 'Esta conta é a de ADMIN_EMAIL: retomaria o papel no próximo início de sessão.',
+    unknownSync: 'Sincronização desconhecida: {id}',
     imageUnreadable: 'Ficheiro de imagem ilegível',
     userNotFound: 'Nenhuma conta com este nome de utilizador',
     cannotFriendSelf: 'Não podes adicionar-te a ti mesmo',

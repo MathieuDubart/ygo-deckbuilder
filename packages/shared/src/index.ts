@@ -19,3 +19,4 @@ export * from './schemas/tags';
 export * from './schemas/facets';
 export * from './schemas/releases';
 export * from './schemas/social';
+export * from './schemas/admin';

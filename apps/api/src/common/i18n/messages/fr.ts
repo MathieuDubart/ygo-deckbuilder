@@ -20,6 +20,9 @@ export const fr: DeepPartialMessages = {
   },
 
   errors: {
+    cannotDemoteSelf: 'Tu ne peux pas retirer ton propre rôle d’administrateur.',
+    cannotDemoteEnvAdmin: 'Ce compte est celui d’ADMIN_EMAIL : il reprendrait le rôle à sa prochaine connexion.',
+    unknownSync: 'Synchro inconnue : {id}',
     imageUnreadable: 'Fichier image illisible',
     userNotFound: 'Aucun compte avec ce pseudo',
     cannotFriendSelf: 'Tu ne peux pas t’ajouter toi-même',

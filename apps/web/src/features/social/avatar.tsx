@@ -16,7 +16,9 @@ export function Avatar({
   size = 'sm',
   className,
 }: {
-  user: PublicUserDto;
+  // Le pseudo et l'image suffisent : tout objet qui décrit un compte peut avoir un avatar,
+  // y compris la ligne du panneau d'administration, qui ne porte pas de bannière.
+  user: Pick<PublicUserDto, 'username' | 'avatarUrl'>;
   size?: keyof typeof SIZES;
   className?: string;
 }) {

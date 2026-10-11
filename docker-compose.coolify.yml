@@ -2,7 +2,8 @@
 #
 #   Coolify → + New → Docker Compose → colle ce fichier → Deploy.
 #   Coolify génère le domaine (service `web`), le mot de passe Postgres et le secret JWT.
-#   Variables à renseigner côté Coolify : ADMIN_EMAIL (ton compte devient admin à l'inscription).
+#   Variables à renseigner côté Coolify : ADMIN_EMAIL (ce compte devient admin à sa prochaine
+#   connexion, même s'il existait déjà) et ouvre le panneau /admin.
 #
 # Pas de port publié : le proxy de Coolify sert le service `web` sur le domaine généré,
 # l'API et la base restent sur le réseau interne.

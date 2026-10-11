@@ -11,7 +11,8 @@
     "duel": "Duell",
     "rules": "Regeln",
     "friends": "Freunde",
-    "profile": "Profil"
+    "profile": "Profil",
+    "admin": "Admin"
   },
   "logout": "Abmelden",
   "pages": {
@@ -26,6 +27,7 @@
     "duel": "Duell-Simulator",
     "rules": "Regeln",
     "friends": "Freunde",
-    "profile": "Profil"
+    "profile": "Profil",
+    "admin": "Verwaltung"
   }
 }

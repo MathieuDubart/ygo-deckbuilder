@@ -21,6 +21,9 @@ export const de: DeepPartialMessages = {
   },
 
   errors: {
+    cannotDemoteSelf: 'Du kannst dir deine eigene Administratorrolle nicht entziehen.',
+    cannotDemoteEnvAdmin: 'Dieses Konto ist das aus ADMIN_EMAIL: es würde die Rolle bei der nächsten Anmeldung zurückbekommen.',
+    unknownSync: 'Unbekannte Synchronisierung: {id}',
     imageUnreadable: 'Bilddatei nicht lesbar',
     userNotFound: 'Kein Konto mit diesem Benutzernamen',
     cannotFriendSelf: 'Du kannst dich nicht selbst hinzufügen',

@@ -1,6 +1,7 @@
 'use client';
 import {
   BookOpen,
+  ShieldCheck,
   Heart,
   Layers,
   Library,
@@ -33,6 +34,9 @@ const SECONDARY = [
   { href: '/friends', key: 'friends', icon: Users },
   { href: '/rules', key: 'rules', icon: ScrollText },
 ] as const;
+
+/** Réservé à l'administrateur de l'instance : les autres comptes ne voient pas le lien. */
+const ADMIN_LINK = { href: '/admin', key: 'admin', icon: ShieldCheck } as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -72,7 +76,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
           <div className="my-3 border-t border-edge" />
-          {SECONDARY.map(({ href, key, icon: Icon }) => {
+          {[...SECONDARY, ...(me?.role === 'ADMIN' ? [ADMIN_LINK] : [])].map(({ href, key, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link
@@ -101,14 +105,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href="/profile"
               className="flex min-w-0 items-center gap-2 text-sm text-fg-muted hover:text-fg"
             >
-              <Avatar
-                user={{
-                  id: me.id,
-                  username: me.username,
-                  avatarUrl: me.avatarUrl ?? null,
-                  bannerUrl: null,
-                }}
-              />
+              <Avatar user={{ username: me.username, avatarUrl: me.avatarUrl ?? null }} />
               <span className="truncate">{me.username}</span>
             </Link>
           ) : (
@@ -131,12 +128,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           {me && (
             <Link href="/profile" className="relative" aria-label={t('nav.profile')}>
               <Avatar
-                user={{
-                  id: me.id,
-                  username: me.username,
-                  avatarUrl: me.avatarUrl ?? null,
-                  bannerUrl: null,
-                }}
+                user={{ username: me.username, avatarUrl: me.avatarUrl ?? null }}
                 size="md"
               />
               {pending > 0 && <PendingDot count={pending} className="absolute -top-1 -right-1" />}

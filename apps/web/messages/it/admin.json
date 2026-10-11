@@ -1,0 +1,77 @@
+{
+  "title": "Amministrazione",
+  "description": "Chi ha un account, se le sincronizzazioni girano, come sta il server.",
+  "tabs": {
+    "label": "Sezione",
+    "users": "Account",
+    "syncs": "Sincronizzazioni",
+    "instance": "Istanza"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "USER": "Membro"
+  },
+  "users": {
+    "search": "Cerca un nome utente o un’email…",
+    "role": "Ruolo",
+    "allRoles": "Tutti i ruoli",
+    "sorts": {
+      "recent": "Iscrizione",
+      "name": "Nome",
+      "cards": "Carte",
+      "decks": "Deck"
+    },
+    "none": "Nessun account corrisponde",
+    "noneHint": "Togli un filtro e riprova.",
+    "copies": "carte",
+    "decks": "deck",
+    "products": "prodotti",
+    "joined": "Iscritto il {date}",
+    "lastSeen": "Visto il {date}",
+    "neverSeen": "Mai connesso",
+    "fromEnv": "ADMIN_EMAIL",
+    "promote": "Rendi admin",
+    "demote": "Togli admin",
+    "promoted": "{name} è ora amministratore",
+    "demoted": "{name} non è più amministratore",
+    "cannotDemoteSelf": "Non puoi togliere il tuo stesso ruolo di amministratore.",
+    "cannotDemoteEnv": "Questo account è quello di ADMIN_EMAIL: riprenderebbe il ruolo al prossimo accesso."
+  },
+  "syncs": {
+    "none": "Nessuna sincronizzazione registrata",
+    "run": "Avvia",
+    "runHint": "Può richiedere diversi minuti: il risultato arriva solo alla fine.",
+    "done": "{id} completata",
+    "failed": "Fallita",
+    "never": "Mai avviata",
+    "lastRun": "Ultima volta il {date}",
+    "neverHint": "Non è mai girata su questa istanza",
+    "count": "{count} voci"
+  },
+  "counts": {
+    "users": "Account",
+    "decks": "Deck",
+    "copies": "Carte possedute",
+    "products": "Prodotti",
+    "cards": "Catalogo",
+    "prints": "Stampe",
+    "sets": "Espansioni",
+    "uploads": "Immagini"
+  },
+  "health": {
+    "database": "Database raggiungibile",
+    "uploads": "Cartella immagini scrivibile",
+    "duel": "Dati del duello",
+    "duelData": {
+      "READY": "Scaricati",
+      "MISSING": "Assenti",
+      "DISABLED": "Simulatore disattivato"
+    },
+    "node": "Node",
+    "uptime": "Online da"
+  },
+  "denied": {
+    "title": "Riservato all’amministratore dell’istanza",
+    "hint": "Il tuo account non ha accesso a questa pagina."
+  }
+}

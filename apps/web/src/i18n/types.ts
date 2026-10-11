@@ -1,3 +1,4 @@
+import type admin from '../../messages/en/admin.json';
 import type auth from '../../messages/en/auth.json';
 import type cards from '../../messages/en/cards.json';
 import type catalog from '../../messages/en/catalog.json';
@@ -35,4 +36,5 @@ export interface Messages {
   releases: typeof releases;
   tags: typeof tags;
   social: typeof social;
+  admin: typeof admin;
 }
