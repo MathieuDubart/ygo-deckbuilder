@@ -33,9 +33,14 @@ export const cardSummarySelect = {
 export type CardSummaryRow = Prisma.CardGetPayload<{ select: typeof cardSummarySelect }>;
 
 export function toCardSummary(card: CardSummaryRow, ownedQuantity?: number): CardSummaryDto {
+  const name = localizedName(card);
   return {
     id: card.id,
-    name: localizedName(card),
+    name,
+    // Le nom anglais n'est répété que s'il diffère : c'est celui qu'indexent les places de
+    // marché, et un nom traduit n'y renvoie rien. Absent quand les deux coïncident, pour ne
+    // pas doubler le poids d'une liste de cartes rendue en anglais.
+    ...(name !== card.name && { nameEn: card.name }),
     category: card.category,
     type: card.type,
     frameType: card.frameType,

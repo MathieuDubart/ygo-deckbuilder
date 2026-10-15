@@ -12,6 +12,14 @@
     "replace": "Ersetzen",
     "remove": "Entfernen",
     "imageHint": "PNG, JPEG oder WebP, bis 8 MB. Wird automatisch verkleinert und umgewandelt.",
+    "market": {
+      "title": "Kaufeinstellungen",
+      "hint": "Gelten für jeden Cardmarket-Link: einmal einstellen statt bei jedem Klick.",
+      "language": "Sprache",
+      "languageDefault": "Wie meine Sammlung",
+      "condition": "Mindestzustand",
+      "conditionAny": "Jeder Zustand"
+    },
     "memberSince": "Mitglied seit {date}",
     "friendsSince": "Freunde seit {date}",
     "friendCount": "{count, plural, =0 {Keine Freunde} one {# Freund} other {# Freunde}}",

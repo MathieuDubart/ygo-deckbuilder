@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { CardLanguage } from '../domain/enums';
+import type { CardCondition, CardLanguage } from '../domain/enums';
 
 export const registerSchema = z.object({
   email: z
@@ -36,6 +36,12 @@ export interface PublicUser {
    * collection vers une langue que personne n'a demandée.
    */
   collectionLanguage: CardLanguage | null;
+  /**
+   * Préférences d'achat, pour construire les liens vers une place de marché. `null` pour la
+   * langue veut dire « comme ma collection » ; `null` pour l'état veut dire « aucun filtre ».
+   */
+  marketLanguage: CardLanguage | null;
+  marketMinCondition: CardCondition | null;
 }
 
 /**

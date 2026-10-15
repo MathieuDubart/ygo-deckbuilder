@@ -24,7 +24,19 @@
   "missing": {
     "summary": "<strong>{count, plural, one {# copia} other {# copie}}</strong> non {count, plural, one {posseduta} other {possedute}} · circa <strong>{cost}</strong>",
     "addAll": "Metti tutto in wishlist",
-    "added": "{count, plural, one {# carta aggiunta alla wishlist} other {# carte aggiunte alla wishlist}}"
+    "added": "{count, plural, one {# carta aggiunta alla wishlist} other {# carte aggiunte alla wishlist}}",
+    "buy": {
+      "action": "Compra le mancanti",
+      "title": "Compra le carte mancanti",
+      "step1": "Copia la lista qui sotto.",
+      "step2": "Apri le tue liste dei desideri su Cardmarket.",
+      "step3": "Incollala in una lista, poi lascia che il loro assistente trovi i venditori più economici.",
+      "copy": "Copia la lista",
+      "copied": "Lista copiata",
+      "openWants": "Apri Cardmarket",
+      "one": "Compra questa carta",
+      "noEditionHint": "La lista porta solo nomi e quantità. Cardmarket chiama le sue espansioni diversamente dal nostro catalogo, e una riga con un'espansione sconosciuta viene scartata del tutto — scegli l'edizione sulla loro pagina, dove sono elencate tutte le stampe."
+    }
   },
   "add": {
     "extraDeckMonster": "Questo mostro va nell’Extra Deck",

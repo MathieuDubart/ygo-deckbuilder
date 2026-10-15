@@ -38,7 +38,14 @@ export interface CardPrintDto {
 
 export interface CardSummaryDto {
   id: number;
+  /** Nom dans la langue de la requête. */
   name: string;
+  /**
+   * Nom anglais, uniquement s'il diffère de `name`. C'est le seul que les places de marché
+   * indexent : un lien d'achat se construit avec lui, jamais avec le nom traduit.
+   * `marketName()` choisit le bon des deux sans avoir à y penser.
+   */
+  nameEn?: string;
   category: CardCategory;
   type: string;
   frameType: string;

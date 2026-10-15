@@ -70,7 +70,7 @@ export class SocialController {
     @CurrentUser() user: AuthUser,
     @Body(new ZodValidationPipe(updateProfileSchema)) body: UpdateProfileInput,
   ) {
-    return this.profile.updateUsername(user.id, body);
+    return this.profile.updateSettings(user.id, body);
   }
 
   @Put('me/profile/cards')

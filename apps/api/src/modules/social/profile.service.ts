@@ -116,14 +116,28 @@ export class ProfileService {
     });
   }
 
-  async updateUsername(userId: string, input: UpdateProfileInput): Promise<void> {
-    if (!input.username) return;
-    const clash = await this.prisma.user.findFirst({
-      where: { username: { equals: input.username, mode: 'insensitive' }, id: { not: userId } },
-      select: { id: true },
-    });
-    if (clash) throw new ConflictException(t('errors.usernameTaken'));
-    await this.prisma.user.update({ where: { id: userId }, data: { username: input.username } });
+  /**
+   * Réglages du compte. Chaque champ absent du corps est laissé tel quel, et seul un `null`
+   * explicite efface une préférence : c'est ce qui permet de changer son pseudo sans toucher
+   * à ses préférences d'achat, et inversement.
+   */
+  async updateSettings(userId: string, input: UpdateProfileInput): Promise<void> {
+    if (input.username) {
+      const clash = await this.prisma.user.findFirst({
+        where: { username: { equals: input.username, mode: 'insensitive' }, id: { not: userId } },
+        select: { id: true },
+      });
+      if (clash) throw new ConflictException(t('errors.usernameTaken'));
+    }
+    const data = {
+      ...(input.username && { username: input.username }),
+      ...(input.marketLanguage !== undefined && { marketLanguage: input.marketLanguage }),
+      ...(input.marketMinCondition !== undefined && {
+        marketMinCondition: input.marketMinCondition,
+      }),
+    };
+    if (Object.keys(data).length === 0) return;
+    await this.prisma.user.update({ where: { id: userId }, data });
   }
 
   /**

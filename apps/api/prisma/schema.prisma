@@ -183,6 +183,10 @@ model User {
   /// on peut lire l'app en français et collectionner en anglais. Null = jamais choisie,
   /// on retombe alors sur la langue de la requête.
   collectionLanguage CardLanguage?
+  /// Préférences d'achat, appliquées aux liens vers Cardmarket. Null pour la langue = celle
+  /// de la collection ; null pour l'état = aucun filtre, on voit toutes les offres.
+  marketLanguage     CardLanguage?
+  marketMinCondition CardCondition?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

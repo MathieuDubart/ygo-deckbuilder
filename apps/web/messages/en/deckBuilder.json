@@ -24,7 +24,19 @@
   "missing": {
     "summary": "<strong>{count, plural, one {# copy} other {# copies}}</strong> not owned · about <strong>{cost}</strong>",
     "addAll": "Add all to wishlist",
-    "added": "{count, plural, one {# card added to your wishlist} other {# cards added to your wishlist}}"
+    "added": "{count, plural, one {# card added to your wishlist} other {# cards added to your wishlist}}",
+    "buy": {
+      "action": "Buy the missing cards",
+      "title": "Buy the missing cards",
+      "step1": "Copy the list below.",
+      "step2": "Open your Cardmarket wants lists.",
+      "step3": "Paste it into a list, then let their shopping wizard find the cheapest sellers.",
+      "copy": "Copy the list",
+      "copied": "List copied",
+      "openWants": "Open Cardmarket",
+      "one": "Buy this card",
+      "noEditionHint": "The list carries card names and quantities only. Cardmarket names its expansions differently from our catalogue, and a line with an unknown expansion is dropped whole — pick the edition on their page, where every printing is listed."
+    }
   },
   "add": {
     "extraDeckMonster": "This monster goes in the Extra Deck",

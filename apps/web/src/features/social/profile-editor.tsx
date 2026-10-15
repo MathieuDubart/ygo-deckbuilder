@@ -1,5 +1,11 @@
 'use client';
-import { MAX_PROFILE_CARDS, usernameSchema, type PublicUserDto } from '@ygo/shared';
+import {
+  CARD_CONDITIONS,
+  MARKET_LANGUAGES,
+  MAX_PROFILE_CARDS,
+  usernameSchema,
+  type PublicUserDto,
+} from '@ygo/shared';
 import { ImagePlus, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
@@ -9,7 +15,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/feedback';
-import { Field, Input } from '@/components/ui/input';
+import { Field, Input, Select } from '@/components/ui/input';
+import { useMe } from '@/lib/api/auth';
 import { useCollection, type CollectionItemDto } from '@/lib/api/collection';
 import {
   imageUrl,
@@ -67,8 +74,66 @@ export function ProfileEditor({
         <ImageField kind="avatar" label={t('avatar')} current={user.avatarUrl} />
         <ImageField kind="banner" label={t('banner')} current={user.bannerUrl} />
         <p className="text-xs text-fg-subtle">{t('imageHint')}</p>
+
+        <MarketPreferences />
       </div>
     </Dialog>
+  );
+}
+
+/**
+ * Ce que les liens d'achat doivent montrer. Réglé une fois ici plutôt que redemandé à chaque
+ * clic : on achète presque toujours dans la même langue et au même état.
+ */
+function MarketPreferences() {
+  const t = useTranslations('social.profile.market');
+  const tc = useTranslations('cards.conditions');
+  const { data: me } = useMe();
+  const update = useUpdateProfile();
+
+  // `null` efface la préférence côté serveur ; la chaîne vide du <select> est donc traduite,
+  // pas envoyée telle quelle.
+  const set = (field: 'marketLanguage' | 'marketMinCondition', value: string) =>
+    update.mutate({ [field]: value === '' ? null : value });
+
+  return (
+    <section className="space-y-3 border-t border-border pt-5">
+      <div>
+        <p className="text-sm font-medium">{t('title')}</p>
+        <p className="text-xs text-fg-subtle">{t('hint')}</p>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Field label={t('language')}>
+          <Select
+            value={me?.marketLanguage ?? ''}
+            onChange={(event) => set('marketLanguage', event.target.value)}
+          >
+            <option value="">{t('languageDefault')}</option>
+            {/* Seulement celles sur lesquelles Cardmarket sait filtrer : proposer le japonais
+                donnerait un choix sans effet. */}
+            {MARKET_LANGUAGES.map((language) => (
+              <option key={language} value={language}>
+                {language}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        <Field label={t('condition')}>
+          <Select
+            value={me?.marketMinCondition ?? ''}
+            onChange={(event) => set('marketMinCondition', event.target.value)}
+          >
+            <option value="">{t('conditionAny')}</option>
+            {CARD_CONDITIONS.map((condition) => (
+              <option key={condition} value={condition}>
+                {tc(condition)}
+              </option>
+            ))}
+          </Select>
+        </Field>
+      </div>
+      {update.error && <p className="text-sm text-danger">{(update.error as Error).message}</p>}
+    </section>
   );
 }
 

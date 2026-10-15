@@ -1,5 +1,5 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import type { CardLanguage, LoginInput, PublicUser, RegisterInput } from '@ygo/shared';
+import type { CardCondition, CardLanguage, LoginInput, PublicUser, RegisterInput } from '@ygo/shared';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { PasswordService } from './password.service';
@@ -14,6 +14,8 @@ type UserRow = {
   createdAt: Date;
   avatarPath?: string | null;
   collectionLanguage?: CardLanguage | null;
+  marketLanguage?: CardLanguage | null;
+  marketMinCondition?: CardCondition | null;
 };
 
 export const toPublicUser = (u: UserRow): PublicUser => ({
@@ -24,6 +26,8 @@ export const toPublicUser = (u: UserRow): PublicUser => ({
   createdAt: u.createdAt.toISOString(),
   avatarUrl: u.avatarPath ? `/uploads/${u.avatarPath}` : null,
   collectionLanguage: u.collectionLanguage ?? null,
+  marketLanguage: u.marketLanguage ?? null,
+  marketMinCondition: u.marketMinCondition ?? null,
 });
 
 @Injectable()

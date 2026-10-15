@@ -3,6 +3,7 @@ export * from './domain/locales';
 export * from './domain/deck-rules';
 export * from './domain/ydk';
 export * from './domain/print-code';
+export * from './domain/cardmarket';
 export * from './schemas/auth';
 export * from './schemas/pagination';
 export * from './schemas/cards';
