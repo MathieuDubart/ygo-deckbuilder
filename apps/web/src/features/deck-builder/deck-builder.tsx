@@ -412,6 +412,7 @@ function BuyMissingDialog({
         {/* Dit franchement ce que la liste ne porte pas, plutôt que de le laisser découvrir */}
         <p className="text-xs text-fg-subtle">{t('noEditionHint')}</p>
 
+        <p className="text-sm font-medium">{t('oneByOne')}</p>
         <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
           {missing.map((m) => (
             <li key={m.card.id} className="flex items-center gap-3 px-3 py-2 text-sm">

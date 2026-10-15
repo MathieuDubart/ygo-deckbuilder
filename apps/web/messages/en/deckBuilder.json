@@ -35,6 +35,7 @@
       "copied": "List copied",
       "openWants": "Open Cardmarket",
       "one": "Buy this card",
+      "oneByOne": "One by one",
       "noEditionHint": "The list carries card names and quantities only. Cardmarket names its expansions differently from our catalogue, and a line with an unknown expansion is dropped whole — pick the edition on their page, where every printing is listed."
     }
   },

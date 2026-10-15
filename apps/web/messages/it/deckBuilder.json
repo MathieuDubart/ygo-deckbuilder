@@ -35,6 +35,7 @@
       "copied": "Lista copiata",
       "openWants": "Apri Cardmarket",
       "one": "Compra questa carta",
+      "oneByOne": "Carta per carta",
       "noEditionHint": "La lista porta solo nomi e quantità. Cardmarket chiama le sue espansioni diversamente dal nostro catalogo, e una riga con un'espansione sconosciuta viene scartata del tutto — scegli l'edizione sulla loro pagina, dove sono elencate tutte le stampe."
     }
   },
