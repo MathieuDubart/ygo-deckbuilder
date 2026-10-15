@@ -35,6 +35,7 @@
       "copied": "Liste kopiert",
       "openWants": "Cardmarket öffnen",
       "one": "Diese Karte kaufen",
+      "oneByOne": "Karte für Karte",
       "noEditionHint": "Die Liste enthält nur Namen und Mengen. Cardmarket benennt seine Editionen anders als unser Katalog, und eine Zeile mit unbekannter Edition wird ganz verworfen — wähl die Edition auf ihrer Seite, wo alle Drucke stehen."
     }
   },

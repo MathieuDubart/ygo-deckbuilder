@@ -35,6 +35,7 @@
       "copied": "Liste copiée",
       "openWants": "Ouvrir Cardmarket",
       "one": "Acheter cette carte",
+      "oneByOne": "Carte par carte",
       "noEditionHint": "La liste ne porte que les noms et les quantités. Cardmarket nomme ses extensions autrement que notre catalogue, et une ligne dont l'extension est inconnue est rejetée entière — tu choisis l'édition sur leur page, où toutes les impressions sont listées."
     }
   },
