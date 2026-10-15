@@ -1,5 +1,5 @@
 'use client';
-import { Check, Heart, Trash2 } from 'lucide-react';
+import { Check, Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -18,6 +18,7 @@ import {
   type WishlistItemDto,
 } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
+import { useMarketLink } from '@/lib/market';
 import { cn } from '@/lib/utils';
 
 const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'] as const;
@@ -59,6 +60,7 @@ function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }
   const update = useUpdateWishlistItem();
   const remove = useRemoveWishlistItem();
   const acquired = useMarkAcquired();
+  const buy = useMarketLink();
   const overBudget =
     item.maxPrice !== null && item.unitPrice !== null && item.unitPrice > item.maxPrice;
 
@@ -113,6 +115,15 @@ function WishRow({ item, onOpen }: { item: WishlistItemDto; onOpen: () => void }
         ))}
       </Select>
       <div className="flex gap-1">
+        {/*
+          Un lien, pas un bouton : il s'ouvre dans un onglet où l'utilisateur est déjà connecté
+          à Cardmarket. L'app n'achète rien et ne parle jamais à la boutique elle-même.
+        */}
+        <a href={buy(item.card)} target="_blank" rel="noreferrer" aria-label={t('row.buy')}>
+          <Button variant="ghost" size="icon" title={t('row.buy')}>
+            <ShoppingCart className="size-4" />
+          </Button>
+        </a>
         <Button
           variant="secondary"
           size="sm"

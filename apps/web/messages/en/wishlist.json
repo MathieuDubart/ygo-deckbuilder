@@ -21,6 +21,7 @@
     "priority": "Priority",
     "acquired": "Got it",
     "acquiredToast": "Added to your collection 🎉",
-    "remove": "Remove"
+    "remove": "Remove",
+    "buy": "Buy on Cardmarket"
   }
 }

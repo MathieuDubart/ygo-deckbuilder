@@ -1,18 +1,27 @@
 'use client';
-import type { DeckDto, DeckIssue } from '@ygo/shared';
+import {
+  cardmarketWantsUrl,
+  marketName,
+  wantsListText,
+  type CardSummaryDto,
+  type DeckDto,
+  type DeckIssue,
+} from '@ygo/shared';
 import {
   AlertTriangle,
   ArrowLeft,
   BookOpen,
   Check,
+  ClipboardCopy,
   CloudOff,
   Download,
   Heart,
   Loader2,
   Scissors,
+  ShoppingCart,
   Swords,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -20,6 +29,7 @@ import { CardDetailDialog } from '@/components/cards/card-detail-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/input';
 import { DeckStrengthPanel } from '@/components/ui/matchups';
 import { DeckGuide } from '@/features/guide/deck-guide';
 import { useRefreshBanlist } from '@/lib/api/banlist';
@@ -27,6 +37,7 @@ import { Skeleton } from '@/components/ui/feedback';
 import { useDeckStrength, useUpdateDeck } from '@/lib/api/decks';
 import { useAddToWishlist } from '@/lib/api/wishlist';
 import { useFormat } from '@/lib/format';
+import { useMarketLink } from '@/lib/market';
 import { CardPicker } from './card-picker';
 import { DeckCardActions } from './deck-card-actions';
 import { DeckZone } from './deck-zone';
@@ -44,6 +55,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
   const [name, setName] = useState(deck.name);
   const [guideOpen, setGuideOpen] = useState(false);
   const [strengthOpen, setStrengthOpen] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
 
   /**
    * La banlist est relue à l'ouverture du deck. Le deck s'affiche sans attendre — on travaille
@@ -209,14 +221,19 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
                 ))}
                 {b.missing.length > 6 && <Badge>+{b.missing.length - 6}</Badge>}
               </div>
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={addMissingToWishlist}
-                loading={addWish.isPending}
-              >
-                <Heart className="size-4" /> {t('missing.addAll')}
-              </Button>
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={addMissingToWishlist}
+                  loading={addWish.isPending}
+                >
+                  <Heart className="size-4" /> {t('missing.addAll')}
+                </Button>
+                <Button size="sm" variant="secondary" onClick={() => setBuyOpen(true)}>
+                  <ShoppingCart className="size-4" /> {t('missing.buy.action')}
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -279,6 +296,7 @@ export function DeckBuilder({ deck }: { deck: DeckDto }) {
         {/* Monté seulement à l'ouverture : le calcul relit les textes de toutes les cartes */}
         {strengthOpen && <DeckStrengthSection deckId={deck.id} />}
       </Dialog>
+      <BuyMissingDialog open={buyOpen} onClose={() => setBuyOpen(false)} missing={b.missing} />
       <CardDetailDialog
         cardId={inspect}
         onClose={() => setInspect(null)}
@@ -327,4 +345,89 @@ function DeckStrengthSection({ deckId }: { deckId: string }) {
   const { data, isLoading } = useDeckStrength(deckId);
   if (isLoading) return <Skeleton className="h-64" />;
   return <DeckStrengthPanel strength={data} />;
+}
+
+/**
+ * Acheter les cartes qui manquent. Cardmarket n'a pas de panier qu'on puisse pré-remplir par
+ * une URL — l'ajout passe par une session connectée, carte par carte — donc on produit le
+ * texte que leur liste de souhaits sait avaler d'un coup, et c'est leur assistant d'achat qui
+ * répartit ensuite la commande entre les vendeurs les moins chers.
+ */
+function BuyMissingDialog({
+  open,
+  onClose,
+  missing,
+}: {
+  open: boolean;
+  onClose: () => void;
+  missing: { card: CardSummaryDto; missing: number }[];
+}) {
+  const t = useTranslations('deckBuilder.missing.buy');
+  const locale = useLocale();
+  const buy = useMarketLink();
+  const [copied, setCopied] = useState(false);
+  const text = useMemo(
+    () => wantsListText(missing.map((m) => ({ nameEn: marketName(m.card), quantity: m.missing }))),
+    [missing],
+  );
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Le presse-papiers peut être refusé : le texte reste sélectionnable à la main.
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose} title={t('title')} className="w-[min(100vw,34rem)]">
+      <div className="space-y-4">
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-fg-muted">
+          <li>{t('step1')}</li>
+          <li>{t('step2')}</li>
+          <li>{t('step3')}</li>
+        </ol>
+
+        <Textarea
+          readOnly
+          value={text}
+          rows={Math.min(12, missing.length + 1)}
+          className="font-mono text-xs"
+        />
+
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" onClick={copy}>
+            {copied ? <Check className="size-4" /> : <ClipboardCopy className="size-4" />}
+            {copied ? t('copied') : t('copy')}
+          </Button>
+          <a href={cardmarketWantsUrl(locale)} target="_blank" rel="noreferrer">
+            <Button size="sm" variant="secondary">
+              <ShoppingCart className="size-4" /> {t('openWants')}
+            </Button>
+          </a>
+        </div>
+
+        {/* Dit franchement ce que la liste ne porte pas, plutôt que de le laisser découvrir */}
+        <p className="text-xs text-fg-subtle">{t('noEditionHint')}</p>
+
+        <ul className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          {missing.map((m) => (
+            <li key={m.card.id} className="flex items-center gap-3 px-3 py-2 text-sm">
+              <span className="w-7 shrink-0 font-mono font-semibold tabular-nums">
+                {m.missing}×
+              </span>
+              <span className="min-w-0 flex-1 truncate">{m.card.name}</span>
+              <a href={buy(m.card)} target="_blank" rel="noreferrer" aria-label={t('one')}>
+                <Button variant="ghost" size="icon" title={t('one')}>
+                  <ShoppingCart className="size-4" />
+                </Button>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Dialog>
+  );
 }

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CARD_CONDITIONS, CARD_LANGUAGES } from '../domain/enums';
 import type { CardSummaryDto } from './cards';
 
 /**
@@ -23,6 +24,13 @@ export const usernameSchema = z
 
 export const updateProfileSchema = z.object({
   username: usernameSchema.optional(),
+  /**
+   * Préférences d'achat, appliquées aux liens vers une place de marché. `null` les efface et
+   * ne vaut pas « absent » : omettre le champ laisse la valeur en place, l'envoyer à null la
+   * remet à son défaut (la langue de la collection, et aucun filtre d'état).
+   */
+  marketLanguage: z.enum(CARD_LANGUAGES).nullish(),
+  marketMinCondition: z.enum(CARD_CONDITIONS).nullish(),
 });
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 
