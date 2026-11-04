@@ -6,12 +6,16 @@ import {
   DeckAssembler,
   fillDeck,
   generateFromArchetype,
+  copyLimit,
   generateFromTemplate,
+  interactionScore,
+  openingOdds,
   scoreDeck,
   topUp,
   type GenCardInfo,
   type GeneratedEntry,
   type GenerationResult,
+  type SynergyInput,
 } from './generator';
 import { cardStats, crossArchetypeStaples } from './stats';
 
@@ -258,6 +262,129 @@ describe('scoreDeck', () => {
     const s = scoreDeck(r);
     expect(s.playable).toBe(false);
     expect(s.score).toBeLessThan(50);
+  });
+});
+
+describe('scoreDeck : note complète (avec l’analyse de synergie)', () => {
+  const entry = (
+    id: number,
+    quantity: number,
+    source: GeneratedEntry['source'],
+  ): GeneratedEntry => ({
+    cardId: id,
+    zone: 'MAIN',
+    quantity,
+    owned: quantity,
+    source,
+    inclusion: null,
+  });
+  const result = (entries: GeneratedEntry[]): GenerationResult => ({
+    entries,
+    counts: { MAIN: entries.reduce((s, e) => s + e.quantity, 0), EXTRA: 0, SIDE: 0 },
+    missingCopies: 0,
+    complete: true,
+  });
+  // 8 cartes moteur × 3 + 4 hand traps × 3 + 2 × 2 compléments = 40
+  const engine = Array.from({ length: 8 }, (_, i) => entry(i + 1, 3, 'ARCHETYPE'));
+  const traps = Array.from({ length: 4 }, (_, i) => entry(100 + i, 3, 'STAPLE'));
+  const deck = result([...engine, ...traps, entry(200, 2, 'FILLER'), entry(201, 2, 'FILLER')]);
+  const synergy = (over: Partial<SynergyInput> = {}): SynergyInput => ({
+    score: 0.8,
+    starterCopies: 12,
+    interactionIds: new Set([100, 101, 102, 103]),
+    brickIds: new Set<number>(),
+    ...over,
+  });
+
+  it('rend la probabilité d’ouvrir et l’interaction', () => {
+    const s = scoreDeck(deck, { synergy: synergy() });
+    expect(s.opening).toBeCloseTo(openingOdds(12, 40));
+    expect(s.interaction).toBe(12);
+    expect(s.bricks).toBe(0);
+    expect(s.playable).toBe(true);
+    expect(s.raw).toBeCloseTo(s.score / 100, 2);
+  });
+
+  it('récompense les starters : plus de mains qui démarrent', () => {
+    const few = scoreDeck(deck, { synergy: synergy({ starterCopies: 5 }) });
+    const many = scoreDeck(deck, { synergy: synergy({ starterCopies: 15 }) });
+    expect(many.raw).toBeGreaterThan(few.raw);
+  });
+
+  it('pénalise les briques qu’on risque d’avoir en main', () => {
+    const clean = scoreDeck(deck, { synergy: synergy() });
+    const bricky = scoreDeck(deck, { synergy: synergy({ brickIds: new Set([1, 2]) }) });
+    expect(bricky.bricks).toBe(6);
+    expect(bricky.raw).toBeLessThan(clean.raw);
+  });
+
+  it('préfère un moteur joué en tournoi, sans compter les staples', () => {
+    const rogue = scoreDeck(deck, { synergy: synergy(), metaPlay: new Map([[100, 0.9]]) });
+    const proven = scoreDeck(deck, {
+      synergy: synergy(),
+      metaPlay: new Map(engine.map((e) => [e.cardId, 0.2])),
+    });
+    expect(proven.raw).toBeGreaterThan(rogue.raw);
+  });
+
+  it('un tas de hand traps n’est pas un deck', () => {
+    const pile = result([
+      ...Array.from({ length: 5 }, (_, i) => entry(i + 1, 3, 'ARCHETYPE')),
+      ...Array.from({ length: 8 }, (_, i) => entry(100 + i, 3, 'STAPLE')),
+      entry(200, 1, 'FILLER'),
+    ]);
+    const s = scoreDeck(pile, {
+      synergy: synergy({ interactionIds: new Set(Array.from({ length: 8 }, (_, i) => 100 + i)) }),
+    });
+    expect(s.interaction).toBe(24);
+    expect(s.playable).toBe(false);
+    expect(s.raw).toBeLessThan(scoreDeck(deck, { synergy: synergy() }).raw);
+  });
+});
+
+describe('openingOdds', () => {
+  it('suit la loi hypergéométrique', () => {
+    expect(openingOdds(0, 40)).toBe(0);
+    expect(openingOdds(40, 40)).toBe(1);
+    // 1 - C(31,5)/C(40,5)
+    expect(openingOdds(9, 40)).toBeCloseTo(1 - 169911 / 658008, 6);
+    expect(openingOdds(15, 40)).toBeGreaterThan(openingOdds(12, 40));
+  });
+
+  it('se lit aussi pour un deck plus gros (plus dur d’ouvrir)', () => {
+    expect(openingOdds(12, 60)).toBeLessThan(openingOdds(12, 40));
+  });
+});
+
+describe('interactionScore', () => {
+  it('monte jusqu’à 12, plafonne, puis baisse au-delà de 16', () => {
+    expect(interactionScore(6, 40)).toBeCloseTo(0.5);
+    expect(interactionScore(12, 40)).toBe(1);
+    expect(interactionScore(16, 40)).toBe(1);
+    expect(interactionScore(22, 40)).toBeLessThan(1);
+  });
+});
+
+describe('copyLimit', () => {
+  it('banlist TCG, et zéro pour une carte hors TCG', () => {
+    expect(copyLimit({ banTcg: null })).toBe(3);
+    expect(copyLimit({ banTcg: 'Limited' })).toBe(1);
+    expect(copyLimit({ banTcg: 'Semi-Limited' })).toBe(2);
+    expect(copyLimit({ banTcg: 'Banned' })).toBe(0);
+    expect(copyLimit({ banTcg: null, tcgLegal: false })).toBe(0);
+  });
+
+  it('le générateur n’ajoute jamais une carte hors TCG', () => {
+    const cards = new Map<number, GenCardInfo>([
+      [1, { id: 1, isExtraDeck: false, banTcg: null, category: 'MONSTER', tcgLegal: false }],
+    ]);
+    const deck = new DeckAssembler({
+      cards,
+      owned: new Map([[1, 3]]),
+      onlyOwned: true,
+      mainTarget: 40,
+    });
+    expect(deck.add({ cardId: 1, want: 3, source: 'ARCHETYPE' })).toBe(0);
   });
 });
 

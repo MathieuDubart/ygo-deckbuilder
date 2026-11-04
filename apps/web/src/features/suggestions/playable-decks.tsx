@@ -100,6 +100,8 @@ function PlayableDeckCard({
             <Badge>{t('official')}</Badge>
           ) : deck.tier !== null ? (
             <Badge>{t('metaTier', { tier: deck.tier })}</Badge>
+          ) : deck.hybrid ? (
+            <Badge>{t('hybrid')}</Badge>
           ) : (
             <Badge>{t('homebrew')}</Badge>
           )}

@@ -11,7 +11,7 @@ import {
   type DeckStyle,
 } from '../synergy/engine/profile';
 import { SynergyCardsService, type FullCard } from '../synergy/synergy-cards.service';
-import { asGenerationResult } from './deck-strength';
+import { asGenerationResult, strengthInput } from './deck-strength';
 
 /** Une ligne de deck telle que la base la porte. */
 export interface DeckCardRow {
@@ -55,13 +55,16 @@ export class DeckStrengthService {
   async rateMany(decks: Map<string, DeckCardRow[]>): Promise<Map<string, DeckStrengthDto>> {
     const ids = [...new Set([...decks.values()].flatMap((rows) => rows.map((r) => r.cardId)))];
     if (!ids.length) return new Map();
-    const [cards, staples] = await Promise.all([this.cards.load(ids), this.stapleIds()]);
+    const [cards, { staples, metaPlay }] = await Promise.all([
+      this.cards.load(ids),
+      this.metaStats(),
+    ]);
     const byId = new Map(cards.map((c) => [c.id, c]));
     const meta = await this.metaOpponents();
 
     const out = new Map<string, DeckStrengthDto>();
     for (const [deckId, rows] of decks) {
-      const strength = this.rate(rows, byId, staples, meta);
+      const strength = this.rate(rows, byId, staples, metaPlay, meta);
       if (strength) out.set(deckId, strength);
     }
     return out;
@@ -77,6 +80,7 @@ export class DeckStrengthService {
     rows: DeckCardRow[],
     byId: Map<number, FullCard>,
     staples: Set<number>,
+    metaPlay: Map<number, number>,
     meta: { name: string; profile: DeckProfile }[],
   ): DeckStrengthDto | null {
     const entries: DeckEntry[] = rows.flatMap((row) => {
@@ -90,14 +94,16 @@ export class DeckStrengthService {
 
     const analysis = analyzeDeck(entries);
     const profile = profileDeck(entries, analysis);
-    const score = scoreDeck(asGenerationResult(entries, analysis, staples), {
+    const { raw: _raw, ...score } = scoreDeck(asGenerationResult(entries, analysis, staples), {
       stapleIds: staples,
-      synergy: { score: analysis.synergy.score, starterCopies: analysis.synergy.starterCopies },
+      synergy: strengthInput(analysis),
+      ...(metaPlay.size && { metaPlay }),
     });
 
     return {
       score: {
         ...score,
+        opening: score.opening === null ? null : round(score.opening),
         engineShare: round(score.engineShare),
         consistency: round(score.consistency),
         fillerShare: round(score.fillerShare),
@@ -129,13 +135,18 @@ export class DeckStrengthService {
       .sort((a, b) => b.edge - a.edge);
   }
 
-  /** Les staples du moment, tels que la synchro meta les a calculés. */
-  private async stapleIds(): Promise<Set<number>> {
+  /**
+   * Les staples du moment et le taux de jeu de chaque carte, tels que la synchro meta les a
+   * calculés. Quelques milliers de lignes au plus : une seule lecture pour tous les decks.
+   */
+  private async metaStats(): Promise<{ staples: Set<number>; metaPlay: Map<number, number> }> {
     const rows = await this.prisma.cardMetaStat.findMany({
-      where: { isStaple: true },
-      select: { cardId: true },
+      select: { cardId: true, deckShare: true, isStaple: true },
     });
-    return new Set(rows.map((r) => r.cardId));
+    return {
+      staples: new Set(rows.filter((r) => r.isStaple).map((r) => r.cardId)),
+      metaPlay: new Map(rows.map((r) => [r.cardId, r.deckShare])),
+    };
   }
 
   /**

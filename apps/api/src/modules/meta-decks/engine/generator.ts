@@ -8,7 +8,17 @@ export interface GenCardInfo {
   isExtraDeck: boolean;
   banTcg: string | null;
   category: CardKind;
+  /** `false` : la carte n'existe pas en TCG (OCG seulement, pas encore sortie) — voir `isTcgLegal` */
+  tcgLegal?: boolean;
 }
+
+/**
+ * Exemplaires qu'un deck TCG peut contenir, toutes zones confondues : la banlist, et zéro pour
+ * une carte qui n'est pas jouable en TCG. C'est la seule porte d'entrée des limites dans le
+ * générateur et l'optimiseur — une carte qui passe ici est légale.
+ */
+export const copyLimit = (info: Pick<GenCardInfo, 'banTcg' | 'tcgLegal'>): number =>
+  info.tcgLegal === false ? 0 : maxCopiesFor(info.banTcg);
 
 /**
  * Origine d'une carte dans un deck généré :
@@ -98,7 +108,7 @@ export class DeckAssembler {
     const info = this.opts.cards.get(c.cardId);
     const zone = this.zoneOf(c);
     if (!info || !zone) return 0;
-    const limit = maxCopiesFor(info.banTcg) - (this.inDeck.get(c.cardId) ?? 0);
+    const limit = copyLimit(info) - (this.inDeck.get(c.cardId) ?? 0);
     const available = this.remaining.get(c.cardId) ?? 0;
     let q = Math.min(c.want, limit, this.roomIn(zone));
     if (this.opts.onlyOwned) q = Math.min(q, available);
@@ -285,6 +295,12 @@ export function generateFromArchetype(
 export interface DeckScore {
   /** 0..100 */
   score: number;
+  /**
+   * La même note avant arrondi (0..1). Sert à classer et à optimiser : deux decks à 81 ne se
+   * valent pas toujours, et un optimiseur qui ne voit que l'entier tourne en rond sur un palier.
+   * Jamais envoyée au client.
+   */
+  raw: number;
   /** Part du main deck tenue par le moteur (archétype, liste type, support) */
   engineShare: number;
   /** Nombre de staples du meta dans le main */
@@ -299,6 +315,12 @@ export interface DeckScore {
   synergy: number | null;
   /** Exemplaires de cartes qui lancent le jeu seules (si analysé) */
   starters: number | null;
+  /** 0..1 — probabilité d'avoir au moins un starter dans une main de départ de 5 cartes */
+  opening: number | null;
+  /** Exemplaires de cartes qui gênent l'adversaire : hand traps, casse-terrains, négations, staples */
+  interaction: number | null;
+  /** Exemplaires de briques : monstres injouables que rien ne va chercher */
+  bricks: number | null;
   /** Jouable = 40 cartes, légal, un vrai moteur (pas un tas de cartes génériques) et de quoi démarrer */
   playable: boolean;
 }
@@ -307,6 +329,14 @@ export interface DeckScore {
 export interface SynergyInput {
   score: number;
   starterCopies: number;
+  /**
+   * Cartes qui interagissent avec l'adversaire (hand traps, casse-terrains, négations, verrous).
+   * Présent = note complète (régularité d'ouverture, interaction, briques) ; absent = note
+   * historique, gardée pour les appelants qui n'ont que le score de synergie.
+   */
+  interactionIds?: ReadonlySet<number>;
+  /** Monstres difficiles à jouer que rien ne va chercher */
+  brickIds?: ReadonlySet<number>;
 }
 
 /** Seuils de jouabilité : au moins la moitié de moteur, au plus un tiers de remplissage. */
@@ -315,15 +345,71 @@ export const MAX_FILLER_SHARE = 0.35;
 /** Sans assez de starters, on ouvre trop souvent sans rien pouvoir faire. */
 export const MIN_STARTER_COPIES = 4;
 
+/** Taille d'une main de départ (en premier ; on en pioche 6 en second, c'est plus facile). */
+export const OPENING_HAND = 5;
 /**
- * Note de solidité d'un deck généré. Heuristique volontairement lisible :
- * un bon deck a un moteur dense, joué en 3 exemplaires, des staples, peu de remplissage,
- * et — s'il vient du meta — reprend une bonne part de la liste de tournoi.
+ * Interaction visée dans un main de 40 : les decks de tournoi jouent une douzaine de cartes
+ * hors moteur qui arrêtent l'adversaire (Ash Blossom, Nibiru, Called by…, Lightning Storm…).
  */
-export function scoreDeck(
-  result: GenerationResult,
-  opts: { metaCoverage?: number | null; stapleIds?: Set<number>; synergy?: SynergyInput } = {},
-): DeckScore {
+export const INTERACTION_TARGET = 12;
+/**
+ * Au-delà, l'interaction coûte : un deck qui ne joue que des hand traps n'a plus de plan à
+ * lui, et ses mains en premier joueur ne font rien.
+ */
+export const INTERACTION_CEILING = 16;
+
+/** 0..1 — l'interaction d'un main deck, ramenée à 40 cartes : monte jusqu'à 12, baisse après 16. */
+export function interactionScore(copies: number, mainCopies: number): number {
+  const per40 = (copies * 40) / Math.max(40, mainCopies);
+  const rising = Math.min(per40 / INTERACTION_TARGET, 1);
+  return Math.max(0, rising - Math.max(0, per40 - INTERACTION_CEILING) / 24);
+}
+
+/** Taux de jeu en tournoi au-delà duquel une carte est « prouvée » (une liste sur dix). */
+export const PROVEN_SHARE = 0.1;
+
+/**
+ * Probabilité de piocher au moins un des `hits` exemplaires dans une main de `hand` cartes,
+ * pour un deck de `deck` cartes (loi hypergéométrique). C'est LA question qu'un joueur pose
+ * à sa liste : « combien de fois j'ouvre sur mon plan ? »
+ */
+export function openingOdds(hits: number, deck: number, hand = OPENING_HAND): number {
+  const n = Math.max(0, Math.round(deck));
+  const k = Math.max(0, Math.min(Math.round(hits), n));
+  if (k === 0 || n === 0) return 0;
+  if (n - k < hand) return 1;
+  // P(aucun) = C(n-k, hand) / C(n, hand), calculé en produit pour rester exact en flottants
+  let none = 1;
+  for (let i = 0; i < hand; i++) none *= (n - k - i) / (n - i);
+  return 1 - none;
+}
+
+export interface ScoreOptions {
+  metaCoverage?: number | null;
+  stapleIds?: ReadonlySet<number>;
+  synergy?: SynergyInput;
+  /**
+   * Taux de jeu de chaque carte dans les listes de tournoi récentes (0..1). Une carte que des
+   * dizaines de joueurs ont choisie est forte, même quand son texte ne dit pas pourquoi.
+   */
+  metaPlay?: ReadonlyMap<number, number>;
+}
+
+/**
+ * Note de solidité d'un deck généré. Heuristique volontairement lisible.
+ *
+ * Avec l'analyse complète (`synergy.interactionIds`), elle dit ce qu'un joueur de tournoi
+ * regarde dans une liste, dans l'ordre :
+ *  - synergie (25 %) : les cartes s'appellent entre elles et l'Extra Deck est invocable ;
+ *  - ouverture (20 %) : la probabilité d'ouvrir un starter en 5 cartes ;
+ *  - interaction (20 %) : de quoi arrêter l'adversaire, une douzaine de cartes pour un 40 ;
+ *  - moteur (10 %) et régularité (10 %) : un vrai thème, joué en 3 exemplaires ;
+ *  - moteur prouvé (15 %) : la part du moteur qui se joue en tournoi (staples exclus) ;
+ *  - moins le remplissage générique et les briques qu'on risque d'avoir en main.
+ *
+ * Sans elle, la note historique : moteur dense, staples, peu de remplissage, liste de tournoi.
+ */
+export function scoreDeck(result: GenerationResult, opts: ScoreOptions = {}): DeckScore {
   const metaCoverage = opts.metaCoverage ?? null;
   // Un staple reste un staple même s'il fait partie de la liste type (Ash Blossom…)
   const isStaple = (e: GeneratedEntry) => e.source === 'STAPLE' || !!opts.stapleIds?.has(e.cardId);
@@ -340,24 +426,59 @@ export function scoreDeck(
   const consistency = engineCopies
     ? engine.filter((e) => e.quantity >= 3).reduce((s, e) => s + e.quantity, 0) / engineCopies
     : 0;
-
-  const meta = metaCoverage ?? Math.min(engineShare, 0.6);
-  const engineScore = Math.min(engineShare / 0.7, 1);
-  const stapleScore = Math.min(staples / 9, 1);
   const fillerPenalty = 0.5 * Math.max(0, fillerShare - 0.15);
   const syn = opts.synergy;
-  // Avec l'analyse de synergie, elle pèse le plus : c'est ce qui fait tourner un deck
-  const raw = syn
-    ? 0.25 * engineScore +
-      0.15 * stapleScore +
-      0.15 * consistency +
-      0.15 * meta +
-      0.3 * syn.score -
-      fillerPenalty
-    : 0.4 * engineScore + 0.2 * stapleScore + 0.2 * consistency + 0.2 * meta - fillerPenalty;
+
+  let raw: number;
+  let opening: number | null = null;
+  let interaction: number | null = null;
+  let bricks: number | null = null;
+
+  if (syn?.interactionIds) {
+    const interacts = syn.interactionIds;
+    opening = openingOdds(syn.starterCopies, total);
+    interaction = copies((e) => isStaple(e) || interacts.has(e.cardId));
+    bricks = syn.brickIds ? copies((e) => syn.brickIds!.has(e.cardId)) : 0;
+    // Prouvé = le MOTEUR se joue en tournoi. Les staples en sont exclus : tout le monde les joue,
+    // ils ne disent rien de la force du deck (l'interaction les compte déjà)
+    const play = opts.metaPlay;
+    const proven = play?.size
+      ? engineCopies
+        ? engine.reduce(
+            (s, e) => s + e.quantity * Math.min(1, (play.get(e.cardId) ?? 0) / PROVEN_SHARE),
+            0,
+          ) / engineCopies
+        : 0
+      : (metaCoverage ?? Math.min(engineShare, 0.6));
+    raw =
+      0.25 * syn.score +
+      0.2 * opening +
+      0.2 * interactionScore(interaction, total) +
+      0.1 * Math.min(engineShare / 0.6, 1) +
+      0.1 * consistency +
+      0.15 * proven -
+      fillerPenalty -
+      // Une brique en main, c'est une carte de moins : on la paie à chaque main qui la contient
+      0.25 * openingOdds(bricks, total);
+  } else {
+    const meta = metaCoverage ?? Math.min(engineShare, 0.6);
+    const engineScore = Math.min(engineShare / 0.7, 1);
+    const stapleScore = Math.min(staples / 9, 1);
+    // Avec l'analyse de synergie, elle pèse le plus : c'est ce qui fait tourner un deck
+    raw = syn
+      ? 0.25 * engineScore +
+        0.15 * stapleScore +
+        0.15 * consistency +
+        0.15 * meta +
+        0.3 * syn.score -
+        fillerPenalty
+      : 0.4 * engineScore + 0.2 * stapleScore + 0.2 * consistency + 0.2 * meta - fillerPenalty;
+  }
+  raw = Math.max(0, Math.min(1, raw));
 
   return {
-    score: Math.round(Math.max(0, Math.min(1, raw)) * 100),
+    score: Math.round(raw * 100),
+    raw,
     engineShare,
     staples,
     consistency,
@@ -365,6 +486,9 @@ export function scoreDeck(
     metaCoverage,
     synergy: syn ? syn.score : null,
     starters: syn ? syn.starterCopies : null,
+    opening,
+    interaction,
+    bricks,
     playable:
       result.complete &&
       engineShare >= MIN_ENGINE_SHARE &&

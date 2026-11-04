@@ -47,6 +47,28 @@ export function maxCopiesFor(banStatus: string | null | undefined): number {
 }
 
 /**
+ * La carte existe-t-elle en TCG aujourd'hui ? La banlist ne suffit pas à le dire : une carte
+ * sortie seulement en OCG (une impression japonaise dans la collection) n'est sur aucune liste
+ * TCG, et rien ne l'empêcherait d'entrer dans un deck TCG — illégal en tournoi.
+ *
+ * `formats` vient de YGOPRODeck (« TCG », « OCG », « Master Duel »…). Deux prudences :
+ *  - une liste vide veut dire « on ne sait pas », pas « interdite » : on laisse passer ;
+ *  - une date de sortie TCG dans le futur (carte annoncée, pas encore éditée) n'est pas jouable.
+ */
+export function isTcgLegal(
+  card: { formats?: readonly string[] | null; tcgDate?: Date | string | null },
+  today: Date = new Date(),
+): boolean {
+  const formats = card.formats ?? [];
+  if (formats.length && !formats.includes('TCG')) return false;
+  if (card.tcgDate) {
+    const released = new Date(card.tcgDate);
+    if (!Number.isNaN(released.getTime()) && released.getTime() > today.getTime()) return false;
+  }
+  return true;
+}
+
+/**
  * La banlist qui s'applique à une carte dans un deck donné : celle de son format. Les deux
  * listes divergent — une carte limitée en TCG peut être libre en OCG — donc se tromper de
  * colonne interdit des cartes légales, ou laisse passer des cartes interdites.

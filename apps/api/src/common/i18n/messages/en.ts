@@ -91,6 +91,21 @@ export const en = {
       other: 'Based on {count} recent tournament lists.',
     },
     metaVersion: 'A tournament version exists: “{name}” in the meta decks.',
+    opening:
+      'Opens on a starter in {percent}% of 5-card hands ({starters} starters) · {interaction} interaction cards (hand traps, board breakers, negates).',
+    engines: 'Hybrid: {names} work together in this deck.',
+    optimized: {
+      one: 'Optimized: {count} swap over the first draft, strength {from} → {to}.',
+      other: 'Optimized: {count} swaps over the first draft, strength {from} → {to}.',
+    },
+    excluded: {
+      one: '{count} card that fits this deck is left out: forbidden or not legal in TCG.',
+      other: '{count} cards that fit this deck are left out: forbidden or not legal in TCG.',
+    },
+    capped: {
+      one: '{count} card is capped by the banlist (Limited or Semi-Limited).',
+      other: '{count} cards are capped by the banlist (Limited or Semi-Limited).',
+    },
   },
 
   mechanics: {

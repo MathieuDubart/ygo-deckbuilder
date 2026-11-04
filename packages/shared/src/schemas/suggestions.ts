@@ -100,6 +100,12 @@ export interface DeckScoreDto {
   synergy: number | null;
   /** Exemplaires de cartes qui lancent le jeu seules */
   starters: number | null;
+  /** 0..1 — probabilité d'ouvrir au moins un starter en 5 cartes (null : textes illisibles) */
+  opening: number | null;
+  /** Exemplaires de cartes qui gênent l'adversaire : hand traps, casse-terrains, négations, staples */
+  interaction: number | null;
+  /** Exemplaires de briques : monstres injouables que rien ne va chercher */
+  bricks: number | null;
   /** 40 cartes, légal, un vrai moteur et assez de starters */
   playable: boolean;
 }
@@ -119,6 +125,8 @@ export interface GeneratedDeckDto {
   mode: GenerationMode | 'ARCHETYPE';
   metaDeckId: string | null;
   archetype: string | null;
+  /** Archétypes qui portent le main (≥ 6 exemplaires), du plus présent au moins présent */
+  engines: string[];
   cards: GeneratedDeckCardDto[];
   counts: { MAIN: number; EXTRA: number; SIDE: number };
   missingCopies: number;
@@ -141,6 +149,10 @@ export interface PlayableDeckDto {
   archetype: string | null;
   /** Tier du deck meta dont il s'inspire, s'il y en a un */
   tier: number | null;
+  /** Archétypes qui portent le main (≥ 6 exemplaires), du plus présent au moins présent */
+  engines: string[];
+  /** Deck maison à deux moteurs : un archétype de la collection et un second qui s'y emboîte */
+  hybrid: boolean;
   score: DeckScoreDto;
   counts: { MAIN: number; EXTRA: number; SIDE: number };
   /** Cartes phares du moteur (pour l'illustration) */

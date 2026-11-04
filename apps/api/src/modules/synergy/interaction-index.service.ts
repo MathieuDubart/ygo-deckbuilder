@@ -7,7 +7,7 @@ import { targetsOfCard } from './engine/interactions';
 import { synCardSelect } from './synergy-cards.service';
 
 /** À incrémenter quand le lecteur de textes évolue : l'index est reconstruit au démarrage. */
-export const INTERACTION_INDEX_VERSION = 1;
+export const INTERACTION_INDEX_VERSION = 2;
 const STATE_ID = 'interactions';
 const READ_BATCH = 2000;
 const WRITE_BATCH = 5000;

@@ -1,5 +1,4 @@
-import { featuresOf } from './graph';
-import { matches } from './parse';
+import { featuresOf, linkQuality } from './graph';
 import type { SynCard } from './types';
 
 /**
@@ -10,25 +9,7 @@ import type { SynCard } from './types';
  */
 export function affinity(core: SynCard[], candidate: SynCard): number {
   const fc = featuresOf(candidate);
-  let score = 0;
-
-  for (const c of core) {
-    if (c.id === candidate.id) continue;
-    const fk = featuresOf(c);
-    // La candidate agit sur une carte du cœur (Sage cherche White Stone…)
-    if (
-      fc.actions.some(
-        (a) => a.verb !== 'SUMMON_EXTRA' && a.filters.some((f) => matches(c, f, fk, a.from)),
-      )
-    ) {
-      score += 1;
-    }
-    // Une carte du cœur agit sur la candidate (Dictator ressuscite un "Blue-Eyes"…)
-    if (fk.actions.some((a) => a.filters.some((f) => matches(candidate, f, fc, a.from))))
-      score += 1;
-    // Citation de nom sans action lisible : lien plus faible
-    if (fc.mentions.includes(c.name) || fk.mentions.includes(candidate.name)) score += 0.5;
-  }
+  let score = linkScore(core, candidate);
 
   // Extra Deck : la candidate est-elle invocable avec le cœur ? On le vérifie ailleurs
   // (checkExtra) ; ici on ne récompense que ses matériaux cités.
@@ -49,6 +30,31 @@ export function affinity(core: SynCard[], candidate: SynCard): number {
   if (candidate.category === 'MONSTER' && fc.cannotNormalSummon && !fc.selfSummon && score < 1)
     score -= 1;
   return Math.min(score, 8);
+}
+
+/**
+ * La part « liens » de l'affinité, sans les bonus de rôle : combien de vrais liens la
+ * candidate a avec le cœur, dans les deux sens. C'est ce qui distingue une carte d'un autre
+ * archétype qui s'emboîte vraiment (elle cherche nos monstres, nos effets l'invoquent) d'une
+ * bonne carte générique — et c'est donc ce qui sert à repérer un second moteur.
+ */
+export function linkScore(core: SynCard[], candidate: SynCard): number {
+  const fc = featuresOf(candidate);
+  let score = 0;
+  for (const c of core) {
+    if (c.id === candidate.id) continue;
+    const fk = featuresOf(c);
+    // La candidate agit sur une carte du cœur (Sage cherche White Stone…). Seuls les vrais
+    // liens comptent : « 1 monstre de Niveau 4 ou moins » touche toute la collection.
+    if (fc.actions.some((a) => a.verb !== 'SUMMON_EXTRA' && linkQuality(a, c, fk) === 2)) {
+      score += 1;
+    }
+    // Une carte du cœur agit sur la candidate (Dictator ressuscite un "Blue-Eyes"…)
+    if (fk.actions.some((a) => linkQuality(a, candidate, fc) === 2)) score += 1;
+    // Citation de nom sans action lisible : lien plus faible
+    if (fc.mentions.includes(c.name) || fk.mentions.includes(candidate.name)) score += 0.5;
+  }
+  return score;
 }
 
 /**

@@ -174,6 +174,12 @@ const ACTION_PATTERNS: { verb: Verb; re: RegExp }[] = [
   },
 ];
 
+/** "take 1 X from your Deck, and either add it to your hand or …" */
+const TAKE_PATTERN = new RegExp(
+  String.raw`take (\d+|one|two|a|an) (.+?) from ${LOC}(,? except (?:"[^"]+"(?:,? (?:or|and) )?)+)?,? and (?:either )?([^.;]+)`,
+  'gi',
+);
+
 /**
  * Déclencheur et coût d'un effet, lus dans le début de sa phrase :
  * "When this card is Normal Summoned: You can add…" → NS ; "You can discard this card, then…" → depuis la main.
@@ -223,6 +229,25 @@ export function parseCard(card: SynCard): CardFeatures {
         ...context(effectText, m.index ?? 0),
       });
     }
+  }
+  // "take 1 "Despia" monster from your Deck, and either add it to your hand or Special Summon
+  // it" : tournure récente qui vaut recherche ET invocation (ou envoi au cimetière) au choix
+  for (const m of effectText.matchAll(TAKE_PATTERN)) {
+    const phrase = m[2]!;
+    if (/^this card\b|^it\b|^them\b/i.test(phrase.trim())) continue;
+    const from = parseLocations(m[3]!);
+    const choice = m[5]!;
+    const base = {
+      from,
+      filters: parseFilters(`${phrase.replace(/ with different names/i, '')}${m[4] ?? ''}`),
+      count: num(m[1]),
+      ...context(effectText, m.index ?? 0),
+    };
+    if (/add (?:it|them) to your hand/i.test(choice)) actions.push({ verb: 'SEARCH', ...base });
+    if (/Special Summon (?:it|them)/i.test(choice))
+      actions.push({ verb: 'SPECIAL_SUMMON', ...base });
+    if (/send (?:it|them) to the (?:GY|Graveyard)/i.test(choice))
+      actions.push({ verb: 'SEND_GY', ...base });
   }
   // "target 1 Level 1 LIGHT Tuner in your GY; add it to your hand" → récupération
   for (const m of effectText.matchAll(
@@ -422,6 +447,26 @@ export function parseMaterials(card: SynCard, line: string): Materials | undefin
     return { mechanic: 'FUSION', parts, exotic: false };
   }
   return undefined;
+}
+
+/** 2 = cite un nom / archétype · 1 = filtre serré (≥ 2 critères) · 0 = générique */
+export type Precision = 0 | 1 | 2;
+
+/** Critères "qui filtrent vraiment" (type Effect exclu : presque tous les monstres le sont). */
+export function precisionOf(f: CardFilter): Precision {
+  if (f.quoted.length) return 2;
+  return criteriaOf(f) >= 2 ? 1 : 0;
+}
+
+/** Nombre de critères qui filtrent vraiment (attribut, type, niveau, syntoniseur, sous-type). */
+export function criteriaOf(f: CardFilter): number {
+  let criteria = 0;
+  if (f.attributes.length) criteria++;
+  if (f.races.length) criteria++;
+  if (f.levelEq !== undefined || f.levelMin !== undefined || f.levelMax !== undefined) criteria++;
+  if (f.tuner || f.nonTuner) criteria++;
+  if (f.subtypes.some((s) => s !== 'Effect' && s !== 'Normal')) criteria++;
+  return criteria;
 }
 
 // ─── Correspondance carte ⇄ filtre ───────────────────────────────────────────

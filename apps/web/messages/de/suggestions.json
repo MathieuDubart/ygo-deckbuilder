@@ -11,7 +11,7 @@
     "archetypeStats": "{cards, plural, one {# Karte} other {# Karten}} · {copies, plural, one {# Exemplar} other {# Exemplare}}",
     "archetypesEmpty": "Füge Karten zu deiner Sammlung hinzu, um Archetypen zu sehen, die du bauen kannst.",
     "sectionHints": {
-      "playable": "Komplett aus deinen eigenen Karten gebaut",
+      "playable": "Die stärksten legalen Decks, die deine Karten hergeben",
       "meta": "Die für dich am leichtesten erreichbaren",
       "official": "Structure Decks, Starter und Box-Listen zum Nachbauen",
       "archetypes": "Ein Deck je Archetyp, den du schon stellen kannst"
@@ -51,12 +51,21 @@
     "homebrew": "Homebrew",
     "composition": "100 % deine Karten · {main} Main · {extra} Extra",
     "open": "Ansehen & erstellen",
-    "official": "Offizielles Deck"
+    "official": "Offizielles Deck",
+    "hybrid": "Hybrid"
   },
   "score": {
-    "hint": "Stärkewertung: Synergie der Karten, Engine, Staples, Konstanz, Anteil generischer Füllkarten",
+    "hint": "Stärkewertung: Starthände, Interaktion, Synergie der Karten, Engine, Konstanz, turnierbewährte Karten – abzüglich generischer Füllkarten und Bricks",
     "label": "Stärke",
     "criteria": {
+      "opening": {
+        "label": "Eröffnung",
+        "hint": "Wahrscheinlichkeit, mindestens einen Starter in einer 5-Karten-Hand zu haben"
+      },
+      "interaction": {
+        "label": "Interaktion",
+        "hint": "Exemplare, die den Gegner stoppen: Hand Traps, Board-Breaker, Negates, Staples (etwa 12 sind ideal)"
+      },
       "engine": {
         "label": "Engine",
         "hint": "Anteil des Main Decks, den der Archetyp einnimmt"
@@ -80,6 +89,10 @@
       "filler": {
         "label": "Füllkarten",
         "hint": "Generische Karten, um auf 40 zu kommen"
+      },
+      "bricks": {
+        "label": "Bricks",
+        "hint": "Schwer spielbare Monster, die nichts im Deck holen kann"
       }
     }
   },

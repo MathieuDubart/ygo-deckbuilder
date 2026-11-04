@@ -1,4 +1,5 @@
 import { featuresOf } from './graph';
+import { precisionOf, type Precision } from './parse';
 import type { Translator } from '../../../common/i18n/translator';
 import type { CardFeatures, CardFilter, Location, SynCard, Verb } from './types';
 
@@ -11,8 +12,7 @@ import type { CardFeatures, CardFilter, Location, SynCard, Verb } from './types'
 
 export type InteractionVerb = Verb | 'MATERIAL' | 'MENTION';
 
-/** 2 = cite un nom / archétype · 1 = filtre serré (≥ 2 critères) · 0 = générique */
-export type Precision = 0 | 1 | 2;
+export { precisionOf, type Precision } from './parse';
 
 export interface EffectTarget {
   verb: InteractionVerb;
@@ -21,18 +21,6 @@ export interface EffectTarget {
   precision: Precision;
   /** Clés de recherche (minuscules) : noms / archétypes cités */
   keys: string[];
-}
-
-/** Critères "qui filtrent vraiment" (type Effect exclu : presque tous les monstres le sont). */
-export function precisionOf(f: CardFilter): Precision {
-  if (f.quoted.length) return 2;
-  let criteria = 0;
-  if (f.attributes.length) criteria++;
-  if (f.races.length) criteria++;
-  if (f.levelEq !== undefined || f.levelMin !== undefined || f.levelMax !== undefined) criteria++;
-  if (f.tuner || f.nonTuner) criteria++;
-  if (f.subtypes.some((s) => s !== 'Effect' && s !== 'Normal')) criteria++;
-  return criteria >= 2 ? 1 : 0;
 }
 
 const key = (s: string) => s.toLowerCase().trim();

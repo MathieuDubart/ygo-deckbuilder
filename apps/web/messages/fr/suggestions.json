@@ -11,7 +11,7 @@
     "archetypeStats": "{cards, plural, one {# carte} other {# cartes}} · {copies} ex.",
     "archetypesEmpty": "Ajoute des cartes à ta collection pour voir émerger des archétypes à construire.",
     "sectionHints": {
-      "playable": "Entièrement montés avec tes cartes",
+      "playable": "Les decks légaux les plus solides que tes cartes permettent",
       "meta": "Ceux qui sont le plus à ta portée",
       "official": "Structure, starters et listes de coffrets à remonter",
       "archetypes": "Un deck par archétype que tu peux déjà aligner"
@@ -51,12 +51,21 @@
     "homebrew": "Deck maison",
     "composition": "100 % tes cartes · {main} main · {extra} extra",
     "open": "Voir et créer",
-    "official": "Deck officiel"
+    "official": "Deck officiel",
+    "hybrid": "Hybride"
   },
   "score": {
-    "hint": "Note de solidité : synergie entre les cartes, moteur, staples, régularité, part de compléments génériques",
+    "hint": "Note de solidité : mains de départ, interaction, synergie entre les cartes, moteur, régularité, cartes prouvées en tournoi — moins les compléments génériques et les briques",
     "label": "solidité",
     "criteria": {
+      "opening": {
+        "label": "Ouverture",
+        "hint": "Probabilité d’avoir au moins un starter dans une main de 5 cartes"
+      },
+      "interaction": {
+        "label": "Interaction",
+        "hint": "Exemplaires qui arrêtent l’adversaire : hand traps, casse-terrains, négations, staples (une douzaine, c’est l’idéal)"
+      },
       "engine": {
         "label": "Moteur",
         "hint": "Part du main tenue par l’archétype"
@@ -80,6 +89,10 @@
       "filler": {
         "label": "Compléments",
         "hint": "Cartes génériques ajoutées pour atteindre 40"
+      },
+      "bricks": {
+        "label": "Briques",
+        "hint": "Monstres difficiles à jouer que rien dans le deck ne va chercher"
       }
     }
   },

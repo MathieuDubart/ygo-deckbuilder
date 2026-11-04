@@ -15,7 +15,16 @@ import {
   ULTIMATE_SPIRIT,
   WHITE_STONE_LEGEND,
 } from './fixtures';
-import { analyzeDeck, type DeckEntry } from './graph';
+import {
+  analyzeDeck,
+  buildEdges,
+  checkExtra,
+  featuresOf,
+  linkQuality,
+  type DeckEntry,
+  type Edge,
+} from './graph';
+import type { SynCard } from './types';
 
 const deck: DeckEntry[] = BLUE_EYES_DECK.map(({ card, qty }) => ({
   card,
@@ -69,5 +78,96 @@ describe('lignes de combo', () => {
     expect(sage.steps[0]).toEqual({ kind: 'NORMAL_SUMMON', cardId: SAGE.id });
     expect(sage.steps[1]).toMatchObject({ kind: 'SEARCH', cardId: SAGE.id });
     expect(sage.steps.some((s) => s.kind === 'EXTRA_SUMMON')).toBe(true);
+  });
+});
+
+describe('liens de réserve (restrictEdges)', () => {
+  it('donne exactement l’analyse du deck seul', () => {
+    // Un deck plus petit que la réserve : ses liens, extraits de la réserve, sont les siens
+    const subset = deck.filter((e) => e.card.id !== DICTATOR.id && e.card.id !== TITANIC.id);
+    const pool = buildEdges(deck);
+    const direct = analyzeDeck(subset);
+    const viaPool = analyzeDeck(subset, { poolEdges: pool });
+    const key = (e: Edge) => `${e.from}>${e.to}:${e.verb}:${e.weak ? 'w' : ''}`;
+    expect(viaPool.edges.map(key).sort()).toEqual(direct.edges.map(key).sort());
+    expect(viaPool.synergy).toEqual(direct.synergy);
+    expect([...viaPool.roles].sort()).toEqual([...direct.roles].sort());
+    expect(viaPool.extra).toEqual(direct.extra);
+    expect(viaPool.bricks).toEqual(direct.bricks);
+  });
+});
+
+/** Carte générique : son effet vise « 1 monstre », sans rien d'autre (texte inventé). */
+const generic = (id: number, desc: string): SynCard => ({
+  id,
+  name: `Generic ${id}`,
+  desc,
+  type: 'Spell Card',
+  frameType: 'spell',
+  category: 'SPELL',
+  race: 'Normal',
+  attribute: null,
+  level: null,
+  linkVal: null,
+  archetype: null,
+  isExtraDeck: false,
+});
+
+describe('qualité des liens', () => {
+  const vanilla: SynCard = {
+    ...BEWD,
+    id: 9001,
+    name: 'Plain Vanilla',
+    desc: 'A very ordinary monster.',
+    level: 4,
+    archetype: null,
+  };
+
+  it('un vrai lien : nom ou archétype cité', () => {
+    const [search] = featuresOf(WHITE_STONE_LEGEND).actions;
+    expect(linkQuality(search!, BEWD, featuresOf(BEWD))).toBe(2);
+  });
+
+  it('une recherche sans aucun critère est un lien faible', () => {
+    // « add 1 monster » cache presque toujours une condition non lue : on ne la croit pas
+    const any = generic(9002, 'Add 1 monster from your Deck to your hand.');
+    const [action] = featuresOf(any).actions;
+    expect(linkQuality(action!, SAGE, featuresOf(SAGE))).toBe(1);
+    const edges = buildEdges([
+      { card: any, quantity: 3, zone: 'MAIN' },
+      { card: SAGE, quantity: 3, zone: 'MAIN' },
+    ]);
+    expect(edges).toContainEqual({ from: any.id, to: SAGE.id, verb: 'SEARCH', weak: true });
+  });
+
+  it('un lien faible ne fait ni starter ni synergie', () => {
+    const any = generic(9003, 'Add 1 monster from your Deck to your hand.');
+    const a = analyzeDeck([
+      { card: any, quantity: 3, zone: 'MAIN' },
+      { card: vanilla, quantity: 3, zone: 'MAIN' },
+    ]);
+    expect(a.roles.get(any.id)).not.toContain('STARTER');
+    expect(a.synergy.connectedShare).toBe(0);
+  });
+
+  it('envoyer au cimetière sans critère vaut un lien si la cible a un effet de cimetière', () => {
+    // Foolish Burial vers White Stone of Legend : c'est tout l'intérêt de la carte
+    const burial = generic(9004, 'Send 1 monster from your Deck to the GY.');
+    const [send] = featuresOf(burial).actions;
+    expect(linkQuality(send!, WHITE_STONE_LEGEND, featuresOf(WHITE_STONE_LEGEND))).toBe(2);
+    expect(linkQuality(send!, vanilla, featuresOf(vanilla))).toBe(1);
+  });
+});
+
+describe('Synchro : réponse rapide', () => {
+  it('dit non sans tout énumérer quand aucune somme de niveaux ne tombe juste', () => {
+    // Que des niveaux 8 et un syntoniseur niveau 1 : Spirit Dragon (9) oui, un Synchro 12 non
+    const main: DeckEntry[] = [
+      { card: SAGE, quantity: 3, zone: 'MAIN' },
+      { card: BEWD, quantity: 3, zone: 'MAIN' },
+    ];
+    expect(checkExtra(SPIRIT_DRAGON, main).reachable).toBe(true);
+    expect(checkExtra(SPIRIT_DRAGON, main).materialIds.sort()).toEqual([SAGE.id, BEWD.id].sort());
+    expect(checkExtra(ULTIMATE_SPIRIT, main).reachable).toBe(false);
   });
 });

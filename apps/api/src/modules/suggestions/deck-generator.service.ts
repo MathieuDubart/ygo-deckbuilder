@@ -11,18 +11,27 @@ import { OwnershipService } from '../collection/ownership.service';
 import {
   generateFromArchetype,
   generateFromTemplate,
-  scoreDeck,
   type DeckScore,
+  type EntrySource,
   type GenerationResult,
+  type ScoreOptions,
   type Staple,
 } from '../meta-decks/engine/generator';
 import type { DeckTemplate } from '../meta-decks/engine/types';
 import { rankBySynergy } from '../synergy/engine/affinity';
-import { analyzeDeck, type DeckAnalysis } from '../synergy/engine/graph';
 import type { SynCard } from '../synergy/engine/types';
 import { SynergyCardsService, type FullCard } from '../synergy/synergy-cards.service';
 import { computeCoverage } from './coverage';
-import { t } from '../../common/i18n/locale-context';
+import {
+  buildPool,
+  enginesOf,
+  evaluateDeck,
+  legalityOf,
+  optimizeDeck,
+  overlap,
+  type OptimizeResult,
+} from './deck-optimizer';
+import { currentLocale, t } from '../../common/i18n/locale-context';
 
 /** Archétypes de la collection évalués pour les propositions automatiques. */
 const MAX_OWNED_ARCHETYPES = 12;
@@ -33,6 +42,16 @@ const MIN_META_COVERAGE = 0.2;
 const MAX_PROPOSALS = 8;
 /** Decks officiels évalués pour les propositions (les mieux couverts d'abord). */
 const MAX_OFFICIAL_CANDIDATES = 15;
+/**
+ * Premiers jets optimisés pour la page de propositions : les mieux notés d'abord. Les autres
+ * ne seraient de toute façon pas dans le haut du classement, et chaque optimisation coûte
+ * quelques centaines d'évaluations.
+ */
+const MAX_OPTIMIZED = 10;
+/** Deux propositions qui partagent plus de cette part de leur main sont le même deck. */
+const SAME_DECK = 0.6;
+/** Une proposition se recalcule quand la collection, le meta ou la banlist bougent ; sinon on la garde. */
+const PLAYABLE_TTL_MS = 10 * 60_000;
 
 type MetaWithCards = NonNullable<Awaited<ReturnType<DeckGeneratorService['loadMeta']>>>;
 type OfficialWithCards = NonNullable<Awaited<ReturnType<DeckGeneratorService['loadOfficial']>>>;
@@ -42,31 +61,53 @@ interface TemplateSource {
   template: DeckTemplate;
   archetype: string | null;
   coverage: number;
+  /** Liste de tournoi : son cœur ne se retire pas (c'est ce qui en fait CE deck) */
+  lockCore: boolean;
 }
 
 interface Shared {
   owned: Map<number, number>;
+  /** Staples du meta possédés, du plus joué au moins joué */
   staples: Staple[];
+  /** Compléments génériques possédés, des meilleurs aux moins bons */
   fillers: number[];
+  /** Tous les staples du meta (possédés ou non) : c'est ce qui les reconnaît dans un deck */
+  stapleIds: Set<number>;
+  /** Taux de jeu en tournoi de chaque carte */
+  metaPlay: Map<number, number>;
+  /** Popularité (vues YGOPRODeck) des cartes possédées */
+  popularity: Map<number, number>;
   /** Cartes déjà chargées (texte compris) pendant cette requête */
   cards: Map<number, FullCard>;
+  /** Toute la collection, chargée à la première recherche de second moteur */
+  collection?: FullCard[];
 }
 
-interface Built {
-  result: GenerationResult;
-  score: DeckScore;
-  analysis: DeckAnalysis;
+interface Built extends OptimizeResult {
+  engines: string[];
+  /** Cartes possédées écartées par la légalité (interdites, hors TCG) ou bridées (limitées) */
+  legality: { excluded: number; capped: number };
 }
 
 /**
  * Génération automatique de decks (aperçu, rien n'est enregistré) :
  *  - depuis un deck du meta : liste type complète, ou version "avec mes cartes"
  *  - depuis un archétype de la collection
- *  - propositions : tous les decks complets et jouables que la collection permet, notés
+ *  - propositions : les decks les plus solides que la collection permet, notés
  * Le front crée ensuite le deck via POST /decks.
+ *
+ * Toute version "avec mes cartes" suit le même chemin : un premier jet gourmand (le
+ * générateur), puis l'optimiseur, qui échange des cartes tant que la note de solidité monte —
+ * y compris avec des cartes d'autres archétypes reliées au cœur, d'où les decks hybrides.
+ * Le chemin étant déterministe, l'aperçu d'une proposition retombe toujours sur la même liste.
  */
 @Injectable()
 export class DeckGeneratorService {
+  private readonly playableCache = new Map<
+    string,
+    { key: string; at: number; decks: PlayableDeckDto[] }
+  >();
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly ownership: OwnershipService,
@@ -81,13 +122,13 @@ export class DeckGeneratorService {
     const meta = await this.loadMeta(metaDeckId);
     if (!meta) throw new NotFoundException(t('errors.metaDeckNotFound'));
     const shared = await this.shared(userId);
-    const { result, score } = await this.buildMeta(userId, meta, mode, shared);
+    const built = await this.buildTemplate(userId, metaSource(meta, shared.owned), mode, shared);
 
     const notes: string[] = [];
-    if (mode === 'OWNED') notes.push(...explain(result, score));
+    if (mode === 'OWNED') notes.push(...explain(built));
     if (meta.listCount) notes.push(t('generator.basedOn', { count: meta.listCount }));
 
-    return this.toDto(result, score, {
+    return this.toDto(built, {
       name: mode === 'OWNED' ? t('generator.ownedName', { name: meta.name }) : meta.name,
       mode,
       metaDeckId: meta.id,
@@ -105,16 +146,17 @@ export class DeckGeneratorService {
     const deck = await this.loadOfficial(productDeckId);
     if (!deck) throw new NotFoundException(t('errors.officialDeckNotFound'));
     const shared = await this.shared(userId);
-    const { result, score } = await this.buildOfficial(userId, deck, mode, shared);
+    const source = officialSource(deck, shared.owned);
+    const built = await this.buildTemplate(userId, source, mode, shared);
     const name = officialName(deck);
-    const notes = mode === 'OWNED' ? explain(result, score) : [];
+    const notes = mode === 'OWNED' ? explain(built) : [];
     notes.push(t('generator.officialBasedOn', { name: deck.set.name }));
 
-    return this.toDto(result, score, {
+    return this.toDto(built, {
       name: mode === 'OWNED' ? t('generator.ownedName', { name }) : name,
       mode,
       metaDeckId: null,
-      archetype: officialSource(deck, shared.owned).archetype,
+      archetype: source.archetype,
       notes,
     });
   }
@@ -129,11 +171,11 @@ export class DeckGeneratorService {
       orderBy: { listCount: 'desc' },
       select: { name: true },
     });
-    const notes = explain(built.result, built.score);
+    const notes = explain(built);
     if (metaVersion) notes.push(t('generator.metaVersion', { name: metaVersion.name }));
 
-    return this.toDto(built.result, built.score, {
-      name: t('generator.autoName', { name: archetype }),
+    return this.toDto(built, {
+      name: t('generator.autoName', { name: deckName(archetype, built.engines) }),
       mode: 'ARCHETYPE',
       metaDeckId: null,
       archetype,
@@ -142,32 +184,56 @@ export class DeckGeneratorService {
   }
 
   /**
-   * Tous les decks complets et jouables qu'on peut monter avec la collection, du plus solide
-   * au moins solide : chaque deck du meta (version "avec mes cartes") et chaque archétype
-   * bien fourni de la collection est construit puis noté ; seuls les jouables sont gardés.
+   * Les decks les plus solides qu'on peut monter avec la collection, du plus solide au moins
+   * solide : chaque deck du meta (version "avec mes cartes"), chaque deck officiel bien
+   * couvert et chaque archétype bien fourni donne un premier jet ; les meilleurs sont
+   * optimisés, puis on écarte les doublons et tout ce qui n'est pas jouable.
    */
   async playable(userId: string): Promise<PlayableDeckDto[]> {
+    const key = await this.playableKey(userId);
+    // Par langue aussi : les noms des cartes phares sont traduits
+    const slot = `${userId}:${currentLocale()}`;
+    const cached = this.playableCache.get(slot);
+    if (cached && cached.key === key && Date.now() - cached.at < PLAYABLE_TTL_MS) {
+      return cached.decks;
+    }
+    const decks = await this.computePlayable(userId);
+    const now = Date.now();
+    // Les entrées périmées partent au passage : le cache ne grossit pas avec les comptes inactifs
+    for (const [k, v] of this.playableCache) {
+      if (now - v.at >= PLAYABLE_TTL_MS) this.playableCache.delete(k);
+    }
+    this.playableCache.set(slot, { key, at: now, decks });
+    return decks;
+  }
+
+  private async computePlayable(userId: string): Promise<PlayableDeckDto[]> {
     const shared = await this.shared(userId);
     if (!shared.owned.size) return [];
 
-    const proposals: (PlayableDeckDto & { result: GenerationResult })[] = [];
+    type Seed = {
+      target: PlayableDeckDto['target'];
+      name: string;
+      archetype: string | null;
+      tier: number | null;
+      /** Premier jet seulement (rapide) ; `optimize` le pousse au maximum */
+      draft: () => Promise<Built | null>;
+      optimize: () => Promise<Built | null>;
+      draftScore?: number;
+    };
+    const seeds: Seed[] = [];
 
     // 1. Decks du meta que la collection couvre au moins en partie
-    const metas = await this.prisma.metaDeck.findMany({ include: { cards: true } });
-    for (const meta of metas) {
-      const coverage = metaCoverage(meta, shared.owned);
-      if (coverage < MIN_META_COVERAGE) continue;
-      const { result, score } = await this.buildMeta(userId, meta, 'OWNED', shared);
-      if (!score.playable) continue;
-      proposals.push({
+    for (const meta of await this.prisma.metaDeck.findMany({ include: { cards: true } })) {
+      const source = metaSource(meta, shared.owned);
+      if (source.coverage < MIN_META_COVERAGE) continue;
+      seeds.push({
         target: { kind: 'meta', metaDeckId: meta.id, name: meta.name },
         name: meta.name,
         archetype: meta.archetype,
         tier: meta.tier,
-        score: toScoreDto(score),
-        counts: result.counts,
-        highlights: [],
-        result,
+        draft: () => this.buildTemplate(userId, source, 'OWNED', shared, { optimize: false }),
+        optimize: () => this.buildTemplate(userId, source, 'OWNED', shared),
       });
     }
 
@@ -178,42 +244,96 @@ export class DeckGeneratorService {
       .sort((a, b) => b.source.coverage - a.source.coverage)
       .slice(0, MAX_OFFICIAL_CANDIDATES);
     for (const { deck, source } of officials) {
-      const built = await this.buildTemplate(userId, source, 'OWNED', shared);
-      if (!built.score.playable) continue;
       const name = officialName(deck);
-      proposals.push({
+      seeds.push({
         target: { kind: 'official', productDeckId: deck.id, name },
         name,
         archetype: source.archetype,
         tier: null,
-        score: toScoreDto(built.score),
-        counts: built.result.counts,
-        highlights: [],
-        result: built.result,
+        draft: () => this.buildTemplate(userId, source, 'OWNED', shared, { optimize: false }),
+        optimize: () => this.buildTemplate(userId, source, 'OWNED', shared),
       });
     }
 
-    // 3. Archétypes bien fournis de la collection, sans équivalent déjà proposé
-    const covered = new Set(proposals.map((p) => p.archetype?.toLowerCase()).filter(Boolean));
+    // 3. Archétypes bien fournis de la collection : le terrain des decks maison et hybrides
     for (const archetype of await this.ownedArchetypes(userId)) {
-      if (covered.has(archetype.toLowerCase())) continue;
-      const built = await this.buildArchetype(userId, archetype, shared);
-      if (!built?.score.playable) continue;
-      proposals.push({
+      seeds.push({
         target: { kind: 'archetype', archetype },
         name: archetype,
         archetype,
         tier: null,
-        score: toScoreDto(built.score),
-        counts: built.result.counts,
-        highlights: [],
-        result: built.result,
+        draft: () => this.buildArchetype(userId, archetype, shared, { optimize: false }),
+        optimize: () => this.buildArchetype(userId, archetype, shared),
       });
     }
 
-    const best = proposals.sort((a, b) => b.score.score - a.score.score).slice(0, MAX_PROPOSALS);
-    const highlights = await this.highlights(best.map((p) => p.result));
-    return best.map(({ result: _result, ...p }, i) => ({ ...p, highlights: highlights[i] ?? [] }));
+    // Premiers jets : on n'optimise que les plus prometteurs, un par archétype
+    for (const seed of seeds) seed.draftScore = (await seed.draft())?.score.raw ?? -1;
+    const seen = new Set<string>();
+    const chosen = seeds
+      .filter((s) => (s.draftScore ?? -1) >= 0)
+      .sort((a, b) => b.draftScore! - a.draftScore!)
+      .filter((s) => {
+        const k =
+          s.target.kind === 'archetype'
+            ? `a:${s.archetype?.toLowerCase()}`
+            : `${s.target.kind}:${s.name}`;
+        if (seen.has(k)) return false;
+        seen.add(k);
+        return true;
+      })
+      .slice(0, MAX_OPTIMIZED);
+
+    const proposals: (PlayableDeckDto & { built: Built })[] = [];
+    for (const seed of chosen) {
+      const built = await seed.optimize();
+      if (!built?.score.playable) continue;
+      const hybrid = seed.target.kind === 'archetype' && built.engines.length >= 2;
+      proposals.push({
+        target: seed.target,
+        name: seed.target.kind === 'archetype' ? deckName(seed.name, built.engines) : seed.name,
+        archetype: seed.archetype,
+        tier: seed.tier,
+        engines: built.engines,
+        hybrid,
+        score: toScoreDto(built.score),
+        counts: built.result.counts,
+        highlights: [],
+        built,
+      });
+    }
+
+    // Deux chemins mènent souvent au même deck (le structure deck et l'archétype qu'il contient,
+    // ou Branded × Despia et Despia × Branded) : on ne garde que le mieux noté
+    const engineKey = (p: PlayableDeckDto) =>
+      p.target.kind === 'archetype' && p.engines.length ? [...p.engines].sort().join('+') : null;
+    const same = (a: PlayableDeckDto & { built: Built }, b: PlayableDeckDto & { built: Built }) =>
+      overlap(a.built.result, b.built.result) >= SAME_DECK ||
+      (engineKey(a) !== null && engineKey(a) === engineKey(b));
+    const best: (PlayableDeckDto & { built: Built })[] = [];
+    for (const p of proposals.sort((a, b) => b.built.score.raw - a.built.score.raw)) {
+      if (best.some((q) => same(q, p))) continue;
+      best.push(p);
+      if (best.length >= MAX_PROPOSALS) break;
+    }
+    const highlights = await this.highlights(best.map((p) => p.built.result));
+    return best.map(({ built: _built, ...p }, i) => ({ ...p, highlights: highlights[i] ?? [] }));
+  }
+
+  /**
+   * Ce qui change une proposition : la collection, le meta, la banlist. Une ligne d'agrégats,
+   * lue à chaque appel — c'est elle qui évite de tout recalculer quand rien n'a bougé.
+   */
+  private async playableKey(userId: string): Promise<string> {
+    const [row] = await this.prisma.$queryRaw<
+      { items: number; copies: number; changed: Date | null; meta: Date | null; ban: Date | null }[]
+    >`
+      SELECT (SELECT COUNT(*)::int FROM "CollectionItem" WHERE "userId" = ${userId}) AS "items",
+             (SELECT COALESCE(SUM(quantity), 0)::int FROM "CollectionItem" WHERE "userId" = ${userId}) AS "copies",
+             (SELECT MAX("updatedAt") FROM "CollectionItem" WHERE "userId" = ${userId}) AS "changed",
+             (SELECT MAX("updatedAt") FROM "MetaDeck") AS "meta",
+             (SELECT MAX("lastSyncAt") FROM "SyncState") AS "ban"`;
+    return JSON.stringify(row ?? null);
   }
 
   // ─── Construction ─────────────────────────────────────────────────────────
@@ -233,44 +353,18 @@ export class DeckGeneratorService {
     return this.prisma.productDeck.findUnique({ where: { id }, ...this.officialQuery });
   }
 
-  private buildMeta(userId: string, meta: MetaWithCards, mode: GenerationMode, shared: Shared) {
-    const template: DeckTemplate = {
-      cards: meta.cards.filter((c) => !c.flex),
-      flex: meta.cards.filter((c) => c.flex),
-      mainSize: Math.max(
-        40,
-        meta.cards.filter((c) => c.zone === 'MAIN' && !c.flex).reduce((s, c) => s + c.quantity, 0),
-      ),
-    };
-    return this.buildTemplate(
-      userId,
-      { template, archetype: meta.archetype, coverage: metaCoverage(meta, shared.owned) },
-      mode,
-      shared,
-    );
-  }
-
-  /** Deck officiel (structure deck, starter, deck de coffret) comme liste de référence. */
-  private buildOfficial(
-    userId: string,
-    deck: OfficialWithCards,
-    mode: GenerationMode,
-    shared: Shared,
-  ) {
-    return this.buildTemplate(userId, officialSource(deck, shared.owned), mode, shared);
-  }
-
   /**
    * Construit un deck à partir d'une liste de référence (meta ou officielle) :
    *  - META : la liste telle quelle (on indique ce qui manque)
-   *  - OWNED : uniquement les cartes possédées, complétées par l'archétype, les staples et
-   *    des compléments, en gardant en priorité ce qui s'emboîte avec le cœur de la liste
+   *  - OWNED : uniquement les cartes possédées — premier jet gourmand (cœur, archétype,
+   *    staples, compléments), puis optimisation avec tout ce qui s'emboîte avec ce cœur
    */
   private async buildTemplate(
     userId: string,
     source: TemplateSource,
     mode: GenerationMode,
     shared: Shared,
+    opts: { optimize?: boolean } = {},
   ): Promise<Built> {
     const { template, archetype, coverage } = source;
     const archetypeCards =
@@ -282,7 +376,7 @@ export class DeckGeneratorService {
         ? [...shared.staples.map((s) => s.cardId), ...archetypeCards, ...shared.fillers]
         : []),
     ]);
-    const stapleIds = new Set(shared.staples.map((s) => s.cardId));
+    const scoring = this.scoring(shared, coverage);
 
     if (mode === 'META') {
       const result = generateFromTemplate(template, {
@@ -293,7 +387,8 @@ export class DeckGeneratorService {
         archetypeCards: [],
         fillers: [],
       });
-      return this.evaluate(result, cards, { metaCoverage: coverage, stapleIds });
+      const ev = evaluateDeck(result, cards, scoring);
+      return { ...ev, baseline: ev.score, swaps: 0, evaluations: 1, engines: [], legality: none };
     }
 
     const core = pick(
@@ -302,22 +397,44 @@ export class DeckGeneratorService {
         .filter((c) => c.zone !== 'SIDE' && shared.owned.has(c.cardId))
         .map((c) => c.cardId),
     );
-    const generate = (exclude: Set<number>) =>
-      generateFromTemplate(template, {
-        mode,
-        cards,
-        owned: shared.owned,
-        staples: shared.staples,
-        archetypeCards: rankBySynergy(core, without(archetypeCards, exclude), cards),
-        fillers: rankBySynergy(core, without(shared.fillers, exclude), cards, 0.7),
-      });
-    return this.twoPass(generate, cards, { metaCoverage: coverage, stapleIds });
+    const seed = generateFromTemplate(template, {
+      mode,
+      cards,
+      owned: shared.owned,
+      staples: shared.staples,
+      archetypeCards: rankBySynergy(core, archetypeCards, cards),
+      fillers: rankBySynergy(core, shared.fillers, cards, 0.7),
+    });
+    const sources = new Map<number, { source: EntrySource; inclusion: number | null }>();
+    for (const c of template.cards)
+      sources.set(c.cardId, { source: 'CORE', inclusion: c.inclusion });
+    for (const c of template.flex) {
+      if (!sources.has(c.cardId)) sources.set(c.cardId, { source: 'FLEX', inclusion: c.inclusion });
+    }
+    const support = archetype ? await this.ownedSupportCards(userId, archetype) : [];
+    for (const id of archetypeCards)
+      if (!sources.has(id)) sources.set(id, { source: 'ARCHETYPE', inclusion: null });
+    for (const id of support)
+      if (!sources.has(id)) sources.set(id, { source: 'SUPPORT', inclusion: null });
+
+    const locked = source.lockCore
+      ? new Set(template.cards.filter((c) => shared.owned.has(c.cardId)).map((c) => c.cardId))
+      : undefined;
+    return this.optimize(shared, {
+      seed,
+      sources,
+      archetype,
+      scoring,
+      locked,
+      optimize: opts.optimize,
+    });
   }
 
   private async buildArchetype(
     userId: string,
     archetype: string,
     shared: Shared,
+    opts: { optimize?: boolean } = {},
   ): Promise<Built | null> {
     const [archetypeCards, supportCards] = await Promise.all([
       this.ownedArchetypeCards(userId, archetype),
@@ -333,77 +450,105 @@ export class DeckGeneratorService {
     // Cœur = les cartes de l'archétype elles-mêmes : on fait remonter celles qui sont reliées
     // aux autres (chercheurs, invocateurs…) et les supports qui les appellent vraiment
     const core = pick(cards, archetypeCards);
-    const generate = (exclude: Set<number>) =>
-      generateFromArchetype({
-        cards,
-        owned: shared.owned,
-        archetypeCards: rankBySynergy(core, without(archetypeCards, exclude), cards),
-        supportCards: rankBySynergy(core, without(supportCards, exclude), cards, 1.5),
-        staples: shared.staples,
-        fillers: rankBySynergy(core, without(shared.fillers, exclude), cards, 0.7),
-      });
-    return this.twoPass(generate, cards, {
-      stapleIds: new Set(shared.staples.map((s) => s.cardId)),
+    const seed = generateFromArchetype({
+      cards,
+      owned: shared.owned,
+      archetypeCards: rankBySynergy(core, archetypeCards, cards),
+      supportCards: rankBySynergy(core, supportCards, cards, 1.5),
+      staples: shared.staples,
+      fillers: rankBySynergy(core, shared.fillers, cards, 0.7),
+    });
+    const sources = new Map<number, { source: EntrySource; inclusion: number | null }>();
+    for (const id of archetypeCards) sources.set(id, { source: 'ARCHETYPE', inclusion: null });
+    for (const id of supportCards)
+      if (!sources.has(id)) sources.set(id, { source: 'SUPPORT', inclusion: null });
+    return this.optimize(shared, {
+      seed,
+      sources,
+      archetype,
+      scoring: this.scoring(shared),
+      optimize: opts.optimize,
     });
   }
 
   /**
-   * 1re passe : on construit et on analyse. S'il reste des monstres d'Extra Deck qu'on ne
-   * peut pas invoquer avec ce main (hors liste de tournoi), on les écarte et on reconstruit.
+   * Réserve de l'optimiseur (`buildPool`), puis optimisation. Sans optimisation demandée, la
+   * réserve se limite au premier jet : c'est la version rapide qui sert à trier les pistes.
    */
-  private twoPass(
-    generate: (exclude: Set<number>) => GenerationResult,
-    cards: Map<number, FullCard>,
-    opts: { metaCoverage?: number; stapleIds: Set<number> },
-  ): Built {
-    const first = this.evaluate(generate(new Set()), cards, opts);
-    const unreachable = new Set(
-      first.analysis.extra
-        .filter((x) => x.reachable === false)
-        .map((x) => x.cardId)
-        .filter((id) => {
-          const e = first.result.entries.find((en) => en.cardId === id);
-          return e && e.source !== 'CORE' && e.source !== 'FLEX';
-        }),
+  private async optimize(
+    shared: Shared,
+    input: {
+      seed: GenerationResult;
+      sources: Map<number, { source: EntrySource; inclusion: number | null }>;
+      archetype: string | null;
+      scoring: Omit<ScoreOptions, 'synergy'>;
+      locked?: Set<number>;
+      optimize?: boolean;
+    },
+  ): Promise<Built> {
+    const full = input.optimize !== false;
+    const collection = full ? await this.collection(shared) : undefined;
+    const pool = buildPool({
+      seed: input.seed,
+      sources: input.sources,
+      archetype: input.archetype,
+      owned: shared.owned,
+      cards: shared.cards,
+      staples: shared.staples,
+      fillers: shared.fillers,
+      metaPlay: shared.metaPlay,
+      popularity: shared.popularity,
+      collection,
+    });
+    const cards = await this.cardInfo(
+      shared,
+      pool.map((p) => p.cardId),
     );
-    if (!unreachable.size) return first;
-    return this.evaluate(generate(unreachable), cards, opts);
+    const optimized = optimizeDeck({
+      cards,
+      pool,
+      seed: input.seed,
+      scoring: input.scoring,
+      locked: input.locked,
+      budget: full ? undefined : 0,
+    });
+    return {
+      ...optimized,
+      engines: enginesOf(optimized.result, cards),
+      legality: legalityOf(pool, cards),
+    };
   }
 
-  private evaluate(
-    result: GenerationResult,
-    cards: Map<number, FullCard>,
-    opts: { metaCoverage?: number; stapleIds: Set<number> },
-  ): Built {
-    const analysis = analyzeDeck(
-      result.entries.flatMap((e) => {
-        const card = cards.get(e.cardId);
-        return card ? [{ card, quantity: e.quantity, zone: e.zone }] : [];
-      }),
-    );
-    // Aucun lien lisible (textes absents ou tournures inconnues du lecteur) : on ne pénalise
-    // pas le deck sur un critère qu'on ne sait pas évaluer, on garde la note classique
-    const readable = analysis.edges.some((e) => e.verb !== 'MENTION');
-    const score = scoreDeck(result, {
-      ...opts,
-      ...(readable && {
-        synergy: { score: analysis.synergy.score, starterCopies: analysis.synergy.starterCopies },
-      }),
-    });
-    return { result, score, analysis };
+  private scoring(shared: Shared, metaCoverage?: number): Omit<ScoreOptions, 'synergy'> {
+    return {
+      stapleIds: shared.stapleIds,
+      ...(metaCoverage !== undefined && { metaCoverage }),
+      ...(shared.metaPlay.size && { metaPlay: shared.metaPlay }),
+    };
   }
 
   // ─── Sources de cartes ────────────────────────────────────────────────────
 
-  /** Ce qui ne dépend pas de l'archétype : collection, staples et compléments possédés. */
+  /** Ce qui ne dépend pas de l'archétype : collection, staples, compléments, taux de jeu. */
   private async shared(userId: string): Promise<Shared> {
     const owned = await this.ownership.quantities(userId);
-    if (!owned.size) return { owned, staples: [], fillers: [], cards: new Map() };
-    const [staples, fillers] = await Promise.all([
+    const stats = await this.prisma.cardMetaStat.findMany({
+      select: { cardId: true, deckShare: true, isStaple: true },
+    });
+    const stapleIds = new Set(stats.filter((s) => s.isStaple).map((s) => s.cardId));
+    const metaPlay = new Map(stats.map((s) => [s.cardId, s.deckShare]));
+    const empty = { staples: [], fillers: [], popularity: new Map(), cards: new Map() };
+    if (!owned.size) return { owned, stapleIds, metaPlay, ...empty };
+    const [staples, fillers, popular] = await Promise.all([
       this.ownedStaples(owned),
       this.ownedFillers(userId),
+      this.prisma.card.findMany({
+        where: { id: { in: [...owned.keys()] }, popularity: { not: null } },
+        select: { id: true, popularity: true },
+      }),
     ]);
-    return { owned, staples, fillers, cards: new Map() };
+    const popularity = new Map(popular.map((c) => [c.id, c.popularity ?? 0]));
+    return { owned, staples, fillers, stapleIds, metaPlay, popularity, cards: new Map() };
   }
 
   /** Staples du meta possédés, du plus joué au moins joué. */
@@ -479,6 +624,17 @@ export class DeckGeneratorService {
     return shared.cards;
   }
 
+  /** Toute la collection avec ses textes : c'est là qu'on cherche les seconds moteurs. */
+  private async collection(shared: Shared): Promise<FullCard[]> {
+    if (!shared.collection) {
+      const cards = await this.cardInfo(shared, [...shared.owned.keys()]);
+      shared.collection = [...shared.owned.keys()].flatMap((id) =>
+        cards.has(id) ? [cards.get(id)!] : [],
+      );
+    }
+    return shared.collection;
+  }
+
   /** 4 cartes phares par deck : les cartes moteur du main, les plus jouées d'abord. */
   private async highlights(results: GenerationResult[]): Promise<CardSummaryDto[][]> {
     const picks = results.map((r) =>
@@ -497,10 +653,10 @@ export class DeckGeneratorService {
   }
 
   private async toDto(
-    result: GenerationResult,
-    score: DeckScore,
+    built: Built,
     meta: Pick<GeneratedDeckDto, 'name' | 'mode' | 'metaDeckId' | 'archetype' | 'notes'>,
   ): Promise<GeneratedDeckDto> {
+    const { result, score } = built;
     const cards = await this.prisma.card.findMany({
       where: { id: { in: result.entries.map((e) => e.cardId) } },
       select: cardSummarySelect,
@@ -516,6 +672,7 @@ export class DeckGeneratorService {
     );
     return {
       ...meta,
+      engines: built.engines,
       cards: entries.map(({ card, zone, quantity, owned, source, inclusion }) => ({
         card,
         zone,
@@ -533,20 +690,42 @@ export class DeckGeneratorService {
   }
 }
 
-/** Part de la liste type (main + extra) déjà possédée. */
-function metaCoverage(meta: MetaWithCards, owned: Map<number, number>): number {
-  return computeCoverage(
-    meta.cards
-      .filter((c) => !c.flex)
-      .map((c) => ({ cardId: c.cardId, zone: c.zone, quantity: c.quantity, unitPrice: null })),
-    owned,
-  ).coverage;
+const none = { excluded: 0, capped: 0 };
+
+/** Liste de tournoi comme liste de référence. Son cœur est verrouillé : c'est CE deck. */
+function metaSource(meta: MetaWithCards, owned: Map<number, number>): TemplateSource {
+  const template: DeckTemplate = {
+    cards: meta.cards.filter((c) => !c.flex),
+    flex: meta.cards.filter((c) => c.flex),
+    mainSize: Math.max(
+      40,
+      meta.cards.filter((c) => c.zone === 'MAIN' && !c.flex).reduce((s, c) => s + c.quantity, 0),
+    ),
+  };
+  return {
+    template,
+    archetype: meta.archetype,
+    coverage: computeCoverage(
+      template.cards.map((c) => ({
+        cardId: c.cardId,
+        zone: c.zone,
+        quantity: c.quantity,
+        unitPrice: null,
+      })),
+      owned,
+    ).coverage,
+    lockCore: true,
+  };
 }
 
 /** Nom affiché d'un deck officiel : le produit, et le deck quand le produit en contient plusieurs. */
 const officialName = (deck: OfficialWithCards) =>
   deck.name ? `${deck.set.name} — ${deck.name}` : deck.set.name;
 
+/**
+ * Deck officiel comme liste de référence. Rien n'est verrouillé : un structure deck est un
+ * point de départ, et le renforcer avec sa collection est exactement ce que font les joueurs.
+ */
 function officialSource(deck: OfficialWithCards, owned: Map<number, number>): TemplateSource {
   const cards = deck.cards.map((c) => ({
     cardId: c.cardId,
@@ -576,17 +755,22 @@ function officialSource(deck: OfficialWithCards, owned: Map<number, number>): Te
       cards.map((c) => ({ ...c, unitPrice: null })),
       owned,
     ).coverage,
+    lockCore: false,
   };
 }
 
-const without = (ids: number[], exclude: Set<number>) =>
-  exclude.size ? ids.filter((id) => !exclude.has(id)) : ids;
+/** « Blue-Eyes », ou « Blue-Eyes × Dragonmaid » quand un second moteur pèse dans le deck. */
+function deckName(archetype: string, engines: string[]): string {
+  const others = engines.filter((e) => e.toLowerCase() !== archetype.toLowerCase());
+  return [archetype, ...others.slice(0, 1)].join(' × ');
+}
+
 const pick = (cards: Map<number, SynCard>, ids: number[]) =>
   ids.flatMap((id) => (cards.has(id) ? [cards.get(id)!] : []));
 
 const round2 = (x: number) => Math.round(x * 100) / 100;
 
-function toScoreDto(s: DeckScore) {
+function toScoreDto({ raw: _raw, ...s }: DeckScore) {
   return {
     ...s,
     engineShare: round2(s.engineShare),
@@ -594,11 +778,13 @@ function toScoreDto(s: DeckScore) {
     fillerShare: round2(s.fillerShare),
     metaCoverage: s.metaCoverage === null ? null : round2(s.metaCoverage),
     synergy: s.synergy === null ? null : round2(s.synergy),
+    opening: s.opening === null ? null : round2(s.opening),
   };
 }
 
 /** Explications lisibles de la composition d'un deck "avec mes cartes". */
-function explain(result: GenerationResult, score: DeckScore): string[] {
+function explain(built: Built): string[] {
+  const { result, score, baseline, swaps, engines, legality } = built;
   const main = result.counts.MAIN;
   const notes = [
     t('generator.composition', {
@@ -609,5 +795,20 @@ function explain(result: GenerationResult, score: DeckScore): string[] {
   ];
   if (!result.complete) notes.push(t('generator.incomplete', { count: 40 - main }));
   else if (!score.playable) notes.push(t('generator.fragile'));
+  if (score.opening !== null) {
+    notes.push(
+      t('generator.opening', {
+        percent: Math.round(score.opening * 100),
+        starters: score.starters ?? 0,
+        interaction: score.interaction ?? 0,
+      }),
+    );
+  }
+  if (engines.length >= 2) notes.push(t('generator.engines', { names: engines.join(' + ') }));
+  if (swaps > 0 && score.score > baseline.score) {
+    notes.push(t('generator.optimized', { count: swaps, from: baseline.score, to: score.score }));
+  }
+  if (legality.excluded) notes.push(t('generator.excluded', { count: legality.excluded }));
+  if (legality.capped) notes.push(t('generator.capped', { count: legality.capped }));
   return notes;
 }

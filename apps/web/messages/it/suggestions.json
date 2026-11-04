@@ -11,7 +11,7 @@
     "archetypeStats": "{cards, plural, one {# carta} other {# carte}} · {copies, plural, one {# copia} other {# copie}}",
     "archetypesEmpty": "Aggiungi carte alla tua collezione per vedere gli archetipi che puoi costruire.",
     "sectionHints": {
-      "playable": "Montati interamente con le tue carte",
+      "playable": "I deck legali più solidi che le tue carte permettono",
       "meta": "Quelli più alla tua portata",
       "official": "Structure deck, starter e liste di box da rifare",
       "archetypes": "Un deck per archetipo che puoi già schierare"
@@ -51,12 +51,21 @@
     "homebrew": "Homebrew",
     "composition": "100% carte tue · {main} main · {extra} extra",
     "open": "Vedi e crea",
-    "official": "Deck ufficiale"
+    "official": "Deck ufficiale",
+    "hybrid": "Ibrido"
   },
   "score": {
-    "hint": "Valutazione della solidità: sinergia tra le carte, engine, staple, consistenza, quota di riempitivi generici",
+    "hint": "Valutazione della solidità: mani iniziali, interazione, sinergia tra le carte, engine, consistenza, carte provate in torneo — meno riempitivi generici e brick",
     "label": "solidità",
     "criteria": {
+      "opening": {
+        "label": "Apertura",
+        "hint": "Probabilità di avere almeno uno starter in una mano da 5 carte"
+      },
+      "interaction": {
+        "label": "Interazione",
+        "hint": "Copie che fermano l’avversario: hand trap, board breaker, negazioni, staple (una dozzina è l’ideale)"
+      },
       "engine": {
         "label": "Engine",
         "hint": "Quota del Main Deck occupata dall’archetipo"
@@ -80,6 +89,10 @@
       "filler": {
         "label": "Riempitivi",
         "hint": "Carte generiche aggiunte per arrivare a 40"
+      },
+      "bricks": {
+        "label": "Brick",
+        "hint": "Mostri difficili da giocare che nulla nel deck può andare a prendere"
       }
     }
   },

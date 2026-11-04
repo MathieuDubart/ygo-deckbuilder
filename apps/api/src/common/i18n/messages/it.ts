@@ -88,6 +88,21 @@ export const it: DeepPartialMessages = {
       other: 'Basato su {count} liste da torneo recenti.',
     },
     metaVersion: 'Esiste una versione da torneo: «{name}» tra i deck meta.',
+    opening:
+      'Pesca uno starter nel {percent}% delle mani da 5 carte ({starters} starter) · {interaction} carte di interazione (hand trap, board breaker, negazioni).',
+    engines: 'Ibrido: {names} funzionano insieme in questo deck.',
+    optimized: {
+      one: 'Ottimizzato: {count} scambio rispetto alla prima bozza, solidità {from} → {to}.',
+      other: 'Ottimizzato: {count} scambi rispetto alla prima bozza, solidità {from} → {to}.',
+    },
+    excluded: {
+      one: '{count} carta adatta a questo deck è esclusa: proibita o non legale nel TCG.',
+      other: '{count} carte adatte a questo deck sono escluse: proibite o non legali nel TCG.',
+    },
+    capped: {
+      one: '{count} carta è limitata dalla banlist (limitata o semi-limitata).',
+      other: '{count} carte sono limitate dalla banlist (limitate o semi-limitate).',
+    },
   },
 
   mechanics: {

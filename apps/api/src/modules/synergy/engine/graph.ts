@@ -1,5 +1,13 @@
-import { matches, parseCard } from './parse';
-import type { CardFeatures, Materials, Role, SummonMechanic, SynCard, Verb } from './types';
+import { criteriaOf, matches, parseCard, precisionOf } from './parse';
+import type {
+  CardAction,
+  CardFeatures,
+  Materials,
+  Role,
+  SummonMechanic,
+  SynCard,
+  Verb,
+} from './types';
 
 export type Zone = 'MAIN' | 'EXTRA' | 'SIDE';
 
@@ -13,6 +21,76 @@ export interface Edge {
   from: number;
   to: number;
   verb: Verb | 'MENTION';
+  /**
+   * Lien faible : l'effet vise « n'importe quoi » ET la cible n'en tire rien (cf. `linkQuality`).
+   * Absent sur un vrai lien. Un lien faible n'est pas faux — l'effet peut bien prendre cette
+   * carte — mais il ne dit rien du deck : dans une grosse collection, une carte générique
+   * « touche » tout, et compter ces liens ferait passer un tas de cartes pour un moteur.
+   */
+  weak?: true;
+}
+
+/**
+ * La cible tire-t-elle quelque chose de cet effet ? Envoyer au cimetière une carte qui a un
+ * effet de cimetière, chercher une carte jouable qui fait quelque chose, invoquer un monstre
+ * qui a un effet à l'invocation : c'est un plan. Le reste ne fait que déplacer une carte.
+ */
+function benefits(verb: Verb, target: SynCard, tf: CardFeatures): boolean {
+  const acts = tf.actions;
+  switch (verb) {
+    case 'SEND_GY':
+      return (
+        tf.sentToGyTrigger ||
+        acts.some((a) => a.trigger === 'SENT_GY' || a.trigger === 'END_PHASE_GY')
+      );
+    case 'SEARCH':
+    case 'RECOVER': {
+      const playable =
+        target.category !== 'MONSTER' ||
+        tf.selfSummon ||
+        tf.handTrap ||
+        (!tf.cannotNormalSummon && (target.level ?? 0) <= 4);
+      const doesSomething =
+        acts.length > 0 ||
+        tf.handTrap ||
+        tf.negates ||
+        tf.removal ||
+        tf.draws ||
+        tf.discardIgnition;
+      return playable && doesSomething;
+    }
+    case 'SPECIAL_SUMMON':
+      return tf.tuner || acts.some((a) => ['SS', 'NS_OR_SS', 'IGNITION'].includes(a.trigger));
+    case 'SUMMON_EXTRA':
+      return acts.length > 0 || tf.negates || tf.removal;
+  }
+}
+
+/**
+ * Qualité du lien entre un effet et une carte : 0 = l'effet ne la vise pas, 1 = lien faible,
+ * 2 = vrai lien. Un vrai lien, c'est :
+ *  - un nom ou un archétype cité, ou un filtre serré (« 1 Syntoniseur LUMIÈRE de Niveau 1 ») ;
+ *  - un filtre à un seul critère (« 1 monstre Dragon ») dont la cible profite ;
+ *  - « envoyer 1 monstre au cimetière » sans critère, vers une carte qui a un effet de cimetière
+ *    (Foolish Burial). Une recherche ou une invocation sans AUCUN critère, elle, cache presque
+ *    toujours une condition que le lecteur n'a pas vue (« du même nom », « de même Niveau ») :
+ *    la prendre au mot relierait la carte à tout le Deck.
+ */
+export function linkQuality(action: CardAction, target: SynCard, tf: CardFeatures): 0 | 1 | 2 {
+  let precision = -1;
+  let criteria = 0;
+  for (const f of action.filters) {
+    if (!matches(target, f, tf, action.from)) continue;
+    const p = precisionOf(f);
+    if (p > precision) {
+      precision = p;
+      criteria = criteriaOf(f);
+    }
+  }
+  if (precision < 0) return 0;
+  if (precision > 0) return 2;
+  if (criteria === 0 && action.verb !== 'SEND_GY') return 1;
+  return benefits(action.verb, target, tf) ? 2 : 1;
 }
 
 export interface ExtraCheck {
@@ -95,10 +173,14 @@ export function buildEdges(entries: DeckEntry[]): Edge[] {
       const pool = action.verb === 'SUMMON_EXTRA' ? extra : main;
       for (const b of uniqueCards(pool)) {
         if (b.id === a.id && action.verb !== 'SPECIAL_SUMMON') continue;
-        if (action.filters.some((f) => matches(b, f, featuresOf(b), action.from))) {
-          edges.push({ from: a.id, to: b.id, verb: action.verb });
-          linked.add(b.id);
-        }
+        const quality = linkQuality(action, b, featuresOf(b));
+        if (!quality) continue;
+        edges.push(
+          quality === 2
+            ? { from: a.id, to: b.id, verb: action.verb }
+            : { from: a.id, to: b.id, verb: action.verb, weak: true },
+        );
+        linked.add(b.id);
       }
     }
     // Citation directe d'un nom ("… reveal "Blue-Eyes White Dragon" …") : lien plus faible
@@ -111,21 +193,40 @@ export function buildEdges(entries: DeckEntry[]): Edge[] {
   return edges;
 }
 
-export function analyzeDeck(entries: DeckEntry[]): DeckAnalysis {
+/**
+ * Les liens d'un deck, extraits de ceux d'une réserve plus large calculés une fois.
+ *
+ * C'est exact, pas une approximation : un lien A → B ne dépend que de A, de B et de la zone
+ * de B (Main ou Extra, qui est celle de la carte), jamais du reste du deck — et la citation
+ * « faible » n'est posée que s'il n'y a pas déjà un vrai lien entre les deux mêmes cartes.
+ * Garder les liens dont les deux bouts sont dans le deck redonne donc `buildEdges(deck)`.
+ * L'optimiseur s'en sert pour évaluer des centaines de variantes sans relire les textes.
+ */
+export function restrictEdges(poolEdges: readonly Edge[], entries: DeckEntry[]): Edge[] {
+  const ids = new Set(entries.filter((e) => e.zone !== 'SIDE').map((e) => e.card.id));
+  return poolEdges.filter((e) => ids.has(e.from) && ids.has(e.to));
+}
+
+export function analyzeDeck(
+  entries: DeckEntry[],
+  opts: { poolEdges?: readonly Edge[] } = {},
+): DeckAnalysis {
   const features = new Map(entries.map((e) => [e.card.id, featuresOf(e.card)]));
-  const edges = buildEdges(entries);
+  const edges = opts.poolEdges ? restrictEdges(opts.poolEdges, entries) : buildEdges(entries);
   const mainEntries = entries.filter((e) => e.zone === 'MAIN');
   const extraEntries = entries.filter((e) => e.zone === 'EXTRA');
   const extra = extraEntries.map((e) => checkExtra(e.card, mainEntries, features));
   const reachableIds = new Set(extra.filter((x) => x.reachable).map((x) => x.cardId));
+  // Rôles, briques et synergie ne se lisent que sur les vrais liens (cf. `Edge.weak`)
+  const strong = edges.filter((e) => !e.weak);
 
   const out = (id: number, verbs: (Verb | 'MENTION')[]) =>
-    edges.filter((e) => e.from === id && verbs.includes(e.verb) && e.to !== id);
+    strong.filter((e) => e.from === id && verbs.includes(e.verb) && e.to !== id);
   const deckTargets = (id: number, from: string) =>
     features
       .get(id)!
       .actions.filter((a) => a.from.includes(from as never))
-      .some((a) => edges.some((e) => e.from === id && e.verb === a.verb));
+      .some((a) => strong.some((e) => e.from === id && e.verb === a.verb));
 
   const roles = new Map<number, Role[]>();
   for (const { card, zone } of entries) {
@@ -168,7 +269,7 @@ export function analyzeDeck(entries: DeckEntry[]): DeckAnalysis {
     for (const r of roles.get(e.card.id) ?? []) roleCopies[r] += e.quantity;
   roleCopies.BOSS = extra.filter((x) => x.reachable).length;
 
-  const accessed = new Set(edges.filter((e) => e.verb !== 'MENTION').map((e) => e.to));
+  const accessed = new Set(strong.filter((e) => e.verb !== 'MENTION').map((e) => e.to));
   const bricks = uniqueCards(mainEntries.map((e) => e.card))
     .filter((c) => {
       const f = features.get(c.id)!;
@@ -193,7 +294,7 @@ export function analyzeDeck(entries: DeckEntry[]): DeckAnalysis {
       )
       .map((c) => c.id),
     bricks,
-    synergy: synergyScore(mainEntries, edges, roleCopies.STARTER, extra),
+    synergy: synergyScore(mainEntries, strong, roleCopies.STARTER, extra),
   };
 }
 
@@ -321,18 +422,49 @@ function synchroSolution(
     xs.flatMap((e) => Array.from({ length: Math.min(e.quantity, 3) }, () => e.card));
   const T = withCopies(tuners);
   const N = withCopies(nons);
+  // Réponse négative rapide : sans somme de niveaux possible, inutile d'énumérer les
+  // combinaisons (c'est le cas coûteux, et l'optimiseur le pose des milliers de fois)
+  const tunerSums = levelSums(T, tunerCount, tunerCount);
+  const nonSums = levelSums(N, 1, 3);
+  if (![...tunerSums].some((t) => nonSums.has(level - t))) return null;
   const tunerSets = combos(T, tunerCount);
   for (const ts of tunerSets) {
     const tl = ts.reduce((s, c) => s + (c.level ?? 0), 0);
+    if (!nonSums.has(level - tl)) continue;
+    // Même ordre que l'énumération complète (k croissant, cartes dans l'ordre) : la première
+    // solution trouvée est la même, sans fabriquer toutes les combinaisons
     for (let k = 1; k <= 3; k++) {
-      for (const ns of combos(N, k)) {
-        if (tl + ns.reduce((s, c) => s + (c.level ?? 0), 0) === level) {
-          return [...new Set([...ts, ...ns].map((c) => c.id))];
-        }
-      }
+      const ns = firstSum(N, k, level - tl);
+      if (ns) return [...new Set([...ts, ...ns].map((c) => c.id))];
     }
   }
   return null;
+}
+
+/** Les `k` premières cartes (dans l'ordre) dont les niveaux font exactement `target`. */
+function firstSum(cards: SynCard[], k: number, target: number, start = 0): SynCard[] | null {
+  if (k === 0) return target === 0 ? [] : null;
+  if (target <= 0) return null;
+  for (let i = start; i <= cards.length - k; i++) {
+    const rest = firstSum(cards, k - 1, target - (cards[i]!.level ?? 0), i + 1);
+    if (rest) return [cards[i]!, ...rest];
+  }
+  return null;
+}
+
+/** Sommes de niveaux atteignables avec `min` à `max` cartes d'une liste (exemplaires compris). */
+function levelSums(cards: SynCard[], min: number, max: number): Set<number> {
+  // byCount[k] = sommes atteignables avec exactement k cartes
+  const byCount: Set<number>[] = Array.from({ length: max + 1 }, () => new Set<number>());
+  byCount[0]!.add(0);
+  for (const c of cards) {
+    for (let k = max; k >= 1; k--) {
+      for (const sum of byCount[k - 1]!) byCount[k]!.add(sum + (c.level ?? 0));
+    }
+  }
+  const out = new Set<number>();
+  for (let k = min; k <= max; k++) for (const sum of byCount[k]!) out.add(sum);
+  return out;
 }
 
 function combos<T>(xs: T[], k: number, start = 0): T[][] {

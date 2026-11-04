@@ -14,6 +14,8 @@ import {
   ALTERNATIVE,
   ASH,
   BEWD,
+  BRANDED_OPENING,
+  TINDANGLE_JHRELTH,
   DICTATOR,
   LINKURIBOH,
   MAJESTY,
@@ -224,5 +226,22 @@ describe('casse-terrain', () => {
         breaker: false,
       });
     }
+  });
+});
+
+describe('« take 1 … and either … »', () => {
+  it('lit une recherche ET une invocation au choix (Branded Opening)', () => {
+    const { actions } = parseCard(BRANDED_OPENING);
+    const verbs = actions.filter((a) => a.from.includes('DECK')).map((a) => a.verb);
+    expect(verbs).toEqual(expect.arrayContaining(['SEARCH', 'SPECIAL_SUMMON']));
+    const search = actions.find((a) => a.verb === 'SEARCH')!;
+    expect(search.filters[0]).toMatchObject({ quoted: ['Despia'], kinds: ['MONSTER'] });
+  });
+
+  it('garde l’exception placée avant le choix (Tindangle Jhrelth)', () => {
+    const { actions } = parseCard(TINDANGLE_JHRELTH);
+    const take = actions.filter((a) => a.filters[0]?.subtypes.includes('Flip'));
+    expect(take.map((a) => a.verb).sort()).toEqual(['SEARCH', 'SEND_GY']);
+    expect(take[0]!.filters[0]!.except).toEqual(['Tindangle Jhrelth']);
   });
 });

@@ -88,6 +88,21 @@ export const fr: DeepPartialMessages = {
       other: 'Basé sur {count} listes de tournoi récentes.',
     },
     metaVersion: 'Une version tournoi existe : « {name} » dans les decks meta.',
+    opening:
+      'Ouvre un starter dans {percent} % des mains de 5 cartes ({starters} starters) · {interaction} cartes d’interaction (hand traps, casse-terrains, négations).',
+    engines: 'Hybride : {names} tournent ensemble dans ce deck.',
+    optimized: {
+      one: 'Optimisé : {count} échange par rapport au premier jet, solidité {from} → {to}.',
+      other: 'Optimisé : {count} échanges par rapport au premier jet, solidité {from} → {to}.',
+    },
+    excluded: {
+      one: '{count} carte qui irait dans ce deck est écartée : interdite ou non légale en TCG.',
+      other: '{count} cartes qui iraient dans ce deck sont écartées : interdites ou non légales en TCG.',
+    },
+    capped: {
+      one: '{count} carte est bridée par la banlist (limitée ou semi-limitée).',
+      other: '{count} cartes sont bridées par la banlist (limitées ou semi-limitées).',
+    },
   },
 
   mechanics: { FUSION: 'Fusion', SYNCHRO: 'Synchro', XYZ: 'Xyz', LINK: 'Lien', RITUAL: 'Rituelle' },

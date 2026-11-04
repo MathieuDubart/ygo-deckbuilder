@@ -358,3 +358,29 @@ export const DARK_RULER = card({
   attribute: null,
   level: null,
 });
+
+/** Tournure « take 1 … and either add it to your hand or Special Summon it » (Branded). */
+export const BRANDED_OPENING = card({
+  id: 36637374,
+  name: 'Branded Opening',
+  type: 'Spell Card',
+  frameType: 'spell',
+  desc: 'Discard 1 card, then take 1 "Despia" monster from your Deck, and either add it to your hand or Special Summon it in Defense Position, also for the rest of this turn after this card resolves, you cannot Special Summon monsters from the Extra Deck, except Fusion Monsters. If a Fusion Monster(s) you control would be destroyed by card effect, you can banish this card from your GY instead. You can only use each effect of "Branded Opening" once per turn.',
+  race: 'Quick-Play',
+  attribute: null,
+  level: null,
+  archetype: 'Branded',
+});
+
+/** La même tournure, avec une exception avant le choix (« …, except "X", and either … »). */
+export const TINDANGLE_JHRELTH = card({
+  id: 24158464,
+  name: 'Tindangle Jhrelth',
+  type: 'Flip Monster',
+  frameType: 'effect',
+  desc: 'FLIP: You can take 1 Flip monster from your Deck, except "Tindangle Jhrelth", and either add it to your hand or send it to the GY.\nIf this card is in your hand: You can discard 1 other card; send 1 "Tindangle" card from your Deck to the GY, except "Tindangle Jhrelth", and if you do, Special Summon this card in face-down Defense Position. You can only use each effect of "Tindangle Jhrelth" once per turn.',
+  race: 'Fiend',
+  attribute: 'DARK',
+  level: 3,
+  archetype: 'Tindangle',
+});

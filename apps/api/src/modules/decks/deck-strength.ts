@@ -2,6 +2,7 @@ import type {
   EntrySource,
   GeneratedEntry,
   GenerationResult,
+  SynergyInput,
 } from '../meta-decks/engine/generator';
 import type { DeckAnalysis, DeckEntry, Zone } from '../synergy/engine/graph';
 
@@ -25,6 +26,29 @@ import type { DeckAnalysis, DeckEntry, Zone } from '../synergy/engine/graph';
  *
  * Pur, sans I/O.
  */
+
+/**
+ * Ce que l'analyse de synergie apporte à `scoreDeck`. Un seul endroit le fabrique : le deck
+ * généré et le deck écrit à la main doivent être notés sur les mêmes faits, sinon la même
+ * liste n'aurait pas la même note selon l'écran.
+ *
+ * Interagir, c'est gêner l'adversaire : depuis la main (hand traps), en nettoyant son terrain
+ * (casse-terrains), en annulant (négations) ou en l'enfermant (verrous). Le simple retrait
+ * d'une carte n'en fait pas partie — presque tous les monstres d'archétype en ont un, et le
+ * compter noierait le signal.
+ */
+export function strengthInput(analysis: DeckAnalysis): SynergyInput {
+  const interactionIds = new Set<number>();
+  for (const [id, f] of analysis.features) {
+    if (f.handTrap || f.boardBreaker || f.negates || f.floodgate) interactionIds.add(id);
+  }
+  return {
+    score: analysis.synergy.score,
+    starterCopies: analysis.synergy.starterCopies,
+    interactionIds,
+    brickIds: new Set(analysis.bricks),
+  };
+}
 
 /** L'archétype le plus représenté dans le main deck, s'il en domine un. */
 export function dominantArchetype(entries: DeckEntry[]): string | null {
@@ -57,8 +81,9 @@ export function sourceOf(
 export function connectedCards(analysis: DeckAnalysis): Set<number> {
   const out = new Set<number>();
   for (const edge of analysis.edges) {
-    // `MENTION` ne prouve rien : citer un nom n'est pas s'en servir
-    if (edge.verb === 'MENTION' || edge.from === edge.to) continue;
+    // `MENTION` ne prouve rien : citer un nom n'est pas s'en servir ; un lien faible non plus
+    // (un effet générique qui « touche » la carte sans qu'elle en tire rien)
+    if (edge.verb === 'MENTION' || edge.weak || edge.from === edge.to) continue;
     out.add(edge.from);
     out.add(edge.to);
   }

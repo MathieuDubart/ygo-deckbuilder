@@ -17,7 +17,7 @@ and generated play guides.
 - **Deck builder** — search limited to your cards (or the whole catalog), live validation (40–60 cards, 3 copies, banlist, Extra Deck), missing copies flagged, auto-save, `.ydk` import/export. Clicking a card opens its details with +/− per zone.
 - **Card interactions** — on every card: what it searches, summons or uses as material, and which cards search, summon or use it. Your cards first, click to jump from card to card.
 - **Automatic meta** — recent tournament top decks are clustered into archetypes by content, with a consensus list, flex cards, a tier and the meta share.
-- **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; **official preconstructed decks** (structure decks, starters, the decks inside boxes such as *Legendary 5D's Decks* or the *2-Player Starter Set*) with what you own of each; a list of complete, playable decks built only from your collection, ranked by a solidity score. Missing cards go to the wishlist.
+- **Deck suggestions & generation** — for each meta deck, your coverage and the cost to complete it; one-click generation of the full meta list or an "owned cards only" version; auto decks for any archetype you own; **official preconstructed decks** (structure decks, starters, the decks inside boxes such as *Legendary 5D's Decks* or the *2-Player Starter Set*) with what you own of each; and the **strongest complete decks your collection can build** — found by an optimizer that swaps cards to maximize the solidity score (opening odds, interaction, synergy, tournament-proven engine), including **hybrids** that mix two of your archetypes, always legal under the TCG banlist (forbidden, limited, OCG-only cards). Missing cards go to the wishlist.
 - **Synergy & play guides** — card effects are read (who searches, summons or sends what; starters, extenders, hand traps; which Extra Deck monsters are actually reachable). Generated decks favour cards that work together, and every deck gets a **play guide**: game plan, key cards, step-by-step combos, going first/second, mistakes to avoid. Optionally rewritten by an AI model (OpenAI-compatible or Anthropic, local models welcome).
 - **Duel simulator** — test your decks with the **real card effects**: the [EDOPro](https://github.com/edo9300/ygopro-core) engine (compiled to WebAssembly) and the [Project Ignis](https://github.com/ProjectIgnis) card scripts run on the server. Force your opening hand, set up the opponent's board (monsters, set cards, hand traps, graveyard), then play against a passive opponent (combo testing), make the opponent's choices yourself (interactions), or face the **bot**, which plays any deck on its own: it builds its board, attacks when the battle favours it and answers your plays with its hand traps and traps. Every summon type, chains, battle and the duel log are supported; you are only asked to chain after an opponent's action (or switch to every chain window, as in EDOPro). Every action is **replayed like a cut-scene**: summon and activation cut-ins, attacks, floating damage with screen shake, rolling LP, turn banners, synthesized sound effects (Web Audio, no audio files), victory confetti — with a skip button and a speed setting (normal / fast / off).
 - **Rules reminder** — the official rules (current Master Rule) in 5 languages: turn structure, every summon type (Fusion, Ritual, Synchro, Xyz, Pendulum, Link), Extra Monster Zones, Tokens, chains, counters, battle, tournament format. Searchable, with a diagram per topic, a glossary, the official Konami resources, and an embedded French video tutorial on most topics.
@@ -194,6 +194,23 @@ It runs on first start, then on `META_SYNC_CRON` (Mondays 5am), or manually with
 the "Update" button on the Suggestions page (admin). The engine
 (`apps/api/src/modules/meta-decks/engine/`) is made of pure functions tested on real lists. Meta decks
 can also be imported from a `.ydk` file (`POST /api/meta-decks/import-ydk`, admin).
+
+### Deck optimizer
+
+Every "with my cards" deck starts as a greedy draft (core, archetype, staples, generic fillers), then
+`apps/api/src/modules/suggestions/deck-optimizer.ts` improves it by local search: it tries swaps
+between the weakest cards of the deck and the most promising cards of your collection, and keeps a
+swap only when the solidity score goes up. The candidate pool includes cards from *other*
+archetypes that have real links with the deck's core (they search its monsters, its effects
+summon them…), which is how hybrid decks appear. Every swap respects the copies you own, the TCG
+banlist, TCG legality (OCG-only and unreleased cards are left out), a 40-card Main Deck and an
+Extra Deck of monsters the Main Deck can actually summon; leftover hand traps and board breakers
+go to the Side Deck.
+
+The solidity score reads what a tournament player looks at: synergy (25 %), the odds of opening a
+starter in 5 cards (20 %), interaction — hand traps, board breakers, negates, about 12 copies
+(20 %), engine share and 3-of consistency (10 % each), how much of the engine sees tournament play
+(15 %), minus generic filler and bricks. The same score rates the decks you write yourself.
 
 ## Synergy and play guides
 

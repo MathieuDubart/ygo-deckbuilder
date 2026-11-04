@@ -11,7 +11,7 @@
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# cópia} other {# cópias}}",
     "archetypesEmpty": "Adicione cards à sua coleção para ver arquétipos que você pode montar.",
     "sectionHints": {
-      "playable": "Montados inteiramente com as tuas cartas",
+      "playable": "Os decks legais mais fortes que os seus cards permitem",
       "meta": "Os que estão mais ao teu alcance",
       "official": "Structure decks, starters e listas de caixas para refazer",
       "archetypes": "Um deck por arquétipo que já consegues montar"
@@ -51,12 +51,21 @@
     "homebrew": "Homebrew",
     "composition": "100% seus cards · {main} main · {extra} extra",
     "open": "Ver e criar",
-    "official": "Deck oficial"
+    "official": "Deck oficial",
+    "hybrid": "Híbrido"
   },
   "score": {
-    "hint": "Nota de força: sinergia entre os cards, engine, staples, consistência, parte de cards genéricos de preenchimento",
+    "hint": "Nota de força: mãos iniciais, interação, sinergia entre os cards, engine, consistência, cards comprovados em torneio — menos cards genéricos de preenchimento e bricks",
     "label": "força",
     "criteria": {
+      "opening": {
+        "label": "Abertura",
+        "hint": "Chance de abrir com pelo menos um starter numa mão de 5 cards"
+      },
+      "interaction": {
+        "label": "Interação",
+        "hint": "Cópias que param o oponente: hand traps, board breakers, negações, staples (uma dúzia é o ideal)"
+      },
       "engine": {
         "label": "Engine",
         "hint": "Parte do Deck Principal ocupada pelo arquétipo"
@@ -80,6 +89,10 @@
       "filler": {
         "label": "Preenchimento",
         "hint": "Cards genéricos adicionados para chegar a 40"
+      },
+      "bricks": {
+        "label": "Bricks",
+        "hint": "Monstros difíceis de jogar que nada no deck consegue buscar"
       }
     }
   },

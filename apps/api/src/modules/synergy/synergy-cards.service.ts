@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { isTcgLegal } from '@ygo/shared';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import type { GenCardInfo } from '../meta-decks/engine/generator';
 import type { SynCard } from './engine/types';
@@ -22,6 +23,9 @@ export const synCardSelect = {
   banTcg: true,
 } as const;
 
+/** Ce qu'il faut en plus pour savoir si la carte se joue en TCG (cf. `isTcgLegal`). */
+const legalitySelect = { formats: true, tcgDate: true } as const;
+
 /** Chargement des cartes pour le moteur de synergie (texte anglais officiel compris). */
 @Injectable()
 export class SynergyCardsService {
@@ -29,6 +33,14 @@ export class SynergyCardsService {
 
   async load(ids: number[]): Promise<FullCard[]> {
     if (!ids.length) return [];
-    return this.prisma.card.findMany({ where: { id: { in: ids } }, select: synCardSelect });
+    const rows = await this.prisma.card.findMany({
+      where: { id: { in: ids } },
+      select: { ...synCardSelect, ...legalitySelect },
+    });
+    const today = new Date();
+    return rows.map(({ formats, tcgDate, ...card }) => ({
+      ...card,
+      tcgLegal: isTcgLegal({ formats, tcgDate }, today),
+    }));
   }
 }

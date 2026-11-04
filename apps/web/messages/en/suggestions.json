@@ -11,7 +11,7 @@
     "archetypeStats": "{cards, plural, one {# card} other {# cards}} · {copies, plural, one {# copy} other {# copies}}",
     "archetypesEmpty": "Add cards to your collection to see archetypes you can build.",
     "sectionHints": {
-      "playable": "Built entirely from cards you own",
+      "playable": "The strongest legal decks your cards can build",
       "meta": "The ones within closest reach",
       "official": "Structure decks, starters and box lists to rebuild",
       "archetypes": "One deck per archetype you can already field"
@@ -51,12 +51,21 @@
     "homebrew": "Homebrew",
     "composition": "100% your cards · {main} main · {extra} extra",
     "open": "View & create",
-    "official": "Official deck"
+    "official": "Official deck",
+    "hybrid": "Hybrid"
   },
   "score": {
-    "hint": "Strength rating: card synergy, engine, staples, consistency, share of generic filler",
+    "hint": "Strength rating: opening hands, interaction, card synergy, engine, consistency, tournament-proven cards — minus generic filler and bricks",
     "label": "strength",
     "criteria": {
+      "opening": {
+        "label": "Opening",
+        "hint": "Chance to open at least one starter in a 5-card hand"
+      },
+      "interaction": {
+        "label": "Interaction",
+        "hint": "Copies that stop the opponent: hand traps, board breakers, negates, staples (about 12 is ideal)"
+      },
       "engine": {
         "label": "Engine",
         "hint": "Share of the Main Deck taken up by the archetype"
@@ -80,6 +89,10 @@
       "filler": {
         "label": "Filler",
         "hint": "Generic cards added to reach 40"
+      },
+      "bricks": {
+        "label": "Bricks",
+        "hint": "Hard-to-play monsters nothing in the deck can fetch"
       }
     }
   },

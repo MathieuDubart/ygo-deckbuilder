@@ -90,6 +90,21 @@ export const pt: DeepPartialMessages = {
       other: 'Baseado em {count} listas de torneio recentes.',
     },
     metaVersion: 'Existe uma versão de torneio: “{name}” nos decks do meta.',
+    opening:
+      'Abre com um starter em {percent}% das mãos de 5 cards ({starters} starters) · {interaction} cards de interação (hand traps, board breakers, negações).',
+    engines: 'Híbrido: {names} funcionam juntos neste deck.',
+    optimized: {
+      one: 'Otimizado: {count} troca em relação ao primeiro rascunho, solidez {from} → {to}.',
+      other: 'Otimizado: {count} trocas em relação ao primeiro rascunho, solidez {from} → {to}.',
+    },
+    excluded: {
+      one: '{count} card que serviria neste deck ficou de fora: proibido ou não legal no TCG.',
+      other: '{count} cards que serviriam neste deck ficaram de fora: proibidos ou não legais no TCG.',
+    },
+    capped: {
+      one: '{count} card está limitado pela banlist (limitado ou semilimitado).',
+      other: '{count} cards estão limitados pela banlist (limitados ou semilimitados).',
+    },
   },
 
   mechanics: {

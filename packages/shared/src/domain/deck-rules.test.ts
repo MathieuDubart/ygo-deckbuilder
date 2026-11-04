@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   banStatusOf,
   banlistFixes,
+  isTcgLegal,
   maxCopiesFor,
   validateDeck,
   type DeckEntryForValidation,
@@ -128,5 +129,28 @@ describe('banlistFixes', () => {
       (i) => i.code === 'FORBIDDEN' || i.code === 'TOO_MANY_COPIES',
     );
     expect(left).toEqual([]);
+  });
+});
+
+describe('isTcgLegal', () => {
+  const today = new Date('2026-11-04');
+
+  it('accepte une carte éditée en TCG', () => {
+    expect(isTcgLegal({ formats: ['TCG', 'OCG'], tcgDate: '2020-01-01' }, today)).toBe(true);
+  });
+
+  it('refuse une carte qui n’existe qu’en OCG', () => {
+    // Une impression japonaise dans la collection ne rend pas la carte jouable en TCG
+    expect(isTcgLegal({ formats: ['OCG'], tcgDate: null }, today)).toBe(false);
+  });
+
+  it('refuse une carte annoncée mais pas encore sortie', () => {
+    expect(isTcgLegal({ formats: ['TCG'], tcgDate: '2026-12-01' }, today)).toBe(false);
+  });
+
+  it('ne refuse pas faute de données', () => {
+    // Liste vide = la source ne dit rien : interdire effacerait la carte de tous les decks
+    expect(isTcgLegal({ formats: [], tcgDate: null }, today)).toBe(true);
+    expect(isTcgLegal({}, today)).toBe(true);
   });
 });

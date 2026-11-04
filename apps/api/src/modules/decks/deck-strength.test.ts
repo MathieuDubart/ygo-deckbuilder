@@ -7,6 +7,7 @@ import {
   connectedCards,
   dominantArchetype,
   sourceOf,
+  strengthInput,
 } from './deck-strength';
 
 const entries = (list: { card: DeckEntry['card']; qty: number }[]): DeckEntry[] =>
@@ -89,6 +90,14 @@ describe('connectedCards', () => {
     expect(connected.size).toBe(0);
   });
 
+  it('ignore un lien faible (effet générique sans bénéfice pour la cible)', () => {
+    const connected = connectedCards({
+      ...analysis,
+      edges: [{ from: 1, to: 2, verb: 'SEARCH', weak: true }],
+    });
+    expect(connected.size).toBe(0);
+  });
+
   it('retient les deux bouts d’un vrai lien', () => {
     const connected = connectedCards(analysis);
     expect(connected.has(SAGE.id)).toBe(true);
@@ -139,5 +148,25 @@ describe('asGenerationResult', () => {
       synergy: { score: analysis.synergy.score, starterCopies: analysis.synergy.starterCopies },
     });
     expect(deckScore.score).toBeGreaterThan(heapScore.score);
+  });
+});
+
+describe('strengthInput', () => {
+  it('compte hand traps et casse-terrains comme interaction, pas le moteur', () => {
+    const deck = entries([...BLUE_EYES_DECK, { card: RAIGEKI, qty: 2 }]);
+    const input = strengthInput(analyzeDeck(deck));
+    expect(input.interactionIds?.has(ASH.id)).toBe(true);
+    expect(input.interactionIds?.has(RAIGEKI.id)).toBe(true);
+    expect(input.interactionIds?.has(SAGE.id)).toBe(false);
+  });
+
+  it('donne à scoreDeck la note complète : ouverture, interaction, briques', () => {
+    const score = scoreDeck(asGenerationResult(blueEyes, analysis, new Set([ASH.id])), {
+      stapleIds: new Set([ASH.id]),
+      synergy: strengthInput(analysis),
+    });
+    expect(score.opening).toBeGreaterThan(0);
+    expect(score.interaction).toBe(3);
+    expect(score.bricks).toBe(0);
   });
 });
